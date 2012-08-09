@@ -1,0 +1,2 @@
+*.txt           text=auto
+*.sh            eol=lf
