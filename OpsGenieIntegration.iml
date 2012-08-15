@@ -6,6 +6,7 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="ThirdParty" level="project" />
+    <orderEntry type="module" module-name="OpsGenieClient" />
   </component>
 </module>
 
