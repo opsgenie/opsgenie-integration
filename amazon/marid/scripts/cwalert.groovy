@@ -108,11 +108,11 @@ def createMetricGraphs(metricNameComingWithSnsMessage, statisticNameFromMessage)
         }
     }
 
-    String html = createHtml(metricImageConfigs, metricNameComingWithSnsMessage)
-    ZipEntry chartEntry = new ZipEntry("index.html");
-    zout.putNextEntry(chartEntry);
-    zout.write(html.getBytes())
-    zout.closeEntry();
+//    String html = createHtml(metricImageConfigs, metricNameComingWithSnsMessage)
+//    ZipEntry chartEntry = new ZipEntry("index.html");
+//    zout.putNextEntry(chartEntry);
+//    zout.write(html.getBytes())
+//    zout.closeEntry();
     zout.close();
     return bout;
 }
