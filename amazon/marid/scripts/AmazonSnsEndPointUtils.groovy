@@ -28,14 +28,18 @@ public class AmazonSnsEndPointUtils {
 
     public static String getCloudwatchAlertDescription(Map message) throws IOException {
         Map cloudWatchMessage = getCloudwatchMessageMap(message);
-        return "${cloudWatchMessage.AlarmDescription}. ${cloudWatchMessage.NewStateReason}"
+        return "${cloudWatchMessage.AlarmDescription?cloudWatchMessage.AlarmDescription:""}. ${cloudWatchMessage.NewStateReason}"
     }
     public static Map getCloudwatchAlertDetails(Map message) throws IOException {
         Map cloudWatchMessage = getCloudwatchMessageMap(message);
-        return [AlarmName:cloudWatchMessage.AlarmName, StateChangeTime:cloudWatchMessage.StateChangeTime,
+        def details = [AlarmName:cloudWatchMessage.AlarmName, StateChangeTime:cloudWatchMessage.StateChangeTime,
                 Region:cloudWatchMessage.Region, MetricName:cloudWatchMessage.Trigger.MetricName,
                 Namespace:cloudWatchMessage.Trigger.Namespace
         ]
+        cloudWatchMessage.Trigger.Dimensions.each{dimension->
+            details[dimension.name] = dimension.value
+        }
+        return details;
     }
 
     public static String getRequestType(HTTPRequest request){
