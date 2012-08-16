@@ -65,24 +65,16 @@ def attachMetricGraphs(snsMessage, alertId){
     def cloudwatchMessageMap = AmazonSnsEndPointUtils.getCloudwatchMessageMap(snsMessage)
     def metricName = cloudwatchMessageMap.Trigger.MetricName;
     def statisticNameFromMessage = cloudwatchMessageMap.Trigger.Statistic;
-    logger.warn("Attaching graphs for ${metricName}");
-    ByteArrayOutputStream bout = createMetricGraphs(metricName, statisticNameFromMessage);
-    def response = opsgenie.attach([alertId:alertId, stream:new ByteArrayInputStream(bout.toByteArray()), fileName:"metrics.zip"])
-    if(response.success){
-        logger.warn("Successfully attached search results");
-    }
+    createMetricGraphs(alertId, metricName, statisticNameFromMessage)
 }
 
-def createMetricGraphs(metricNameComingWithSnsMessage, statisticNameFromMessage){
-    ByteArrayOutputStream bout = new ByteArrayOutputStream();
-    ZipOutputStream zout = new ZipOutputStream(bout);
+def createMetricGraphs(alertId, metricNameComingWithSnsMessage, statisticNameFromMessage){
     AmazonCloudWatch cloudWatch = new AmazonCloudWatchClient(new BasicAWSCredentials(AWS_ACCESS_KEY, AWS_SECRET_KEY))
     def additionalMetrics = ADDITIONAL_METRICS[metricNameComingWithSnsMessage];
     def metrics = [metricNameComingWithSnsMessage];
     if(additionalMetrics) metrics.addAll(additionalMetrics);
     def endDate = new Date(System.currentTimeMillis());
     def startDate = new Date(Math.max(endDate.getTime() - TimeUnit.DAYS.toMillis(100), endDate.getTime() - 1440*300*1000));
-    def metricImageConfigs = [];
     metrics.each{String metricNameToBeProcessed->
         ListMetricsRequest listMetricsRequest = new ListMetricsRequest();
         listMetricsRequest.setMetricName(metricNameToBeProcessed)
@@ -100,21 +92,15 @@ def createMetricGraphs(metricNameComingWithSnsMessage, statisticNameFromMessage)
             req.setStatistics([statisticName])
             req.setMetricName(metric.getMetricName());
             GetMetricStatisticsResult res = cloudWatch.getMetricStatistics(req)
-            ZipEntry chartEntry = new ZipEntry(imageName);
-            zout.putNextEntry(chartEntry);
-            createGraphFromMetricResults(res, statisticName, zout);
-            zout.closeEntry()
-            metricImageConfigs << [name:imageName, title:"${statisticName} ${metric.getMetricName()} of ${metric.getNamespace()}"]
+            ByteArrayOutputStream bout = new ByteArrayOutputStream();
+            createGraphFromMetricResults(res, statisticName, bout);
+            logger.warn("Attaching graphs for ${metric.getMetricName()}");
+            def response = opsgenie.attach([alertId:alertId, stream:new ByteArrayInputStream(bout.toByteArray()), fileName:imageName])
+            if(response.success){
+                logger.warn("Successfully attached search results as ${imageName} for metric ${metric.getMetricName()}");
+            }
         }
     }
-
-//    String html = createHtml(metricImageConfigs, metricNameComingWithSnsMessage)
-//    ZipEntry chartEntry = new ZipEntry("index.html");
-//    zout.putNextEntry(chartEntry);
-//    zout.write(html.getBytes())
-//    zout.closeEntry();
-    zout.close();
-    return bout;
 }
 
 def createHtml(metricImageConfigs, metricName){
