@@ -24,8 +24,8 @@ import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer
 /********************** CONFIGURATION ************************/
 recipients = "cloudwatchgroup"
 ADDITIONAL_METRICS = [CPUUtilization:["DiskReadBytes", "NetworkIn", "NetworkOut" , "DiskWriteBytes"]]
-AWS_ACCESS_KEY="AKIAJOP7BLKVKCBL2GDQ"
-AWS_SECRET_KEY="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"
+AWS_ACCESS_KEY="<amazon_access_key>"
+AWS_SECRET_KEY="<amazon_secret_key>"
 LAST_N_DAYS=10;
 STAT_PERIOD = 300;
 ATTACH_GRAPHS = true;
