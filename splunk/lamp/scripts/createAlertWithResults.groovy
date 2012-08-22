@@ -79,8 +79,8 @@ def createHtml(List records, OutputStream out){
         def rec = records[i];
         details.append("""
         <tr>
-        <td>${df.format(new Date(Long.parseLong(rec.get("_time"))*1000))}</td>
-        <td>${rec.get("_raw")}</td>
+        <td width="20%"><span class="datestr">${df.format(new Date(Long.parseLong(rec.get("_time"))*1000))}</span></td>
+        <td width="80%">${rec.get("_raw")}</td>
         </tr>
     """)
     }
@@ -98,12 +98,18 @@ def createHtml(List records, OutputStream out){
             table{
                 border:1px solid #cccccc;
                 border-bottom:none;
+                table-layout: fixed;
+                width: 100%;
             }
             td, th {
                 border-bottom:1px solid #cccccc;
+                word-wrap:break-word;
             }
             th {
                 background-color:#eeeeee;
+            }
+            .datestr{
+                white-space:nowrap;
             }
         </style>
     </head>
@@ -111,18 +117,22 @@ def createHtml(List records, OutputStream out){
         <div  style="padding-bottom:5px;">
             <a href="${browserUrl}">Go to Splunk</a>
         </div>
-        <div style="padding-bottom:20px;">
+        <div style="padding-bottom:20px;text-align:center;">
             <img src="chart.png">
         </div>
-        <table width="500" cellspacing="0">
-            <tr>
-                <th colspan="2">Search Results</th>
-            </tr>
-            <tr  style="text-align:left;">
-                <th>Date</th>
-                <th>Line</th>
-            </tr>
+        <div style="text-align:center;">
+            <h2>Search Results</h2>
+        </div>
+        <table  cellspacing="0">
+            <thead>
+                <tr  style="text-align:left;">
+                    <th width="20%">Date</th>
+                    <th width="80%">Line</th>
+                </tr>
+            </thead>
+            <tbody>
             ${details.toString()}
+            </tbody>
         </table>
     </body>
     </html>
