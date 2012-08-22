@@ -79,8 +79,8 @@ def createHtml(List records, OutputStream out){
         def rec = records[i];
         details.append("""
         <tr>
-        <td width="20%"><span class="datestr">${df.format(new Date(Long.parseLong(rec.get("_time"))*1000))}</span></td>
-        <td width="80%">${rec.get("_raw")}</td>
+        <td width="15%"><span class="datestr">${df.format(new Date(Long.parseLong(rec.get("_time"))*1000))}</span></td>
+        <td width="85%">${rec.get("_raw")}</td>
         </tr>
     """)
     }
@@ -126,8 +126,8 @@ def createHtml(List records, OutputStream out){
         <table  cellspacing="0">
             <thead>
                 <tr  style="text-align:left;">
-                    <th width="20%">Date</th>
-                    <th width="80%">Line</th>
+                    <th width="15%">Date</th>
+                    <th width="85%">Line</th>
                 </tr>
             </thead>
             <tbody>
