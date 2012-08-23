@@ -43,7 +43,7 @@ public class AmazonSnsMessage {
     }
 
     public boolean confirmSubscription() throws Exception{
-        String subscribeURL = (String) couldwatchMessage.get("SubscribeURL");
+        String subscribeURL = (String) snsMessage.get("SubscribeURL");
         HttpURLConnection connection = (HttpURLConnection) new URL(subscribeURL).openConnection();
         connection.setConnectTimeout(30000);
         connection.setReadTimeout(30000);
@@ -152,6 +152,7 @@ public class AmazonSnsMessage {
 
     private Map getCloudwatchMessageMap() throws IOException {
         String messageStr = getMessageStr()
+        println messageStr
         return JsonUtils.parse(messageStr);
     }
 
