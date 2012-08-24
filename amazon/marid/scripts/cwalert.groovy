@@ -15,9 +15,13 @@ if(AmazonSnsMessage.MESSAGE_TYPE_SUBSCRIPTION_CONFIRMATION.equals(snsMessage.get
     snsMessage.confirmSubscription();
 }
 else if(AmazonSnsMessage.MESSAGE_TYPE_NOTIFICATION.equals(snsMessage.getRequestType())){
-    def alertId = createAlert(snsMessage);
     if(ATTACH_GRAPHS){
-        attachMetricGraphs(snsMessage, alertId);
+        def graphs = snsMessage.createMetricGraphs()
+        def alertId = createAlert(snsMessage);
+        attachMetricGraphs(graphs, alertId);
+    }
+    else{
+        createAlert(snsMessage);
     }
 }
 
@@ -33,8 +37,7 @@ def createAlert(AmazonSnsMessage snsMessage){
     return alertId;
 }
 
-def attachMetricGraphs(snsMessage, alertId){
-    def graphs = snsMessage.createMetricGraphs()
+def attachMetricGraphs(graphs, alertId){
     graphs.each{graph->
         logger.warn("Attaching graphs ${graph.name}");
         def response = opsgenie.attach([alertId:alertId, stream:new ByteArrayInputStream(graph.data), fileName:graph.name])
