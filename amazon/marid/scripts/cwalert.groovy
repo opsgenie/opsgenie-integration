@@ -16,6 +16,12 @@ if(AmazonSnsMessage.MESSAGE_TYPE_SUBSCRIPTION_CONFIRMATION.equals(snsMessage.get
 }
 else if(AmazonSnsMessage.MESSAGE_TYPE_NOTIFICATION.equals(snsMessage.getRequestType())){
     if(ATTACH_GRAPHS){
+        if(conf.AWS_ACCESS_KEY == null){
+            throw new Exception("AWS_ACCESS_KEY need to be defined in marid.conf file");
+        }
+        if(conf.AWS_SECRET_KEY == null){
+            throw new Exception("AWS_SECRET_KEY need to be defined in marid.conf file");
+        }
         def graphs = snsMessage.createMetricGraphs()
         def alertId = createAlert(snsMessage);
         attachMetricGraphs(graphs, alertId);
