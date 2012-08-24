@@ -1,5 +1,6 @@
 /********************** CONFIGURATION ************************/
-recipients = "cloudwatchgroup"
+recipients = ["cloudwatchgroup"]
+actions = []
 ATTACH_GRAPHS = true
 def snsMessageConfig = [
     ADDITIONAL_METRICS:[CPUUtilization:["DiskReadBytes", "NetworkIn", "NetworkOut" , "DiskWriteBytes"]],
@@ -35,7 +36,12 @@ def createAlert(AmazonSnsMessage snsMessage){
     String alertDescription = snsMessage.getCloudwatchAlertDescription()
     Map details = snsMessage.getCloudwatchAlertDetails()
     String subject = snsMessage.getSubject()
-    def alertProps = [recipients:recipients, message:subject,  details:details, description:alertDescription]
+    def alertProps = [:]
+    alertProps.recipients = params.recipients?params.recipients.split(","):recipients;
+    alertProps.message = params.message?params.message:subject
+    alertProps.description = params.description?params.description:alertDescription
+    alertProps.actions = params.actions?params.actions.split(","):actions
+    alertProps.details = details
     logger.warn("Creating alert with message ${subject}");
     def response = opsgenie.createAlert(alertProps)
     def alertId =  response.alertId;
