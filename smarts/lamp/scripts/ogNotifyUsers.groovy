@@ -231,15 +231,15 @@ def createHtml(String className, String instanceName){
             <thead>
             <tr>
     """)
-notificationAttributeNames.each{attributeName, attributeLabel->
-    bfr.append("""<th>${attributeLabel}</th>""")
+    notificationAttributeNames.each{attributeName, attributeLabel->
+        bfr.append("""<th>${attributeLabel}</th>""")
 
-}
-bfr.append("""
-</tr>
-    </thead>
-    <tbody>
-""")
+    }
+    bfr.append("""
+    </tr>
+        </thead>
+        <tbody>
+    """)
     rowCount = 0;
     connParams = [broker: BROKER_NAME, domain: DOMAIN_NAME, password: SMARTS_PASSWORD, username: SMARTS_USERNAME];
     SmartsDatasource.execute(connParams){ds->
@@ -263,12 +263,13 @@ bfr.append("""
     }
 
     bfr.append("""
-        </tbody>
-        </table>
-        </div>
-    </body>
-    </html>
-""")
+            </tbody>
+            </table>
+            </div>
+        </body>
+        </html>
+    """)
+    return bfr.toString();
 }
 
 def getTopologyObjectProperties(connParams, className, instanceName){
