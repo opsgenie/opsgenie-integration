@@ -34,7 +34,8 @@ notificationAttributesListToBeAddedToAlertDetails = [
         "InstanceName":"Instance Name",
         "EventText":"Event Text",
         "OccurrenceCount":"Count",
-        "Name":"NotificationName"]
+        "Name":"NotificationName"
+    ]
 /**************************************************************/
 
 
