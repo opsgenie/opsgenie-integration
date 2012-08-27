@@ -29,7 +29,12 @@ SOURCE_DOMAIN_NAME = System.getenv().get("SM_OBJ_SourceDomainName");
 MESSAGE= "Smarts notification: ${CLASS_NAME} ${INSTANCE_NAME} ${EVENT_NAME}"
 DESCRIPTION= "Smarts notification: ${CLASS_NAME} ${INSTANCE_NAME} ${EVENT_NAME} ${EVENT_TEXT}"
 // Specify the notification properties that should be included in the OpsGenie alert
-notificationAttributesListToBeAddedToAlertDetails = ["Severity":"Severity", "InstanceName":"Instance Name", "EventText":"Event Text", "OccurrenceCount":"Count"]
+notificationAttributesListToBeAddedToAlertDetails = [
+        "Severity":"Severity",
+        "InstanceName":"Instance Name",
+        "EventText":"Event Text",
+        "OccurrenceCount":"Count",
+        "Name":"NotificationName"]
 /**************************************************************/
 
 
@@ -66,6 +71,8 @@ notificationAttributesListToBeAddedToAlertDetails.each{smartsAttributeName, deta
 	def smartsEnvVarName = "SM_OBJ_" + smartsAttributeName
     details[detailsPropName] = String.valueOf(System.getenv().get(smartsEnvVarName));
 }
+details["DOMAIN_NAME"]=DOMAIN_NAME;
+
 if(details){
     alertProps.details = details;
 }
