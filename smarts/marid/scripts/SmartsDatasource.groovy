@@ -4,7 +4,9 @@ import com.smarts.remote.SmRemoteServerInfo
 import com.smarts.repos.MR_PropertyNameValue
 import com.smarts.repos.MR_Ref
 import com.smarts.repos.MR_Choice
-import org.apache.commons.codec.binary.Hex;
+import org.apache.commons.codec.binary.Hex
+import com.smarts.repos.MR_AnyVal
+import com.smarts.repos.MR_AnyValString;
 
 public class SmartsDatasource {
     final static String NOTIFICATION_CLASS_NAME = "ICS_Notification";
@@ -46,6 +48,12 @@ public class SmartsDatasource {
     }
     public Map getAllProperties(String className, String instanceName){
         return convertToMap(domainManager.getAllProperties(className, instanceName, MR_PropertyNameValue.MR_BOTH))
+    }
+
+    private void invokeNotificationOperation(String notificationName, String operationName, String userName, String auditTrailText)
+    {
+        MR_AnyVal[] opParams = [new MR_AnyValString(userName), new MR_AnyValString(auditTrailText)];
+        domainManager.invokeOperation("ICS_Notification", notificationName, operationName, opParams)
     }
 
     public List<Map> getNotifications(String className, String instanceName, String eventName){

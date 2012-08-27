@@ -1,0 +1,1 @@
+SmartsActionExecutor.execute(logger, alert);
