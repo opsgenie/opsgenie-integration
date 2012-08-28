@@ -1,1 +1,1 @@
-SmartsActionExecutor.execute(logger, alert);
+SmartsActionExecutor.execute(logger, alert, conf, opsgenie);

@@ -1,19 +1,17 @@
-import com.ifountain.opsgenie.client.script.util.ScriptProxy
-import com.ifountain.opsgenie.client.marid.MaridConfig
-
 public class SmartsActionExecutor{
-    static def SMARTS_USERNAME = "admin"
-    static def SMARTS_PASSWORD = "changeme"
-    static def SM_BROKER = "localhost:426"
 
-    public static void execute(def logger, def alert)
+
+    public static void execute(def logger, def alert, def conf, def opsgenie)
     {
-
+        def connParams = [:];
+        connParams.broker = conf["smarts.broker"];
+        connParams.username = conf["smarts.username"];
+        connParams.password = conf["smarts.password"];
+        connParams.brokerUsername = conf["smarts.brokerUsername"];
+        connParams.brokerPassword = conf["smarts.brokerPassword"];
 
         def LOG_PREFIX ="[${alert.action}]:";
         logger.warn("${LOG_PREFIX} Will execute action for alertId ${alert.alertId}");
-
-        def opsgenie = new ScriptProxy(MaridConfig.getInstance().getOpsGenieClient(), MaridConfig.getInstance().getCustomerKey());
 
         def alertFromOpsGenie = opsgenie.getAlert(["alertId": alert.alertId]);
         def notificationName = alertFromOpsGenie.details["NotificationName"];
@@ -31,9 +29,8 @@ public class SmartsActionExecutor{
             throw new Exception("domainName does not exists in alert details")
         }
 
-
+        connParams.domain=domainName;
         logger.warn("${LOG_PREFIX} Will execute action for alert ${notificationName} on Smarts");
-        def connParams = [broker: SM_BROKER, domain: domainName, password: SMARTS_PASSWORD, username: SMARTS_USERNAME];
         SmartsDatasource.execute(connParams){ds->
             if(alert.action == "acknowledge")
             {
