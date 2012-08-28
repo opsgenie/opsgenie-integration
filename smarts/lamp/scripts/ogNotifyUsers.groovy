@@ -13,15 +13,19 @@ SOURCE = "Smarts"
 // Smarts credentials are needed to retrieve object details from Smarts servers.
 // Script attempts to get the object details from the underlying domain, using SourceDomainName
 // If it cannot get it from the underlying domain, it gets object details from the SAM server
-SMARTS_USERNAME = "admin"
-SMARTS_PASSWORD = "changeme"
+def connParams = [:];
+connParams.broker = System.getenv().get("SM_BROKER");
+connParams.username = conf["smarts.username"];
+connParams.password = conf["smarts.password"];
+connParams.brokerUsername = conf["smarts.brokerUsername"];
+connParams.brokerPassword = conf["smarts.brokerPassword"];
+
 CLASS_NAME = System.getenv().get("SM_OBJ_ClassName");
 INSTANCE_NAME = System.getenv().get("SM_OBJ_InstanceName");
 ELEMENT_CLASS_NAME = System.getenv().get("SM_OBJ_ElementClassName");
 ELEMENT_NAME = System.getenv().get("SM_OBJ_ElementName");
 EVENT_NAME = System.getenv().get("SM_OBJ_EventName");
 EVENT_TEXT = System.getenv().get("SM_OBJ_EventText");
-BROKER_NAME = System.getenv().get("SM_BROKER");
 DOMAIN_NAME = System.getenv().get("SM_SERVER_NAME");
 SOURCE_DOMAIN_NAME = System.getenv().get("SM_OBJ_SourceDomainName");
 
@@ -179,14 +183,14 @@ def createHtml(String className, String instanceName){
             </thead>
             <tbody>
     """)
-    def connParams = [broker: BROKER_NAME, domain: SOURCE_DOMAIN_NAME, password: SMARTS_PASSWORD, username: SMARTS_USERNAME];
+    connParams.domain= SOURCE_DOMAIN_NAME;
     Map topologyAttributes = null;
     try{
         topologyAttributes = getTopologyObjectProperties(connParams, className, instanceName);
     }
     catch (Throwable t){
         if(t.toString().indexOf("is not registered with the broker") >= 0){
-            connParams = [broker: BROKER_NAME, domain: DOMAIN_NAME, password: SMARTS_PASSWORD, username: SMARTS_USERNAME];
+            connParams.domain= DOMAIN_NAME;
             try{
                 topologyAttributes = getTopologyObjectProperties(connParams, className, instanceName);
             }
@@ -249,7 +253,7 @@ def createHtml(String className, String instanceName){
         <tbody>
     """)
     rowCount = 0;
-    connParams = [broker: BROKER_NAME, domain: DOMAIN_NAME, password: SMARTS_PASSWORD, username: SMARTS_USERNAME];
+    connParams.domain= DOMAIN_NAME;
     SmartsDatasource.execute(connParams){ds->
         List<Map> notifications = ds.getNotifications(className, instanceName, ".*");
         notifications.each{notificationAttributes->
