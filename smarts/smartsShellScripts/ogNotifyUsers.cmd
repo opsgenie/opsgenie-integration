@@ -13,7 +13,9 @@ set RECIPIENTS=%SM_POBJ_Recipients%
 SET DESCRIPTION=%SM_OBJ_EventText%
 
 cmd /c %LAMP_HOME%\lamp.bat createAlert --message %MESSAGE% --recipients %RECIPIENTS% --description %DESCRIPTION% ^
- --source Smarts -DElementName=%SM_OBJ_ElementName% -DDomain=%SM_OBJ_SourceDomainName% -DCount=%SM_OBJ_OccurrenceCount%
+--source Smarts --actions "acknowledge,unacknowledge,take ownership,release ownership" ^
+-DElementName=%SM_OBJ_ElementName% -DDomain=%SM_OBJ_SourceDomainName% -DCount=%SM_OBJ_OccurrenceCount% ^
+-DNotificationName=%SM_OBJ_Name% -DDomainName=%SM_SERVER_NAME%
 
 
 
