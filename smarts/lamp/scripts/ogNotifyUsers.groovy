@@ -13,7 +13,7 @@ SOURCE = "Smarts"
 // Smarts credentials are needed to retrieve object details from Smarts servers.
 // Script attempts to get the object details from the underlying domain, using SourceDomainName
 // If it cannot get it from the underlying domain, it gets object details from the SAM server
-def connParams = [:];
+connParams = [:];
 connParams.broker = System.getenv().get("SM_BROKER");
 connParams.username = conf["smarts.username"];
 connParams.password = conf["smarts.password"];
@@ -71,12 +71,13 @@ alertProps.message = MESSAGE
 alertProps.recipients = RECIPIENTS
 alertProps.description = DESCRIPTION
 alertProps.source = SOURCE
+alertProps.actions = ["acknowledge","unacknowledge","take ownership","release ownership"]
 def details = [:]
 notificationAttributesListToBeAddedToAlertDetails.each{smartsAttributeName, detailsPropName->
 	def smartsEnvVarName = "SM_OBJ_" + smartsAttributeName
     details[detailsPropName] = String.valueOf(System.getenv().get(smartsEnvVarName));
 }
-details["DOMAIN_NAME"]=DOMAIN_NAME;
+details["DomainName"]=DOMAIN_NAME;
 
 if(details){
     alertProps.details = details;
