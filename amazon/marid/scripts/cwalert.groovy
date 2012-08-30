@@ -1,5 +1,5 @@
 /********************** CONFIGURATION ************************/
-recipients = ["cloudwatchgroup"]
+recipients = ["all"]
 actions = []
 ATTACH_GRAPHS = true
 def snsMessageConfig = [
