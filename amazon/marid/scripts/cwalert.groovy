@@ -1,4 +1,5 @@
 /********************** CONFIGURATION ************************/
+//recipients can be users or groups created in OpsGenie
 recipients = ["all"]
 actions = []
 ATTACH_GRAPHS = true
