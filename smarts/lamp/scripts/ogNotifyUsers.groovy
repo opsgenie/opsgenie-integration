@@ -3,8 +3,10 @@ import org.apache.commons.lang.StringEscapeUtils
 
 /********************CONFIGURATIONS****************************/
 // Recipients should be specified here for automatic tools. 
-// For server tools, it can be set dynamically by prompt
-RECIPIENTS="web_operations"
+// Recipients can be users or groups created in OpsGenie
+// For Smarts server tools, it can be set dynamically by prompt
+RECIPIENTS="all"
+
 // This assumes the name of the prompt is :Recipients"
 // Modify the name of the environment variable accordingly
 if (System.getenv().get("SM_POBJ_Recipients")) RECIPIENTS = System.getenv().get("SM_POBJ_Recipients")
