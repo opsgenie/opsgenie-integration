@@ -3,8 +3,6 @@
 # Specify the location of the lamp utility
 LAMP_HOME=/opt/lamp
 
-export CLASSPATH=$CLASSPATH:$SM_HOME/classes/*
-
 MESSAGE="Smarts notification: $SM_OBJ_ClassName $SM_OBJ_InstanceDisplayName $SM_OBJ_EventName"
 RECIPIENTS=$SM_POBJ_Recipients
 DESCRIPTION=$SM_OBJ_EventText

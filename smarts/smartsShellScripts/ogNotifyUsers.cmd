@@ -1,7 +1,6 @@
 @echo off
 
 SET LAMP_HOME=C:\lamp
-SET OC_CLASSPATH=%SM_HOME%/classes/*
 
 SET MESSAGE=Smarts notification: %SM_OBJ_ClassName% %SM_OBJ_InstanceDisplayName% %SM_OBJ_EventName%
 SET RECIPIENTS=%SM_POBJ_Recipients%
