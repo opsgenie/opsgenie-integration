@@ -7,7 +7,7 @@ SET RECIPIENTS="%SM_POBJ_Recipients%"
 SET DESCRIPTION="%SM_OBJ_EventText%"
 SET ACTIONS="acknowledge,unacknowledge,take ownership,release ownership"
 
-IF "%SM_POBJ_Recipients%"=="" SET RECIPIENTS="web_operations"
+IF "%SM_POBJ_Recipients%"=="" SET RECIPIENTS="all"
 
 echo Creating Alert
 CMD /c %LAMP_HOME%\lamp.bat createAlert --message %MESSAGE% --recipients %RECIPIENTS% ^
