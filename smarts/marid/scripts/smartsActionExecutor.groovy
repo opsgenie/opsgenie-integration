@@ -5,7 +5,7 @@ connParams.password = conf["smarts.password"];
 connParams.brokerUsername = conf["smarts.brokerUsername"];
 connParams.brokerPassword = conf["smarts.brokerPassword"];
 
-def LOG_PREFIX ="[${alert.action}]:";
+def LOG_PREFIX ="[${action}]:";
 logger.warn("${LOG_PREFIX} Will execute action for alertId ${alert.alertId}");
 
 def alertFromOpsGenie = opsgenie.getAlert(["alertId": alert.alertId]);
@@ -27,25 +27,25 @@ if(!domainName)
 connParams.domain=domainName;
 logger.warn("${LOG_PREFIX} Will execute action for alert ${notificationName} on Smarts");
 SmartsDatasource.execute(connParams){ds->
-    if(alert.action == "acknowledge")
+    if(action == "acknowledge")
     {
         ds.invokeNotificationOperation(notificationName, "acknowledge", alert.username, "Acknowledged via OpsGenie");
     }
-    else if(alert.action == "unacknowledge")
+    else if(action == "unacknowledge")
     {
         ds.invokeNotificationOperation(notificationName, "unacknowledge", alert.username, "Unacknowledged via OpsGenie");
     }
-    else if(alert.action == "take ownership")
+    else if(action == "take ownership")
     {
         ds.invokeNotificationOperation(notificationName, "takeOwnership", alert.username, "TakeOwnership via OpsGenie");
     }
-    else if(alert.action == "release ownership")
+    else if(action == "release ownership")
     {
         ds.invokeNotificationOperation(notificationName, "releaseOwnership", alert.username, "ReleaseOwnership via OpsGenie");
     }
     else
     {
-        throw new Exception("Unknown action ${alert.action}")
+        throw new Exception("Unknown action ${action}")
     }
 }
 logger.warn("${LOG_PREFIX} Executed action for alert ${notificationName} on Smarts");
