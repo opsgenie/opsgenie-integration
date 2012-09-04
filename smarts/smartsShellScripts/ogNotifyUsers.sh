@@ -8,10 +8,11 @@ RECIPIENTS="$SM_POBJ_Recipients"
 DESCRIPTION="$SM_OBJ_EventText"
 ACTIONS="acknowledge,unacknowledge,take ownership,release ownership"
 
-if [[ -n "$SM_POBJ_Recipients" ]] ; then
+if [[ "$SM_POBJ_Recipients" == "" ]] ; then
      RECIPIENTS="all"
 fi
 
+echo "Creating Alert"
 $LAMP_HOME/lamp createAlert --message "$MESSAGE" --recipients "$RECIPIENTS" --description "$DESCRIPTION" --source Smarts --actions "$ACTIONS" -DElementName="$SM_OBJ_ElementName" -DDomain="$SM_OBJ_SourceDomainName" -DCount="$SM_OBJ_OccurrenceCount" -DNotificationName="$SM_OBJ_Name" -DDomainName="$SM_SERVER_NAME"
 
 
