@@ -1,7 +1,6 @@
 @echo off
 ::####################################CONFIGURATION_SETTIGNS###############################
-set LAMP_PATH=lamp_path
-set JAVA_HOME=java_home
+SET LAMP_HOME=C:\lamp
 ::#########################################################################################
 
 
