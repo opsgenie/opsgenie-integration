@@ -7,6 +7,8 @@ import com.smarts.repos.MR_Choice
 import org.apache.commons.codec.binary.Hex
 import com.smarts.repos.MR_AnyVal
 import com.smarts.repos.MR_AnyValString;
+import com.smarts.repos.MR_AnyValUnsignedInt;
+
 
 public class SmartsDatasource {
     final static String NOTIFICATION_CLASS_NAME = "ICS_Notification";
@@ -54,6 +56,9 @@ public class SmartsDatasource {
     {
         MR_AnyVal[] opParams = [new MR_AnyValString(userName), new MR_AnyValString(auditTrailText)];
         domainManager.invokeOperation("ICS_Notification", notificationName, operationName, opParams)
+
+        MR_AnyVal[] notifyArgs = [new MR_AnyValUnsignedInt(0)]; //wait for notify
+        domainManager.invokeOperation("ICS_Notification", notificationName, "changed", notifyArgs);
     }
 
     public List<Map> getNotifications(String className, String instanceName, String eventName){

@@ -9,7 +9,7 @@ def LOG_PREFIX ="[${action}]:";
 logger.warn("${LOG_PREFIX} Will execute action for alertId ${alert.alertId}");
 
 def alertFromOpsGenie = opsgenie.getAlert(["alertId": alert.alertId]);
-def notificationName = alertFromOpsGenie.details["NotificationName"];
+def notificationName = alertFromOpsGenie.alias;
 if(!notificationName)
 {
     logger.warn("${LOG_PREFIX} notificationName does not exists in alert details for alert id : ${alert.alertId}");

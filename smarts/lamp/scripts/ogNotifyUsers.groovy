@@ -39,9 +39,8 @@ notificationAttributesListToBeAddedToAlertDetails = [
         "Severity":"Severity",
         "InstanceName":"Instance Name",
         "EventText":"Event Text",
-        "OccurrenceCount":"Count",
-        "Name":"NotificationName"
-    ]
+        "OccurrenceCount":"Count"
+]
 /**************************************************************/
 
 
@@ -73,6 +72,7 @@ alertProps.message = MESSAGE
 alertProps.recipients = RECIPIENTS
 alertProps.description = DESCRIPTION
 alertProps.source = SOURCE
+alertProps.alias = String.valueOf(System.getenv().get("SM_OBJ_Name"));
 alertProps.actions = ["acknowledge","unacknowledge","take ownership","release ownership"]
 def details = [:]
 notificationAttributesListToBeAddedToAlertDetails.each{smartsAttributeName, detailsPropName->
