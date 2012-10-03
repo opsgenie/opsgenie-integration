@@ -43,6 +43,10 @@ SmartsDatasource.execute(connParams){ds->
     {
         ds.invokeNotificationOperation(notificationName, "releaseOwnership", alert.username, "ReleaseOwnership via OpsGenie");
     }
+    else if(action == "AddNote")
+    {
+        ds.invokeNotificationOperation(notificationName, "addAuditEntry", alert.username, alert.note);
+    }
     else
     {
         throw new Exception("Unknown action ${action}")

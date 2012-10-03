@@ -54,7 +54,15 @@ public class SmartsDatasource {
 
     private void invokeNotificationOperation(String notificationName, String operationName, String userName, String auditTrailText)
     {
-        MR_AnyVal[] opParams = [new MR_AnyValString(userName), new MR_AnyValString(auditTrailText)];
+        MR_AnyVal[] opParams = [];
+        if(operationName == "addAuditEntry")
+        {
+            opParams = [new MR_AnyValString(userName), new MR_AnyValString("AddNote"), new MR_AnyValString(auditTrailText)];
+        }
+        else
+        {
+            opParams = [new MR_AnyValString(userName), new MR_AnyValString(auditTrailText)];
+        }
         domainManager.invokeOperation("ICS_Notification", notificationName, operationName, opParams)
 
         MR_AnyVal[] notifyArgs = [new MR_AnyValUnsignedInt(0)]; //wait for notify
