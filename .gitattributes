@@ -1,2 +1,3 @@
 *.txt           text=auto
 *.sh            eol=lf
+opsgenie            eol=lf
