@@ -1,0 +1,9 @@
+#!/bin/sh
+
+# Specify the location of the lamp utility
+LAMP_HOME=/usr/local/lamp
+
+$LAMP_HOME/lamp executeScript --name ogCreateAlert.groovy -Dentity="$1"
+
+
+
