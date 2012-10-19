@@ -3,7 +3,7 @@ netcool.db.driver=com.sybase.jdbc2.jdbc.SybDriver
 netcool.db.host=localhost
 netcool.db.port=4100
 netcool.db.username=root
-netcool.db.password=
+netcool.db.password=root
 
 ########################################NETCOOL INTEGRATION - ALERT ACTION CONFIGURATION ######################
 actions.acknowledge.script=netcoolActionExecutor.groovy
