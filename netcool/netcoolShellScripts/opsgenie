@@ -1,0 +1,28 @@
+#!/bin/sh
+
+# Specify the location of the lamp utility
+LAMP_HOME=/usr/local/lamp
+
+#Specify the alert recipients
+RECIPIENTS=all
+
+ACTIONS="acknowledge,deacknowledge,add to task list, remove from task list"
+SERIAL="$1"
+NODE="$2"
+SEVERITY="$3"
+SUMMARY="$4"
+COUNT="$5"
+TYPE="$6"
+DESCRIPTION=$(cat <<EOF
+This message refers to node [$NODE] which has the following problem;
+
+$SUMMARY
+
+The Severity is $SEVERITY
+
+Sent by the Netcool/OMNIbus Automation system
+EOF
+)
+
+$LAMP_HOME/lamp createAlert --message "$SUMMARY" --recipients $RECIPIENTS --entity "$NODE" --description  "$DESCRIPTION" --source NETCOOL --actions $ACTIONS \
+     -DSerial="$SERIAL" -DNode="$NODE" -DCount="$COUNT" -DType="$TYPE" -DSeverity="$SEVERITY"
