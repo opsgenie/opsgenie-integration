@@ -12,7 +12,6 @@ NODE="$2"
 SEVERITY="$3"
 SUMMARY="$4"
 COUNT="$5"
-TYPE="$6"
 DESCRIPTION=$(cat <<EOF
 This message refers to node [$NODE] which has the following problem;
 
@@ -25,4 +24,4 @@ EOF
 )
 
 $LAMP_HOME/lamp createAlert --message "$SUMMARY" --recipients $RECIPIENTS --entity "$NODE" --description  "$DESCRIPTION" --source NETCOOL --actions $ACTIONS \
-     -DSerial="$SERIAL" -DNode="$NODE" -DCount="$COUNT" -DType="$TYPE" -DSeverity="$SEVERITY"
+     -DSerial="$SERIAL" -DNode="$NODE" -DCount="$COUNT" -DSeverity="$SEVERITY"
