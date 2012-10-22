@@ -51,8 +51,8 @@ if(entity == "host" || entity == "service"){
     def hostAddress = System.getenv('NAGIOS_HOSTADDRESS')
     def dateTime =  System.getenv('NAGIOS_LONGDATETIME')
     if(entity == "host"){
-        def hostName = System.getenv('HOSTNAME')
-        def hostState = System.getenv('HOSTSTATE');
+        def hostName = System.getenv('NAGIOS_HOSTNAME')
+        def hostState = System.getenv('NAGIOS_HOSTSTATE');
 
         alertProps.message= "** ${notificationType} Host Alert: ${hostName} is ${hostState} **"
         alertProps.description = """***** Nagios *****
