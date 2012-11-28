@@ -5,7 +5,7 @@ SET LAMP_HOME=C:\lamp
 SET MESSAGE="Smarts notification: %SM_OBJ_ClassName% %SM_OBJ_InstanceDisplayName% %SM_OBJ_EventName%"
 SET RECIPIENTS="%SM_POBJ_Recipients%"
 SET DESCRIPTION="%SM_OBJ_EventText%"
-SET ACTIONS="acknowledge,unacknowledge,take ownership,release ownership"
+SET ACTIONS="unacknowledge,take ownership,release ownership"
 
 IF "%SM_POBJ_Recipients%"=="" SET RECIPIENTS="all"
 

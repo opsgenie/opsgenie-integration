@@ -6,7 +6,7 @@ LAMP_HOME=/usr/local/lamp
 #Specify the alert recipients
 RECIPIENTS=all
 
-ACTIONS="acknowledge,deacknowledge,add to task list, remove from task list"
+ACTIONS="deacknowledge,add to task list, remove from task list"
 SERIAL="$1"
 NODE="$2"
 SEVERITY="$3"

@@ -73,7 +73,7 @@ alertProps.recipients = RECIPIENTS
 alertProps.description = DESCRIPTION
 alertProps.source = SOURCE
 alertProps.alias = String.valueOf(System.getenv().get("SM_OBJ_Name"));
-alertProps.actions = ["acknowledge","unacknowledge","take ownership","release ownership"]
+alertProps.actions = ["unacknowledge","release ownership"]
 def details = [:]
 notificationAttributesListToBeAddedToAlertDetails.each{smartsAttributeName, detailsPropName->
 	def smartsEnvVarName = "SM_OBJ_" + smartsAttributeName

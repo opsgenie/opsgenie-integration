@@ -6,7 +6,7 @@ LAMP_HOME=/opt/lamp
 MESSAGE="Smarts notification: $SM_OBJ_ClassName $SM_OBJ_InstanceDisplayName $SM_OBJ_EventName"
 RECIPIENTS="$SM_POBJ_Recipients"
 DESCRIPTION="$SM_OBJ_EventText"
-ACTIONS="acknowledge,unacknowledge,take ownership,release ownership"
+ACTIONS="unacknowledge,release ownership"
 
 if [[ "$SM_POBJ_Recipients" == "" ]] ; then
      RECIPIENTS="all"
