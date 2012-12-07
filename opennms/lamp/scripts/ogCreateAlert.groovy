@@ -7,7 +7,8 @@ import org.apache.http.HttpHost;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
-import java.text.SimpleDateFormat;
+import java.text.SimpleDateFormat
+import org.apache.commons.lang.StringEscapeUtils;
 
 /********************CONFIGURATIONS****************************/
 
@@ -94,7 +95,7 @@ def createHtml(restResponse){
 				</head>
 				<body>
 					<div>
-						<h2>Outages of Node ${nodelabel}</h2>
+						<h2>Outages of Node ${htmlEscape(nodelabel)}</h2>
 						<table>
 							<tbody>
 					
@@ -127,13 +128,13 @@ def createHtml(restResponse){
 				</tr>
 				<tr>
 					<td>Interface:</td>
-					<td>${ipInterface}</td>
+					<td>${htmlEscape(ipInterface)}</td>
 					<td>Lost Service Time:</td>
 					<td>${lostTime}</td>
 				</tr>
 				<tr>
 					<td>Service:</td>
-					<td>${service}</td>
+					<td>${htmlEscape(service)}</td>
 					<td>Regain Service Time:</td>
 					<td>${regainTime}</td>
 				</tr>
@@ -144,15 +145,15 @@ def createHtml(restResponse){
 					<td>Severity:</td>
 					<td>${serviceLostEvent.@severity.text()}</td>
 					<td>UEI:</td>
-					<td>${serviceLostEvent.uei.text()}</td>
+					<td>${htmlEscape(serviceLostEvent.uei.text())}</td>
 				</tr>
 				<tr>
 					<td>Description:</td>
-					<td colspan="3">${serviceLostEvent.description.text()}</td>
+					<td colspan="3">${htmlEscape(serviceLostEvent.description.text())}</td>
 				</tr>
 				<tr>
 					<td>Log Message:</td>
-					<td colspan="3">${serviceLostEvent.logMessage.text()}</td>
+					<td colspan="3">${htmlEscape(serviceLostEvent.logMessage.text())}</td>
 				</tr>
 			""")
 			if(serviceRegainedEvent.size() > 0){
@@ -164,15 +165,15 @@ def createHtml(restResponse){
 						<td>Severity:</td>
 						<td>${serviceRegainedEvent.@severity.text()}</td>
 						<td>UEI:</td>
-						<td>${serviceRegainedEvent.uei.text()}</td>
+						<td>${htmlEscape(serviceRegainedEvent.uei.text())}</td>
 					</tr>
 					<tr>
 						<td>Description:</td>
-						<td colspan="3">${serviceRegainedEvent.description.text()}</td>
+						<td colspan="3">${htmlEscape(serviceRegainedEvent.description.text())}</td>
 					</tr>
 					<tr>
 						<td>Log Message:</td>
-						<td colspan="3">${serviceRegainedEvent.logMessage.text()}</td>
+						<td colspan="3">${htmlEscape(serviceRegainedEvent.logMessage.text())}</td>
 					</tr>
 				""")
 			}
@@ -220,5 +221,8 @@ def restCall(nodeId){
 	finally{
 		httpclient.getConnectionManager().shutdown();
 	}
-	
+}
+
+def htmlEscape(value){
+    return StringEscapeUtils.escapeHtml(value)
 }

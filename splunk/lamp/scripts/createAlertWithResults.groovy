@@ -16,6 +16,7 @@ import org.jfree.data.time.TimeSeriesCollection
 import org.jfree.data.xy.XYDataset
 import java.util.zip.ZipOutputStream
 import java.util.zip.ZipEntry
+import org.apache.commons.lang.StringEscapeUtils
 
 numberOfEvents = System.getenv("SPLUNK_ARG_1");
 searchTerms = System.getenv("SPLUNK_ARG_2");
@@ -80,7 +81,7 @@ def createHtml(List records, OutputStream out){
         details.append("""
         <tr>
         <td width="15%"><span class="datestr">${df.format(new Date(Long.parseLong(rec.get("_time"))*1000))}</span></td>
-        <td width="85%">${rec.get("_raw")}</td>
+        <td width="85%">${htmlEscape(rec.get("_raw"))}</td>
         </tr>
     """)
     }
@@ -174,3 +175,6 @@ def createChart(List records, OutputStream out){
     ChartUtilities.writeChartAsPNG(out, chart, 500, 200);
 }
 
+def htmlEscape(value){
+    return StringEscapeUtils.escapeHtml(value)
+}
