@@ -6,7 +6,7 @@ netcool.db.username=root
 netcool.db.password=root
 
 ########################################NETCOOL INTEGRATION - ALERT ACTION CONFIGURATION ######################
-actions.acknowledge.script=netcoolActionExecutor.groovy
+actions.Acknowledge.script=netcoolActionExecutor.groovy
 actions.deacknowledge.script=netcoolActionExecutor.groovy
 actions.addtotasklist.script=netcoolActionExecutor.groovy
 actions.removefromtasklist.script=netcoolActionExecutor.groovy

@@ -11,9 +11,9 @@ smarts.brokerPassword=Nonsecure
 ########################################SMARTS INTEGRATION - ALERT ACTION CONFIGURATION ######################
 ###Action Script will be used in Smarts Integration
 actions.AddNote.script=smartsActionExecutor.groovy
-actions.acknowledge.script=smartsActionExecutor.groovy
+actions.Acknowledge.script=smartsActionExecutor.groovy
+actions.TakeOwnership.script=smartsActionExecutor.groovy
 actions.unacknowledge.script=smartsActionExecutor.groovy
-actions.takeownership.script=smartsActionExecutor.groovy
 actions.releaseownership.script=smartsActionExecutor.groovy
 
 ##############################################################################################################
