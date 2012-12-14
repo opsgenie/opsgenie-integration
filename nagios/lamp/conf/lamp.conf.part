@@ -1,5 +1,5 @@
 ######################################## NAGIOS ALERT RECIPIENTS CONFIGURATION #######################################
-nagios.recipients=
+nagios.recipients=all
 
 ######################################## NAGIOS HTTP AUTHENTICATION CONFIGURATION #######################################
 nagios.host=localhost
