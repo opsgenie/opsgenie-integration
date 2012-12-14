@@ -38,7 +38,7 @@ if (entity == "host" || entity == "service") {
         def hostName = System.getenv('NAGIOS_HOSTNAME')
         def hostState = System.getenv('NAGIOS_HOSTSTATE');
         alias = hostName
-        if (hostState == "DOWN") {
+        if (hostState == "DOWN" && notificationType == "PROBLEM") {
             action = "createAlert"
             alertProps.alias = alias
             alertProps.details = ["host": hostName]
@@ -52,7 +52,7 @@ Address: ${hostAddress}
 Additional Info: ${System.getenv('NAGIOS_HOSTOUTPUT')}
 Date/Time: ${dateTime}
 """
-        } else if (hostState == "UP") {
+        } else if (hostState == "UP" && notificationType == "RECOVERY") { 
             action = "closeAlert"
         }
     }
@@ -64,7 +64,7 @@ Date/Time: ${dateTime}
         alias = hostName + "_" + service
         logger.warn("service state: ${serviceState}")
 
-        if (serviceState == "CRITICAL") {
+        if (serviceState == "CRITICAL" && notificationType == "PROBLEM") {
             action = "createAlert"
             alertProps.alias = alias
             alertProps.details = ["host": hostName, "service": service]
@@ -79,7 +79,7 @@ State: ${serviceState}
 Additional Info: ${System.getenv('NAGIOS_SERVICEOUTPUT')}
 Date/Time: ${dateTime}
 """
-        } else if (serviceState == "OK") {
+        } else if (serviceState == "OK" && notificationType == "RECOVERY") {
             action = "closeAlert"
         }
     }
