@@ -1,0 +1,15 @@
+######################################## NAGIOS HTTP AUTHENTICATION CONFIGURATION #######################################
+nagios.host=localhost
+nagios.port=80
+nagios.user=nagiosadmin
+nagios.password=admin
+nagios.http.timeout=30000
+
+########################################NAGIOS INTEGRATION - ALERT ACTION CONFIGURATION ######################
+actions.Acknowledge.script=nagiosActionExecutor.groovy
+actions.AddNote.script=nagiosActionExecutor.groovy
+actions.TakeOwnership.script=nagiosActionExecutor.groovy
+actions.AssignOwnership.script=nagiosActionExecutor.groovy
+actions.Close.script=nagiosActionExecutor.groovy
+
+##############################################################################################################
