@@ -1,0 +1,9 @@
+######################################## NAGIOS ALERT RECIPIENTS CONFIGURATION #######################################
+nagios.recipients=
+
+######################################## NAGIOS HTTP AUTHENTICATION CONFIGURATION #######################################
+nagios.host=localhost
+nagios.port=80
+nagios.user=nagiosadmin
+nagios.password=admin
+nagios.http.timeout=30000

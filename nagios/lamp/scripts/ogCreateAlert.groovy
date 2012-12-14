@@ -14,29 +14,19 @@ import java.awt.image.BufferedImage
 import org.apache.commons.lang.StringEscapeUtils
 import java.text.SimpleDateFormat
 
-/********************CONFIGURATIONS****************************/
-
-// Recipients should be specified here for automatic tools. 
-// Recipients can be users or groups created in OpsGenie
-RECIPIENTS = "john.smith@ifountain.com"
 SOURCE = "Nagios"
-
-//Nagios credentials are needed for extra information to be fetched through Nagios CGIs
-NAGIOS_USER = "nagiosadmin"
-NAGIOS_PASSWORD = "admin"
-NAGIOS_HOST = "localhost"
-NAGIOS_PORT = 80
+RECIPIENTS = conf["nagios.recipients"]
 
 //http client preparation
-def timeout = 30000;
-TARGET_HOST = new HttpHost(NAGIOS_HOST, NAGIOS_PORT, "http");
+def timeout = conf["nagios.http.timeout"].toInteger();
+TARGET_HOST = new HttpHost(conf["nagios.host"], conf["nagios.port"].toInteger(), "http");
 HttpParams httpClientParams = new BasicHttpParams();
 HttpConnectionParams.setConnectionTimeout(httpClientParams, timeout);
 HttpConnectionParams.setSoTimeout(httpClientParams, timeout);
 HttpConnectionParams.setTcpNoDelay(httpClientParams, true);
 HTTP_CLIENT = new DefaultHttpClient(httpClientParams);
 AuthScope scope = new AuthScope(TARGET_HOST.getHostName(), TARGET_HOST.getPort());
-HTTP_CLIENT.getCredentialsProvider().setCredentials(scope, new UsernamePasswordCredentials(NAGIOS_USER, NAGIOS_PASSWORD));
+HTTP_CLIENT.getCredentialsProvider().setCredentials(scope, new UsernamePasswordCredentials(conf["nagios.user"], conf["nagios.password"]));
 
 def entity = params.entity;
 def action
