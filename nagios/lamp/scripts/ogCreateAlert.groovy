@@ -17,17 +17,6 @@ import java.text.SimpleDateFormat
 SOURCE = "Nagios"
 RECIPIENTS = conf["nagios.recipients"]
 
-//http client preparation
-def timeout = conf["nagios.http.timeout"].toInteger();
-TARGET_HOST = new HttpHost(conf["nagios.host"], conf["nagios.port"].toInteger(), "http");
-HttpParams httpClientParams = new BasicHttpParams();
-HttpConnectionParams.setConnectionTimeout(httpClientParams, timeout);
-HttpConnectionParams.setSoTimeout(httpClientParams, timeout);
-HttpConnectionParams.setTcpNoDelay(httpClientParams, true);
-HTTP_CLIENT = new DefaultHttpClient(httpClientParams);
-AuthScope scope = new AuthScope(TARGET_HOST.getHostName(), TARGET_HOST.getPort());
-HTTP_CLIENT.getCredentialsProvider().setCredentials(scope, new UsernamePasswordCredentials(conf["nagios.user"], conf["nagios.password"]));
-
 def entity = params.entity;
 def action
 def attachFile = true
@@ -63,10 +52,8 @@ Address: ${hostAddress}
 Additional Info: ${System.getenv('NAGIOS_HOSTOUTPUT')}
 Date/Time: ${dateTime}
 """
-        } else {
-            if (hostState == "UP") {
-                action = "closeAlert"
-            }
+        } else if (hostState == "UP") {
+            action = "closeAlert"
         }
     }
     else {
@@ -92,10 +79,8 @@ State: ${serviceState}
 Additional Info: ${System.getenv('NAGIOS_SERVICEOUTPUT')}
 Date/Time: ${dateTime}
 """
-        } else {
-            if (serviceState == "OK") {
-                action = "closeAlert"
-            }
+        } else if (serviceState == "OK") {
+            action = "closeAlert"
         }
     }
     if (action == "createAlert") {
@@ -109,7 +94,7 @@ Date/Time: ${dateTime}
     } else {
         if (action == "closeAlert") {
             logger.warn("Closing the alert ${alias}")
-            def response = opsgenie.closeAlert([alias: alias])
+            opsgenie.closeAlert([alias: alias])
         }
     }
 } else {
@@ -120,6 +105,18 @@ Date/Time: ${dateTime}
 def attach(alertId, entity) {
     // will get alert histgoram and trends charts from nagios and attach them to the alert
     try {
+        //http client preparation
+        def timeout = conf["nagios.http.timeout"].toInteger();
+        TARGET_HOST = new HttpHost(conf["nagios.host"], conf["nagios.port"].toInteger(), "http");
+        HttpParams httpClientParams = new BasicHttpParams();
+        HttpConnectionParams.setConnectionTimeout(httpClientParams, timeout);
+        HttpConnectionParams.setSoTimeout(httpClientParams, timeout);
+        HttpConnectionParams.setTcpNoDelay(httpClientParams, true);
+        HTTP_CLIENT = new DefaultHttpClient(httpClientParams);
+        AuthScope scope = new AuthScope(TARGET_HOST.getHostName(), TARGET_HOST.getPort());
+        HTTP_CLIENT.getCredentialsProvider().setCredentials(scope, new UsernamePasswordCredentials(conf["nagios.user"], conf["nagios.password"]));
+
+
         def alertHistogram = getAlertHistogram(entity);
         def trends = getTrends(entity);
         def htmlText = createHtml(entity, alertHistogram, trends)
