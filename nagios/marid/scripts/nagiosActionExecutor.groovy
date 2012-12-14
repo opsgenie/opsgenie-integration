@@ -26,10 +26,10 @@ HTTP_CLIENT.getCredentialsProvider().setCredentials(scope, new UsernamePasswordC
 
 
 try {
-    def alert = opsgenie.getAlert(alertId: alert.alertId)
-    if (alert.size() > 0) {
-        def host = alert.details.host
-        def service = alert.details.service
+    def alertFromOpsgenie = opsgenie.getAlert(alertId: alert.alertId)
+    if (alertFromOpsgenie.size() > 0) {
+        def host = alertFromOpsgenie.details.host
+        def service = alertFromOpsgenie.details.service
         def postParams = ["btnSubmit": "Commit", "persistent": "on", "cmd_mod": "2", "send_notification": "off", "host": host]
         if(service) postParams.service = service;
         if(action == "Acknowledge"){
@@ -41,7 +41,7 @@ try {
             postParams.com_data = "alert ownership taken by ${alert.username}"
             postParams.cmd_typ = service ? "3" : "1";
         }
-        else if(action == "Assign"){
+        else if(action == "AssignOwnership"){
             postParams.com_data = "alert ownership assigned to ${alert.owner}"
             postParams.cmd_typ = service ? "3" : "1";
         }
@@ -62,6 +62,7 @@ finally {
 
 
 def postToNagios(postParams){
+    logger.debug("${LOG_PREFIX} Posting to Nagios.")
     HttpPost post = new HttpPost("/nagios/cgi-bin/cmd.cgi")
     def formparams = [];
     postParams.each{key, value ->
@@ -71,8 +72,9 @@ def postToNagios(postParams){
     post.setEntity(entity);
     def response = HTTP_CLIENT.execute(TARGET_HOST, post);
     if(response.getStatusLine().getStatusCode() == 200){
+        def resp = EntityUtils.toString(response.getEntity());
         logger.info("${LOG_PREFIX} Successfully executed at Nagios.");
-        EntityUtils.consume(response.getEntity());
+        logger.debug("${LOG_PREFIX} Nagios response: ${resp}")
     }
     else{
         logger.warn("${LOG_PREFIX} Could not execute at Nagios.")
