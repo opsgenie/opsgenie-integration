@@ -27,7 +27,7 @@ if(!domainName)
 connParams.domain=domainName;
 logger.warn("${LOG_PREFIX} Will execute action for alert ${notificationName} on Smarts");
 SmartsDatasource.execute(connParams){ds->
-    if(action == "acknowledge")
+    if(action == "Acknowledge")
     {
         ds.invokeNotificationOperation(notificationName, "acknowledge", alert.username, "Acknowledged via OpsGenie");
     }
@@ -35,7 +35,7 @@ SmartsDatasource.execute(connParams){ds->
     {
         ds.invokeNotificationOperation(notificationName, "unacknowledge", alert.username, "Unacknowledged via OpsGenie");
     }
-    else if(action == "take ownership")
+    else if(action == "TakeOwnership")
     {
         ds.invokeNotificationOperation(notificationName, "takeOwnership", alert.username, "TakeOwnership via OpsGenie");
     }

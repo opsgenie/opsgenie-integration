@@ -12,7 +12,7 @@ def alertFromOpsGenie = opsgenie.getAlert(["alertId": alert.alertId]);
 def serial = alertFromOpsGenie.details.Serial.toInteger();
 Sql sql = Sql.newInstance(dbUrl, dbUser, dbPass, dbDriver)
 try {
-    if (action == "acknowledge") {
+    if (action == "Acknowledge") {
         def result = sql.executeUpdate("update alerts.status set Acknowledged=1 where ServerSerial=?", [serial])
         if (result) {
             writeJournal(sql, serial, "Alert acknowledged by ${alert.username}");
