@@ -19,7 +19,10 @@ RECIPIENTS = conf["nagios.recipients"]
 
 def entity = params.entity;
 def action
-def attachFile = true
+// attach additional information as a file (only for pro & enterprise plans)
+def attachFile = true 
+// whether to close existing alerts for resolve (Up/OK) events create a separate alert
+def autoCloseAlert = true
 
 if (entity == "host" || entity == "service") {
     def alertProps = [:]
@@ -38,7 +41,7 @@ if (entity == "host" || entity == "service") {
         def hostName = System.getenv('NAGIOS_HOSTNAME')
         def hostState = System.getenv('NAGIOS_HOSTSTATE');
         alias = hostName
-        if (hostState == "DOWN" && notificationType == "PROBLEM") {
+        if ((hostState == "DOWN" && notificationType == "PROBLEM") || autoCloseAlert == false) {
             action = "createAlert"
             alertProps.alias = alias
             alertProps.details = ["host": hostName]
@@ -64,7 +67,7 @@ Date/Time: ${dateTime}
         alias = hostName + "_" + service
         logger.warn("service state: ${serviceState}")
 
-        if (serviceState == "CRITICAL" && notificationType == "PROBLEM") {
+        if ((serviceState == "CRITICAL" && notificationType == "PROBLEM")  || autoCloseAlert == false) {
             action = "createAlert"
             alertProps.alias = alias
             alertProps.details = ["host": hostName, "service": service]
