@@ -5,6 +5,14 @@ nagios.user=nagiosadmin
 nagios.password=admin
 nagios.http.timeout=30000
 
+#You can configure more than one Nagios Server like the following
+#In order to use feature you should also create your alerts with nagiosServer:server1 , check out lamp.cof
+#nagios.server1.host=localhost
+#nagios.server1.port=80
+#nagios.server1.user=nagiosadmin
+#nagios.server1.password=admin
+#nagios.server1.http.timeout=30000
+
 ########################################NAGIOS INTEGRATION - ALERT ACTION CONFIGURATION ######################
 actions.Acknowledge.script=nagiosActionExecutor.groovy
 actions.AddNote.script=nagiosActionExecutor.groovy

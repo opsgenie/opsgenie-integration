@@ -13,21 +13,15 @@ import org.apache.http.util.EntityUtils
 LOG_PREFIX = "[${action}]:";
 logger.warn("${LOG_PREFIX} Will execute action for alertId ${alert.alertId}");
 
-//http client preparation
-def timeout = conf["nagios.http.timeout"].toInteger();
-TARGET_HOST = new HttpHost(conf["nagios.host"], conf["nagios.port"].toInteger(), "http");
-HttpParams httpClientParams = new BasicHttpParams();
-HttpConnectionParams.setConnectionTimeout(httpClientParams, timeout);
-HttpConnectionParams.setSoTimeout(httpClientParams, timeout);
-HttpConnectionParams.setTcpNoDelay(httpClientParams, true);
-HTTP_CLIENT = new DefaultHttpClient(httpClientParams);
-AuthScope scope = new AuthScope(TARGET_HOST.getHostName(), TARGET_HOST.getPort());
-HTTP_CLIENT.getCredentialsProvider().setCredentials(scope, new UsernamePasswordCredentials(conf["nagios.user"], conf["nagios.password"]));
-
+CONF_PROPS_TO_CHECK =["host", "port", "user", "password", "http.timeout"];
+HTTP_CLIENT = null;
+TARGET_HOST = null;
+CONF_PREFIX = "nagios.";
 
 try {
     def alertFromOpsgenie = opsgenie.getAlert(alertId: alert.alertId)
     if (alertFromOpsgenie.size() > 0) {
+
         def host = alertFromOpsgenie.details.host
         def service = alertFromOpsgenie.details.service
         def postParams = ["btnSubmit": "Commit", "persistent": "on", "cmd_mod": "2", "send_notification": "off", "host": host]
@@ -49,17 +43,55 @@ try {
             postParams.com_data = "${alert.note} by ${alert.username}"
             postParams.cmd_typ = service ? "3" : "1";
         }
-        postToNagios(postParams)
+        def nagiosServer=alertFromOpsgenie.details.nagiosServer
+        if (!nagiosServer || nagiosServer == "default")
+        {
+            CONF_PREFIX = "nagios.";
+        }
+        else
+        {
+
+            CONF_PREFIX = "nagios."+nagiosServer+".";
+        }
+        def error_found=false;
+        CONF_PROPS_TO_CHECK.each {item ->
+            if (!_conf(item)){
+                logger.warn("${LOG_PREFIX} Skipping action ${action} Conf item ${CONF_PREFIX}${item} is missing. Check your marid conf file.")
+                error_found=true;
+            }
+        }
+
+        if (!error_found){
+            //http client preparation
+            def timeout = _conf("http.timeout").toInteger();
+            TARGET_HOST = new HttpHost(_conf("host"), _conf("port").toInteger(), "http");
+            HttpParams httpClientParams = new BasicHttpParams();
+            HttpConnectionParams.setConnectionTimeout(httpClientParams, timeout);
+            HttpConnectionParams.setSoTimeout(httpClientParams, timeout);
+            HttpConnectionParams.setTcpNoDelay(httpClientParams, true);
+            HTTP_CLIENT = new DefaultHttpClient(httpClientParams);
+            AuthScope scope = new AuthScope(TARGET_HOST.getHostName(), TARGET_HOST.getPort());
+            HTTP_CLIENT.getCredentialsProvider().setCredentials(scope, new UsernamePasswordCredentials(_conf("user"), _conf("password")));
+
+            postToNagios(postParams);
+        }
     }
     else {
         logger.warn("${LOG_PREFIX} Alert with id [${alert.alertId}] does not exist in OpsGenie. It is probably deleted.")
     }
 }
 finally {
-    HTTP_CLIENT.getConnectionManager().shutdown();
+    if (HTTP_CLIENT)
+    {
+        HTTP_CLIENT.getConnectionManager().shutdown();
+    }
 }
 
 
+def _conf(confKey)
+{
+    return conf[CONF_PREFIX+confKey]
+}
 
 def postToNagios(postParams){
     logger.debug("${LOG_PREFIX} Posting to Nagios.")

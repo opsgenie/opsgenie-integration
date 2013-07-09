@@ -1,6 +1,9 @@
 ######################################## NAGIOS ALERT RECIPIENTS CONFIGURATION #######################################
 nagios.recipients=all
 
+#You can use different nagiosServer values for each of your Nagios servers
+nagios.nagiosServer=default
+
 ######################################## NAGIOS HTTP AUTHENTICATION CONFIGURATION #######################################
 nagios.host=localhost
 nagios.port=80

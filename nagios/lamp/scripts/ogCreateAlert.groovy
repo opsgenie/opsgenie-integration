@@ -16,6 +16,7 @@ import java.text.SimpleDateFormat
 
 SOURCE = "Nagios"
 RECIPIENTS = conf["nagios.recipients"]
+NAGIOS_SERVER=conf["nagios.nagiosServer"]
 
 def entity = params.entity;
 def action
@@ -70,7 +71,7 @@ Date/Time: ${dateTime}
         if ((serviceState == "CRITICAL" && notificationType == "PROBLEM")  || autoCloseAlert == false) {
             action = "createAlert"
             alertProps.alias = alias
-            alertProps.details = ["host": hostName, "service": service]
+            alertProps.details = ["host": hostName, "service": service, "nagiosServer": NAGIOS_SERVER]
             alertProps.message = "** ${notificationType} Service Alert: ${hostAlias}/${service} is ${serviceState} **"
             alertProps.description = """***** Nagios *****
 
