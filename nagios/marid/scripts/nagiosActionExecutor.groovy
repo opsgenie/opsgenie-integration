@@ -53,28 +53,33 @@ try {
 
             CONF_PREFIX = "nagios."+nagiosServer+".";
         }
-        def error_found=false;
+
+        def confItemsMissing = [];
         CONF_PROPS_TO_CHECK.each {item ->
             if (!_conf(item)){
-                logger.warn("${LOG_PREFIX} Skipping action ${action} Conf item ${CONF_PREFIX}${item} is missing. Check your marid conf file.")
-                error_found=true;
+                confItemsMissing.add("${CONF_PREFIX}${item}");
             }
         }
 
-        if (!error_found){
-            //http client preparation
-            def timeout = _conf("http.timeout").toInteger();
-            TARGET_HOST = new HttpHost(_conf("host"), _conf("port").toInteger(), "http");
-            HttpParams httpClientParams = new BasicHttpParams();
-            HttpConnectionParams.setConnectionTimeout(httpClientParams, timeout);
-            HttpConnectionParams.setSoTimeout(httpClientParams, timeout);
-            HttpConnectionParams.setTcpNoDelay(httpClientParams, true);
-            HTTP_CLIENT = new DefaultHttpClient(httpClientParams);
-            AuthScope scope = new AuthScope(TARGET_HOST.getHostName(), TARGET_HOST.getPort());
-            HTTP_CLIENT.getCredentialsProvider().setCredentials(scope, new UsernamePasswordCredentials(_conf("user"), _conf("password")));
-
-            postToNagios(postParams);
+        if(confItemsMissing.size()>0)
+        {
+            def errorMessage = "${LOG_PREFIX} Skipping action, Conf items ${confItemsMissing} is missing. Check your marid conf file.";
+            logger.warn(errorMessage);
+            throw new Exception(errorMessage);
         }
+
+        //http client preparation
+        def timeout = _conf("http.timeout").toInteger();
+        TARGET_HOST = new HttpHost(_conf("host"), _conf("port").toInteger(), "http");
+        HttpParams httpClientParams = new BasicHttpParams();
+        HttpConnectionParams.setConnectionTimeout(httpClientParams, timeout);
+        HttpConnectionParams.setSoTimeout(httpClientParams, timeout);
+        HttpConnectionParams.setTcpNoDelay(httpClientParams, true);
+        HTTP_CLIENT = new DefaultHttpClient(httpClientParams);
+        AuthScope scope = new AuthScope(TARGET_HOST.getHostName(), TARGET_HOST.getPort());
+        HTTP_CLIENT.getCredentialsProvider().setCredentials(scope, new UsernamePasswordCredentials(_conf("user"), _conf("password")));
+
+        postToNagios(postParams);
     }
     else {
         logger.warn("${LOG_PREFIX} Alert with id [${alert.alertId}] does not exist in OpsGenie. It is probably deleted.")
