@@ -1,4 +1,6 @@
 import org.apache.http.HttpHost
+import org.apache.http.conn.scheme.Scheme
+import org.apache.http.conn.ssl.SSLSocketFactory
 import org.apache.http.params.HttpParams
 import org.apache.http.params.BasicHttpParams
 import org.apache.http.params.HttpConnectionParams
@@ -9,6 +11,12 @@ import org.apache.http.client.methods.HttpPost
 import org.apache.http.client.entity.UrlEncodedFormEntity
 import org.apache.http.message.BasicNameValuePair
 import org.apache.http.util.EntityUtils
+
+import javax.net.ssl.SSLContext
+import javax.net.ssl.TrustManager
+import javax.net.ssl.X509TrustManager
+import java.security.cert.CertificateException
+import java.security.cert.X509Certificate
 
 LOG_PREFIX = "[${action}]:";
 logger.warn("${LOG_PREFIX} Will execute action for alertId ${alert.alertId}");
@@ -69,16 +77,7 @@ try {
         }
 
         //http client preparation
-        def timeout = _conf("http.timeout").toInteger();
-        TARGET_HOST = new HttpHost(_conf("host"), _conf("port").toInteger(), "http");
-        HttpParams httpClientParams = new BasicHttpParams();
-        HttpConnectionParams.setConnectionTimeout(httpClientParams, timeout);
-        HttpConnectionParams.setSoTimeout(httpClientParams, timeout);
-        HttpConnectionParams.setTcpNoDelay(httpClientParams, true);
-        HTTP_CLIENT = new DefaultHttpClient(httpClientParams);
-        AuthScope scope = new AuthScope(TARGET_HOST.getHostName(), TARGET_HOST.getPort());
-        HTTP_CLIENT.getCredentialsProvider().setCredentials(scope, new UsernamePasswordCredentials(_conf("user"), _conf("password")));
-
+        createHttpClient();
         postToNagios(postParams);
     }
     else {
@@ -96,6 +95,45 @@ finally {
 def _conf(confKey)
 {
     return conf[CONF_PREFIX+confKey]
+}
+
+def createHttpClient(){
+    def timeout = _conf("http.timeout").toInteger();
+    def scheme =  _conf("http.scheme")
+    if(scheme == null) scheme = "http";
+    def port = _conf("port").toInteger();
+    def host = _conf("host");
+    TARGET_HOST = new HttpHost(host, port, scheme);
+    HttpParams httpClientParams = new BasicHttpParams();
+    HttpConnectionParams.setConnectionTimeout(httpClientParams, timeout);
+    HttpConnectionParams.setSoTimeout(httpClientParams, timeout);
+    HttpConnectionParams.setTcpNoDelay(httpClientParams, true);
+    HTTP_CLIENT = new DefaultHttpClient(httpClientParams);
+    AuthScope scope = new AuthScope(TARGET_HOST.getHostName(), TARGET_HOST.getPort());
+    HTTP_CLIENT.getCredentialsProvider().setCredentials(scope, new UsernamePasswordCredentials(_conf("user"), _conf("password")));
+    if(scheme == "https"){
+        SSLSocketFactory sf = createSocketFactory();
+        HTTP_CLIENT.getConnectionManager().getSchemeRegistry().register(new Scheme(scheme, port, sf));
+    }
+
+}
+
+private SSLSocketFactory createSocketFactory() throws Exception{
+    SSLContext sslContext = SSLContext.getInstance("TLS");
+    TrustManager tm = new X509TrustManager() {
+        public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+        }
+
+        public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+        }
+
+        public X509Certificate[] getAcceptedIssuers() {
+            return null;
+        }
+    };
+
+    sslContext.init(null, [tm] as TrustManager[], null);
+    return new SSLSocketFactory(sslContext, SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
 }
 
 def postToNagios(postParams){
