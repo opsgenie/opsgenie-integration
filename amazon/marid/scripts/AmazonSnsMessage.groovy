@@ -1,7 +1,11 @@
+import com.amazonaws.services.cloudwatch.model.Dimension
 import com.ifountain.opsgenie.client.marid.http.HTTPRequest
 import com.ifountain.opsgenie.client.util.JsonUtils
 import com.amazonaws.services.cloudwatch.model.GetMetricStatisticsResult
 import org.jfree.chart.axis.DateAxis
+import org.jfree.chart.axis.DateTickUnit
+import org.jfree.chart.axis.DateTickUnitType
+
 import java.text.SimpleDateFormat
 import org.jfree.chart.axis.NumberAxis
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer
@@ -23,22 +27,29 @@ import com.amazonaws.services.cloudwatch.model.GetMetricStatisticsRequest;
 public class AmazonSnsMessage {
     public static final Map STATISTICS_NAMES = [
             average:"Average",
-            max:"Max",
-            min:"Min",
+            maximum:"Maximum",
+            minimum:"Minimum",
+            sum:"Sum",
+            sample_count:"SampleCount"
     ]
+    //Sum, Maximum, Minimum, SampleCount, Average
+
     public static final String MESSAGE_TYPE_SUBSCRIPTION_CONFIRMATION = "SubscriptionConfirmation";
     public static final String MESSAGE_TYPE_NOTIFICATION = "Notification";
     public static final String MESSAGE_TYPE_HEADER_NAME = "x-amz-sns-message-type";
+    static List ALERT_DETAILS_PROPERTYNAMES = ["AlarmName", "Region", "StateChangeTime","NewStateValue","OldStateValue"]
+    public static final String OK_STATE= "OK";
+
     HTTPRequest request;
     Map snsMessage;
-    Map couldwatchMessage;
+    Map cloudwatchMessage;
     Map config;
     public AmazonSnsMessage(HTTPRequest request, Map config = [:]){
         this.request = request;
         this.config = config;
         snsMessage = getSnsMessage();
         if(MESSAGE_TYPE_NOTIFICATION == request.getHeader(MESSAGE_TYPE_HEADER_NAME)){
-            couldwatchMessage = getCloudwatchMessageMap();
+            cloudwatchMessage = getCloudwatchMessageMap();
         }
     }
 
@@ -61,15 +72,24 @@ public class AmazonSnsMessage {
 
 
     public String getCloudwatchAlertDescription() throws IOException {
-        return "${couldwatchMessage.AlarmDescription?couldwatchMessage.AlarmDescription:""}. ${couldwatchMessage.NewStateReason}"
+        return "${cloudwatchMessage.AlarmDescription?cloudwatchMessage.AlarmDescription:""}. ${cloudwatchMessage.NewStateReason}"
     }
+
+    public Map getCloudwatchMessage(){
+        return this.cloudwatchMessage;
+    }
+
     public Map getCloudwatchAlertDetails() throws IOException {
-        def details = [AlarmName:couldwatchMessage.AlarmName, StateChangeTime:couldwatchMessage.StateChangeTime,
-                Region:couldwatchMessage.Region, MetricName:couldwatchMessage.Trigger.MetricName,
-                Namespace:couldwatchMessage.Trigger.Namespace
-        ]
-        couldwatchMessage.Trigger.Dimensions.each{dimension->
-            details[dimension.name] = dimension.value
+        def details = [:];
+        ALERT_DETAILS_PROPERTYNAMES.each {propName ->
+            details[propName]=cloudwatchMessage[propName];
+        }
+        Object trigger = cloudwatchMessage.get("Trigger");
+        if(trigger instanceof Map){
+            trigger.each{ propName, value ->
+                def triggerKey = "Trigger_"+propName;
+                details.put(triggerKey, value);
+            }
         }
         return details;
     }
@@ -82,7 +102,8 @@ public class AmazonSnsMessage {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         def datapoint = metricResult.getDatapoints().sort{it.timestamp};
         DateAxis domainAxis = new DateAxis();
-        domainAxis.setDateFormatOverride(new SimpleDateFormat("dd-MM-yyyy"))
+        domainAxis.setDateFormatOverride(new SimpleDateFormat("dd-MM HH:mm"))
+        domainAxis.setTickUnit(new DateTickUnit(DateTickUnitType.HOUR, 6));
         NumberAxis rangeAxis = new NumberAxis("Number of Events");
         XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer(true, false);
         XYDataset dataset = new TimeSeriesCollection();
@@ -103,43 +124,42 @@ public class AmazonSnsMessage {
 
 
     public List<Map> createMetricGraphs(){
-        def metrics = getMetrics()
-        def statisticNameFromMessage = couldwatchMessage.Trigger.Statistic;
+        def statisticNameFromMessage = cloudwatchMessage.Trigger.Statistic;
         def statisticName = STATISTICS_NAMES[statisticNameFromMessage.toLowerCase()]
         List<Map> graphs = new ArrayList<Map>();
         AmazonCloudWatch cloudWatch = new AmazonCloudWatchClient(new BasicAWSCredentials(config.AWS_ACCESS_KEY, config.AWS_SECRET_KEY))
-        def endDate = new Date(System.currentTimeMillis());
-        def startDate = new Date(Math.max(endDate.getTime() - TimeUnit.DAYS.toMillis(config.LAST_N_DAYS), endDate.getTime() - 1440*config.STAT_PERIOD*1000));
-        metrics.each{String metricNameToBeProcessed->
-            ListMetricsRequest listMetricsRequest = new ListMetricsRequest();
-            listMetricsRequest.setMetricName(metricNameToBeProcessed)
-            ListMetricsResult listMetricsResult = cloudWatch.listMetrics(listMetricsRequest)
-            listMetricsResult.metrics.each{metric->
-                GetMetricStatisticsRequest req = new GetMetricStatisticsRequest();
-                req.setEndTime(endDate);
-                req.setStartTime(startDate);
-                req.setPeriod(config.STAT_PERIOD)
-                req.setDimensions(metric.getDimensions())
-                req.setNamespace(metric.getNamespace())
-                def imageName = "${metric.getNamespace()}_${metric.getMetricName()}".replaceAll("\\W", "_")
-                imageName = "${imageName}.png"
-                req.setStatistics([statisticName])
-                req.setMetricName(metric.getMetricName());
-                GetMetricStatisticsResult res = cloudWatch.getMetricStatistics(req)
-                def data = createGraphFromMetricResults(res, statisticName)
-                graphs.add([data:data, name:imageName])
-            }
+
+        def metricName = cloudwatchMessage.Trigger.MetricName;
+        def metricPeriod = cloudwatchMessage.Trigger.Period
+        def metricNamespace = cloudwatchMessage.Trigger.Namespace
+        def metricUnit = cloudwatchMessage.Trigger.Unit
+        def metricDimensions = [];
+        cloudwatchMessage.Trigger.Dimensions.each{ dimension ->
+            metricDimensions.add(new Dimension(name:dimension.name, value:dimension.value));
         }
+
+        def endDate = new Date(System.currentTimeMillis());
+        def startDate = new Date(endDate.getTime() - TimeUnit.HOURS.toMillis(config.GRAPH_LAST_N_HOURS));
+
+        GetMetricStatisticsRequest req = new GetMetricStatisticsRequest();
+        req.setEndTime(endDate);
+        req.setStartTime(startDate);
+        req.setPeriod(metricPeriod)
+        req.setDimensions(metricDimensions)
+        req.setNamespace(metricNamespace)
+        def imageName = "${metricNamespace}_${metricName}".replaceAll("\\W", "_")
+        imageName = "${imageName}.png"
+        req.setStatistics([statisticName])
+        req.setMetricName(metricName);
+        if(metricUnit) req.setUnit(metricUnit);
+
+        GetMetricStatisticsResult res = cloudWatch.getMetricStatistics(req)
+        def data = createGraphFromMetricResults(res, statisticName)
+        graphs.add([data:data, name:imageName])
+
         return graphs;
     }
 
-    private List getMetrics(){
-        def metricName = couldwatchMessage.Trigger.MetricName;
-        def additionalMetrics = config?.ADDITIONAL_METRICS?.get(metricName);
-        def metrics = [metricName];
-        if(additionalMetrics) metrics.addAll(additionalMetrics);
-        return metrics;
-    }
 
     private Map getSnsMessage(){
         String contentAsString = request.getContent();
