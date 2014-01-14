@@ -14,7 +14,7 @@ details = {
 }
 # populate the map that contains alert properties
 alertProps = {
-   "customerKey":"your-customer-key",
+   "apiKey":"your-opsgenie-api-key",
    "message":sys.argv[5],
    "recipients":"web_operations",
    "source":"Splunk",
