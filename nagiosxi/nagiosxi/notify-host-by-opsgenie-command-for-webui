@@ -1,0 +1,5 @@
+host command {
+    command_name    notify-host-by-opsgenie
+​  command_line   /usr/local/bin/opsgenie host "$NOTIFICATIONTYPE$" "$LONGDATETIME$" "$SERVICEDURATION$" "$SERVICESTATETYPE$" "$HOSTNAME$" "$HOSTGROUPNAME$" "$HOSTSTATE$" "$LASTHOSTCHECK$" "$LASTHOSTSTATECHANGE$" "$HOSTALIAS$" "$HOSTADDRESS$" "$HOSTDURATION$" "$HOSTOUTPUT$" "$HOSTATTEMPT$" "$MAXHOSTATTEMPTS$" "$HOSTSTATETYPE$" "$HOSTLATENCY$" 1>/usr/local/lamp/logs/opsgeniescriptout.log 2>/usr/local/lamp/logs/opsgeniescripterr.log
+    command_type    misc command
+}
