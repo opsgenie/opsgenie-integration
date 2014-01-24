@@ -18,6 +18,12 @@ SOURCE = "Nagios"
 RECIPIENTS = conf["nagios.recipients"]
 NAGIOS_SERVER=conf["nagios.nagiosServer"]
 
+logger.warn("ogCreateAlert params:${params}")
+if(!getNagiosParam('NOTIFICATIONTYPE')){
+    logger.warn("Stopping, Nagios NOTIFICATIONTYPE param has no value, please make sure your Nagios and OpsGenie files pass necessary parameters");
+    return;
+}
+
 def entity = params.entity;
 def action
 // attach additional information as a file (only for pro & enterprise plans)
@@ -33,14 +39,14 @@ if (entity == "host" || entity == "service") {
     alertProps.recipients = RECIPIENTS
     alertProps.description = params.textMessage
     alertProps.source = SOURCE
-    def notificationType = System.getenv('NAGIOS_NOTIFICATIONTYPE')
+    def notificationType = getNagiosParam('NOTIFICATIONTYPE')
     logger.warn("notificationType: ${notificationType}")
 
-    def hostAddress = System.getenv('NAGIOS_HOSTADDRESS')
-    def dateTime = System.getenv('NAGIOS_LONGDATETIME')
+    def hostAddress = getNagiosParam('HOSTADDRESS')
+    def dateTime = getNagiosParam('LONGDATETIME')
     if (entity == "host") {
-        def hostName = System.getenv('NAGIOS_HOSTNAME')
-        def hostState = System.getenv('NAGIOS_HOSTSTATE');
+        def hostName = getNagiosParam('HOSTNAME')
+        def hostState = getNagiosParam('HOSTSTATE');
         alias = hostName
         if ((hostState == "DOWN" && notificationType == "PROBLEM") || autoCloseAlert == false) {
             action = "createAlert"
@@ -53,7 +59,7 @@ Notification Type: ${notificationType}
 Host: ${hostName}
 State: ${hostState}
 Address: ${hostAddress}
-Additional Info: ${System.getenv('NAGIOS_HOSTOUTPUT')}
+Additional Info: ${getNagiosParam('HOSTOUTPUT')}
 Date/Time: ${dateTime}
 """
         } else if (hostState == "UP" && notificationType == "RECOVERY") { 
@@ -61,10 +67,10 @@ Date/Time: ${dateTime}
         }
     }
     else {
-        def service = System.getenv("NAGIOS_SERVICEDESC")
-        def serviceState = System.getenv("NAGIOS_SERVICESTATE");
-        def hostAlias = System.getenv("NAGIOS_HOSTALIAS");
-        def hostName = System.getenv("NAGIOS_HOSTNAME");
+        def service = getNagiosParam("SERVICEDESC")
+        def serviceState = getNagiosParam("SERVICESTATE");
+        def hostAlias = getNagiosParam("HOSTALIAS");
+        def hostName = getNagiosParam("HOSTNAME");
         alias = hostName + "_" + service
         logger.warn("service state: ${serviceState}")
 
@@ -80,7 +86,7 @@ Service: ${service}
 Host: ${hostAlias}
 Address: ${hostAddress}
 State: ${serviceState}
-Additional Info: ${System.getenv('NAGIOS_SERVICEOUTPUT')}
+Additional Info: ${getNagiosParam('SERVICEOUTPUT')}
 Date/Time: ${dateTime}
 """
         } else if (serviceState == "OK" && notificationType == "RECOVERY") {
@@ -138,8 +144,8 @@ def attach(alertId, entity) {
         }
     }
     catch (e) {
-        logger.warn("Could not attach details. Reason: ${e.getMessage()}")
-        println "Could not attach details. Reason: ${e.getMessage()}"
+        logger.warn("Could not attach details. Reason: ${e}", e)
+        println "Could not attach details. Reason: ${e}"
     }
 }
 
@@ -207,28 +213,34 @@ def createHtml(entity, alertHistogram, trends) {
 
 def getServicesStatusHtml(buf) {
     SimpleDateFormat dateFormatter = new SimpleDateFormat("MM-dd-yyyy hh:mm:ss")
-    def serviceGroup = System.getenv('NAGIOS_SERVICEGROUPNAME');
+    def serviceGroup = getNagiosParam('SERVICEGROUPNAME');
     def memberOf = serviceGroup ? serviceGroup : 'No service groups'
-    def state = System.getenv('NAGIOS_SERVICESTATE');
-    def lastServiceCheck = System.getenv("NAGIOS_LASTSERVICECHECK");
-    def lastStateChange = System.getenv("NAGIOS_LASTSERVICESTATECHANGE");
-    lastServiceCheck = dateFormatter.format(Long.parseLong(lastServiceCheck) * 1000L)
-    lastStateChange = dateFormatter.format(Long.parseLong(lastStateChange) * 1000L)
+    def state = getNagiosParam('SERVICESTATE');
+    def lastServiceCheck = getNagiosParam("LASTSERVICECHECK");
+    def lastStateChange = getNagiosParam("LASTSERVICESTATECHANGE");
+    try{
+        lastServiceCheck = dateFormatter.format(Long.parseLong(lastServiceCheck) * 1000L)
+    }catch(Throwable e){}
+
+    try{
+        lastStateChange = dateFormatter.format(Long.parseLong(lastStateChange) * 1000L)
+    }catch(Throwable e){}
+
     buf.append("""
         <div class="well">
             <table>
                 <tbody>
-                    <tr><td><b>Service:</b></td><td>${htmlEscape(System.getenv('NAGIOS_SERVICEDESC'))}</td></tr>
-                    <tr><td><b>Host:</b></td><td>${htmlEscape(System.getenv('NAGIOS_HOSTALIAS'))} (${htmlEscape(System.getenv('NAGIOS_HOSTNAME'))})</td></tr>
-                    <tr><td><b>Address:</b></td><td>${htmlEscape(System.getenv('NAGIOS_HOSTADDRESS'))}</td></tr>
+                    <tr><td><b>Service:</b></td><td>${htmlEscape(getNagiosParam('SERVICEDESC'))}</td></tr>
+                    <tr><td><b>Host:</b></td><td>${htmlEscape(getNagiosParam('HOSTALIAS'))} (${htmlEscape(getNagiosParam('HOSTNAME'))})</td></tr>
+                    <tr><td><b>Address:</b></td><td>${htmlEscape(getNagiosParam('HOSTADDRESS'))}</td></tr>
                     <tr><td><b>Member of:</b></td><td>${htmlEscape(memberOf)}</td></tr>
-                    <tr><td><b>Current Status:</b></td><td><span class="${state}">${state}</span> for (${System.getenv('NAGIOS_SERVICEDURATION')})</td></tr>
-                    <tr><td><b>Status Information:</b></td><td>${htmlEscape(System.getenv('NAGIOS_SERVICEOUTPUT'))}</td></tr>
-                    <tr><td><b>Performance Data:</b></td><td>${htmlEscape(System.getenv('NAGIOS_SERVICEPERFDATA'))}</td></tr>
-                    <tr><td><b>Current Attempt:</b></td><td>${System.getenv('NAGIOS_SERVICEATTEMPT')}/${System.getenv('NAGIOS_MAXSERVICEATTEMPTS')} (${System.getenv('NAGIOS_SERVICESTATETYPE')} state)</td></tr>
+                    <tr><td><b>Current Status:</b></td><td><span class="${state}">${state}</span> for (${getNagiosParam('SERVICEDURATION')})</td></tr>
+                    <tr><td><b>Status Information:</b></td><td>${htmlEscape(getNagiosParam('SERVICEOUTPUT'))}</td></tr>
+                    <tr><td><b>Performance Data:</b></td><td>${htmlEscape(getNagiosParam('SERVICEPERFDATA'))}</td></tr>
+                    <tr><td><b>Current Attempt:</b></td><td>${getNagiosParam('SERVICEATTEMPT')}/${getNagiosParam('MAXSERVICEATTEMPTS')} (${getNagiosParam('SERVICESTATETYPE')} state)</td></tr>
                     <tr><td><b>Last Check Time:</b></td><td>${lastServiceCheck}</td></tr>
-                    <tr><td><b>Check Type:</b></td><td>${System.getenv('NAGIOS_SERVICECHECKTYPE')}</td></tr>
-                    <tr><td><b>Check Latency:</b></td><td>${System.getenv('NAGIOS_SERVICELATENCY')}</td></tr>
+                    <tr><td><b>Check Type:</b></td><td>${getNagiosParam('SERVICECHECKTYPE')}</td></tr>
+                    <tr><td><b>Check Latency:</b></td><td>${getNagiosParam('SERVICELATENCY')}</td></tr>
                     <tr><td><b>Last State Change:</b></td><td>${lastStateChange}</td></tr>
                 </tbody>
             </table>
@@ -238,27 +250,31 @@ def getServicesStatusHtml(buf) {
 
 def getHostStatusHtml(buf) {
     SimpleDateFormat dateFormatter = new SimpleDateFormat("MM-dd-yyyy hh:mm:ss")
-    def hostGroup = System.getenv('NAGIOS_HOSTGROUPNAME');
+    def hostGroup = getNagiosParam('HOSTGROUPNAME');
     def memberOf = hostGroup ? hostGroup : 'No host groups'
-    def state = System.getenv('NAGIOS_HOSTSTATE');
-    def lastCheckTime = System.getenv("NAGIOS_LASTHOSTCHECK");
-    def lastStateChange = System.getenv("NAGIOS_LASTHOSTSTATECHANGE");
-    lastCheckTime = dateFormatter.format(Long.parseLong(lastCheckTime) * 1000L)
-    lastStateChange = dateFormatter.format(Long.parseLong(lastStateChange) * 1000L)
+    def state = getNagiosParam('HOSTSTATE');
+    def lastCheckTime = getNagiosParam("LASTHOSTCHECK");
+    def lastStateChange = getNagiosParam("LASTHOSTSTATECHANGE");
+    try{
+        lastCheckTime = dateFormatter.format(Long.parseLong(lastCheckTime) * 1000L)
+    }catch(Throwable e){}
+    try{
+        lastStateChange = dateFormatter.format(Long.parseLong(lastStateChange) * 1000L)
+    }catch(Throwable e){}
     buf.append("""
         <div class="well">
             <table>
                 <tbody>
-                    <tr><td><b>Host:</b></td><td>${htmlEscape(System.getenv('NAGIOS_HOSTALIAS'))} (${htmlEscape(System.getenv('NAGIOS_HOSTNAME'))})</td></tr>
-                    <tr><td><b>Address:</b></td><td>${htmlEscape(System.getenv('NAGIOS_HOSTADDRESS'))}</td></tr>
+                    <tr><td><b>Host:</b></td><td>${htmlEscape(getNagiosParam('HOSTALIAS'))} (${htmlEscape(getNagiosParam('HOSTNAME'))})</td></tr>
+                    <tr><td><b>Address:</b></td><td>${htmlEscape(getNagiosParam('HOSTADDRESS'))}</td></tr>
                     <tr><td><b>Member of:</b></td><td>${htmlEscape(memberOf)}</td></tr>
-                    <tr><td><b>Current Status:</b></td><td><span class="${state}">${state}</span> for (${System.getenv('NAGIOS_HOSTDURATION')})</td></tr>
-                    <tr><td><b>Status Information:</b></td><td>${htmlEscape(System.getenv('NAGIOS_HOSTOUTPUT'))}</td></tr>
-                    <tr><td><b>Performance Data:</b></td><td>${htmlEscape(System.getenv('NAGIOS_HOSTPERFDATA'))}</td></tr>
-                    <tr><td><b>Current Attempt:</b></td><td>${System.getenv('NAGIOS_HOSTATTEMPT')}/${System.getenv('NAGIOS_MAXHOSTATTEMPTS')} (${System.getenv('NAGIOS_HOSTSTATETYPE')} state)</td></tr>
+                    <tr><td><b>Current Status:</b></td><td><span class="${state}">${state}</span> for (${getNagiosParam('HOSTDURATION')})</td></tr>
+                    <tr><td><b>Status Information:</b></td><td>${htmlEscape(getNagiosParam('HOSTOUTPUT'))}</td></tr>
+                    <tr><td><b>Performance Data:</b></td><td>${htmlEscape(getNagiosParam('HOSTPERFDATA'))}</td></tr>
+                    <tr><td><b>Current Attempt:</b></td><td>${getNagiosParam('HOSTATTEMPT')}/${getNagiosParam('MAXHOSTATTEMPTS')} (${getNagiosParam('HOSTSTATETYPE')} state)</td></tr>
                     <tr><td><b>Last Check Time:</b></td><td>${lastCheckTime}</td></tr>
-                    <tr><td><b>Check Type:</b></td><td>${System.getenv('NAGIOS_HOSTCHECKTYPE')}</td></tr>
-                    <tr><td><b>Check Latency:</b></td><td>${System.getenv('NAGIOS_HOSTLATENCY')}</td></tr>
+                    <tr><td><b>Check Type:</b></td><td>${getNagiosParam('HOSTCHECKTYPE')}</td></tr>
+                    <tr><td><b>Check Latency:</b></td><td>${getNagiosParam('HOSTLATENCY')}</td></tr>
                     <tr><td><b>Last State Change:</b></td><td>${lastStateChange}</td></tr>
                 </tbody>
             </table>
@@ -275,10 +291,10 @@ def getTrends(entity) {
 }
 
 def getImage(url, entity) {
-    def host = System.getenv("NAGIOS_HOSTNAME")
+    def host = getNagiosParam("HOSTNAME")
     url += "?createimage&host=" + URLEncoder.encode(host)
     if (entity == "service") {
-        def service = System.getenv("NAGIOS_SERVICEDESC")
+        def service = getNagiosParam("SERVICEDESC")
         url += "&service=" + URLEncoder.encode(service)
     }
     HttpGet httpGet = new HttpGet(url);
@@ -298,4 +314,14 @@ def getImage(url, entity) {
 def htmlEscape(value) {
     return StringEscapeUtils.escapeHtml(value)
 }
+
+def getNagiosParam(paramName)
+{
+    def value = System.getenv("NAGIOS_"+paramName);
+    if(!value){
+        value = params[paramName];
+    }
+    return value;
+}
+
 
