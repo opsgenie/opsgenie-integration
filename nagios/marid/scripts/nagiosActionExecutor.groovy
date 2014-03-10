@@ -137,7 +137,7 @@ private SSLSocketFactory createSocketFactory() throws Exception{
 }
 
 def postToNagios(postParams){
-    logger.debug("${LOG_PREFIX} Posting to Nagios.")
+    logger.debug("${LOG_PREFIX} Posting to Nagios. Url ${TARGET_HOST}/nagios/cgi-bin/cmd.cgi params:${postParams}")
     HttpPost post = new HttpPost("/nagios/cgi-bin/cmd.cgi")
     def formparams = [];
     postParams.each{key, value ->
