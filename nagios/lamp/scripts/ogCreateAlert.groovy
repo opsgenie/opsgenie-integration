@@ -297,16 +297,19 @@ def getImage(url, entity) {
         def service = getNagiosParam("SERVICEDESC")
         url += "&service=" + URLEncoder.encode(service)
     }
+    logger.warn("Sending request to url:" + url)
     HttpGet httpGet = new HttpGet(url);
     def response = HTTP_CLIENT.execute(TARGET_HOST, httpGet);
-    if (response.getStatusLine().getStatusCode() == 200) {
+    def code = response.getStatusLine().getStatusCode()
+    if (code == 200) {
         logger.warn("Image received");
         println "Image received"
         return EntityUtils.toByteArray(response.getEntity());
     }
     else {
-        logger.warn("Could not get image from url ${url}")
-        println "Could not get image from url ${url}"
+        def content = EntityUtils.toString(response.getEntity())
+        logger.warn("Could not get image from url ${url}. ResponseCode:${code} Reason:" + content)
+        println "Could not get image from url ${url}. ResponseCode:${code} Reason:"+content
         return null;
     }
 }

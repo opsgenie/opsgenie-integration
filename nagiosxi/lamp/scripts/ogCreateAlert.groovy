@@ -295,13 +295,16 @@ def getImage(url, entity) {
     HttpGet httpGet = new HttpGet(url);
     HttpHost httpHost = new HttpHost(conf["nagios.host"],Integer.valueOf(conf["nagios.port"]))
     def response = HTTP_CLIENT.execute(httpHost, httpGet);
-    if (response.getStatusLine().getStatusCode() == 200) {
+    def code = response.getStatusLine().getStatusCode()
+    if (code == 200) {
         logger.warn("Image received");
         println "Image received"
         return EntityUtils.toByteArray(response.getEntity());
-    } else {
-        logger.warn("Could not get image from url ${url}")
-        println "Could not get image from url ${url}"
+    }
+    else {
+        def content = EntityUtils.toString(response.getEntity())
+        logger.warn("Could not get image from url ${url}. ResponseCode:${code} Reason:" + content)
+        println "Could not get image from url ${url}. ResponseCode:${code} Reason:"+content
         return null;
     }
 }
