@@ -1,59 +1,62 @@
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.util.EntityUtils;
-import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.HttpHost;
-import org.apache.http.params.BasicHttpParams;
-import org.apache.http.params.HttpConnectionParams;
-import org.apache.http.params.HttpParams;
-import java.util.zip.ZipOutputStream
-import java.util.zip.ZipEntry
+import com.ifountain.opsgenie.client.http.OpsGenieHttpClient
+import com.ifountain.opsgenie.client.util.ClientConfiguration
+import org.apache.commons.lang.StringEscapeUtils
+import org.apache.http.HttpHost
+import org.apache.http.auth.UsernamePasswordCredentials
+
 import javax.imageio.ImageIO
 import java.awt.image.BufferedImage
-import org.apache.commons.lang.StringEscapeUtils
 import java.text.SimpleDateFormat
+import java.util.zip.ZipEntry
+import java.util.zip.ZipOutputStream
 
 SOURCE = "Nagios"
 RECIPIENTS = conf["nagios.recipients"]
-NAGIOS_SERVER=conf["nagios.nagiosServer"]
+NAGIOS_SERVER = conf["nagios.nagiosServer"]
 
 logger.warn("ogCreateAlert params:${params}")
-if(!getNagiosParam('NOTIFICATIONTYPE')){
+if (!getNagiosParam('NOTIFICATIONTYPE')) {
     logger.warn("Stopping, Nagios NOTIFICATIONTYPE param has no value, please make sure your Nagios and OpsGenie files pass necessary parameters");
     return;
 }
-
-def entity = params.entity;
-def action
-// attach additional information as a file (only for pro & enterprise plans)
-def attachFile = true 
+HTTP_CLIENT = createHttpClient();
+try {
+    def entity = params.entity;
+    def action = null;
+    def attachFiles = conf["nagios.attachFiles"] == "true"
 // whether to close existing alerts for resolve (Up/OK) events create a separate alert
-def autoCloseAlert = true
+    def autoCloseAlert = true
+    def autoAckAlert = true
 
-if (entity == "host" || entity == "service") {
-    def alertProps = [:]
-    def alias
+    if (entity == "host" || entity == "service") {
+        def alertProps = [:]
+        def alias
 
-    alertProps.message = params.subject
-    alertProps.recipients = RECIPIENTS
-    alertProps.description = params.textMessage
-    alertProps.source = SOURCE
-    def notificationType = getNagiosParam('NOTIFICATIONTYPE')
-    logger.warn("notificationType: ${notificationType}")
+        alertProps.message = params.subject
+        alertProps.recipients = RECIPIENTS
+        alertProps.description = params.textMessage
+        alertProps.source = SOURCE
+        def notificationType = getNagiosParam('NOTIFICATIONTYPE')
+        logger.warn("notificationType: ${notificationType}")
 
-    def hostAddress = getNagiosParam('HOSTADDRESS')
-    def dateTime = getNagiosParam('LONGDATETIME')
-    if (entity == "host") {
-        def hostName = getNagiosParam('HOSTNAME')
-        def hostState = getNagiosParam('HOSTSTATE');
-        alias = hostName
-        if ((hostState == "DOWN" && notificationType == "PROBLEM") || autoCloseAlert == false) {
-            action = "createAlert"
-            alertProps.alias = alias
-            alertProps.details = ["host": hostName]
-            alertProps.message = "** ${notificationType} Host Alert: ${hostName} is ${hostState} **"
-            alertProps.description = """***** Nagios *****
+        def hostAddress = getNagiosParam('HOSTADDRESS')
+        def dateTime = getNagiosParam('LONGDATETIME')
+        if (entity == "host") {
+            def hostName = getNagiosParam('HOSTNAME')
+            def hostState = getNagiosParam('HOSTSTATE');
+            alias = hostName
+            if(autoAckAlert && hostState == "DOWN" && notificationType == "ACKNOWLEDGEMENT"){
+                action = "ackAlert"
+            }
+            else if(autoCloseAlert && hostState == "UP" && notificationType == "RECOVERY"){
+                action = "closeAlert"
+            }
+            else if((hostState == "DOWN" || hostState == "UP") && (notificationType == "PROBLEM" || notificationType == "RECOVERY" || notificationType == "ACKNOWLEDGEMENT")){
+                action = "createAlert"
+                alertProps.alias = alias
+                alertProps.details = ["host": hostName]
+                alertProps.message = "** ${notificationType} Host Alert: ${hostName} is ${hostState} **"
+                alertProps.description = """***** Nagios *****
 
 Notification Type: ${notificationType}
 Host: ${hostName}
@@ -62,24 +65,27 @@ Address: ${hostAddress}
 Additional Info: ${getNagiosParam('HOSTOUTPUT')}
 Date/Time: ${dateTime}
 """
-        } else if (hostState == "UP" && notificationType == "RECOVERY") { 
-            action = "closeAlert"
-        }
-    }
-    else {
-        def service = getNagiosParam("SERVICEDESC")
-        def serviceState = getNagiosParam("SERVICESTATE");
-        def hostAlias = getNagiosParam("HOSTALIAS");
-        def hostName = getNagiosParam("HOSTNAME");
-        alias = hostName + "_" + service
-        logger.warn("service state: ${serviceState}")
+            }
+        } else {
+            def service = getNagiosParam("SERVICEDESC")
+            def serviceState = getNagiosParam("SERVICESTATE");
+            def hostAlias = getNagiosParam("HOSTALIAS");
+            def hostName = getNagiosParam("HOSTNAME");
+            alias = hostName + "_" + service
+            logger.warn("service state: ${serviceState}")
 
-        if ((serviceState == "CRITICAL" && notificationType == "PROBLEM")  || autoCloseAlert == false) {
-            action = "createAlert"
-            alertProps.alias = alias
-            alertProps.details = ["host": hostName, "service": service, "nagiosServer": NAGIOS_SERVER]
-            alertProps.message = "** ${notificationType} Service Alert: ${hostAlias}/${service} is ${serviceState} **"
-            alertProps.description = """***** Nagios *****
+            if(autoAckAlert && serviceState == "CRITICAL" && notificationType == "ACKNOWLEDGEMENT"){
+                action = "ackAlert"
+            }
+            else if(autoCloseAlert && serviceState == "OK" && notificationType == "RECOVERY"){
+                action = "closeAlert"
+            }
+            else if((serviceState == "CRITICAL" || serviceState == "OK") && (notificationType == "PROBLEM" || notificationType == "RECOVERY" || notificationType == "ACKNOWLEDGEMENT")){
+                action = "createAlert"
+                alertProps.alias = alias
+                alertProps.details = ["host": hostName, "service": service, "nagiosServer": NAGIOS_SERVER]
+                alertProps.message = "** ${notificationType} Service Alert: ${hostAlias}/${service} is ${serviceState} **"
+                alertProps.description = """***** Nagios *****
 
 Notification Type: ${notificationType}
 Service: ${service}
@@ -89,44 +95,41 @@ State: ${serviceState}
 Additional Info: ${getNagiosParam('SERVICEOUTPUT')}
 Date/Time: ${dateTime}
 """
-        } else if (serviceState == "OK" && notificationType == "RECOVERY") {
-            action = "closeAlert"
+            }
         }
-    }
-    if (action == "createAlert") {
-        logger.warn("Creating alert with message ${alertProps.message}");
-        println "Creating alert"
-        def response = opsgenie.createAlert(alertProps)
-        def alertId = response.alertId;
-        logger.warn("Alert is created with id :" + alertId);
-        println "Alert is created with id :" + alertId
-        if (attachFile) { attach(alertId, entity) }
-    } else {
-        if (action == "closeAlert") {
+        if (action == "createAlert") {
+            logger.warn("Creating alert with message ${alertProps.message}");
+            println "Creating alert"
+            def response = opsgenie.createAlert(alertProps)
+            def alertId = response.alertId;
+            logger.warn("Alert is created with id :" + alertId);
+            println "Alert is created with id :" + alertId
+            if (attachFiles) {
+                attach(alertId, entity)
+            }
+        }
+        else if (action == "closeAlert") {
             logger.warn("Closing the alert ${alias}")
-            opsgenie.closeAlert([alias: alias])
+            opsgenie.closeAlert([alias: alias, source:"nagios"])
         }
+        else if (action == "ackAlert") {
+            logger.warn("Acknowledging the alert ${alias}")
+            opsgenie.acknowledge([alias: alias, source:"nagios"])
+        }
+        else{
+            logger.warn("Could not find action type for ${params}")
+        }
+    } else {
+        logger.warn("Invalid notification mode ${entity}")
+        println "Invalid notification mode ${entity}"
     }
-} else {
-    logger.warn("Invalid notification mode ${entity}")
-    println "Invalid notification mode ${entity}"
+}finally {
+    HTTP_CLIENT.close();
 }
 
 def attach(alertId, entity) {
     // will get alert histgoram and trends charts from nagios and attach them to the alert
     try {
-        //http client preparation
-        def timeout = conf["nagios.http.timeout"].toInteger();
-        TARGET_HOST = new HttpHost(conf["nagios.host"], conf["nagios.port"].toInteger(), "http");
-        HttpParams httpClientParams = new BasicHttpParams();
-        HttpConnectionParams.setConnectionTimeout(httpClientParams, timeout);
-        HttpConnectionParams.setSoTimeout(httpClientParams, timeout);
-        HttpConnectionParams.setTcpNoDelay(httpClientParams, true);
-        HTTP_CLIENT = new DefaultHttpClient(httpClientParams);
-        AuthScope scope = new AuthScope(TARGET_HOST.getHostName(), TARGET_HOST.getPort());
-        HTTP_CLIENT.getCredentialsProvider().setCredentials(scope, new UsernamePasswordCredentials(conf["nagios.user"], conf["nagios.password"]));
-
-
         def alertHistogram = getAlertHistogram(entity);
         def trends = getTrends(entity);
         def htmlText = createHtml(entity, alertHistogram, trends)
@@ -137,8 +140,7 @@ def attach(alertId, entity) {
         if (response.success) {
             logger.warn("Successfully attached details");
             println "Successfully attached details"
-        }
-        else {
+        } else {
             println "Could not attach details"
             logger.warn("Could not attach details");
         }
@@ -193,8 +195,7 @@ def createHtml(entity, alertHistogram, trends) {
     """)
     if (entity == "host") {
         getHostStatusHtml(buf)
-    }
-    else {
+    } else {
         getServicesStatusHtml(buf)
     }
     if (trends) {
@@ -218,26 +219,34 @@ def getServicesStatusHtml(buf) {
     def state = getNagiosParam('SERVICESTATE');
     def lastServiceCheck = getNagiosParam("LASTSERVICECHECK");
     def lastStateChange = getNagiosParam("LASTSERVICESTATECHANGE");
-    try{
+    try {
         lastServiceCheck = dateFormatter.format(Long.parseLong(lastServiceCheck) * 1000L)
-    }catch(Throwable e){}
+    } catch (Throwable e) {
+    }
 
-    try{
+    try {
         lastStateChange = dateFormatter.format(Long.parseLong(lastStateChange) * 1000L)
-    }catch(Throwable e){}
+    } catch (Throwable e) {
+    }
 
     buf.append("""
         <div class="well">
             <table>
                 <tbody>
                     <tr><td><b>Service:</b></td><td>${htmlEscape(getNagiosParam('SERVICEDESC'))}</td></tr>
-                    <tr><td><b>Host:</b></td><td>${htmlEscape(getNagiosParam('HOSTALIAS'))} (${htmlEscape(getNagiosParam('HOSTNAME'))})</td></tr>
+                    <tr><td><b>Host:</b></td><td>${htmlEscape(getNagiosParam('HOSTALIAS'))} (${
+        htmlEscape(getNagiosParam('HOSTNAME'))
+    })</td></tr>
                     <tr><td><b>Address:</b></td><td>${htmlEscape(getNagiosParam('HOSTADDRESS'))}</td></tr>
                     <tr><td><b>Member of:</b></td><td>${htmlEscape(memberOf)}</td></tr>
-                    <tr><td><b>Current Status:</b></td><td><span class="${state}">${state}</span> for (${getNagiosParam('SERVICEDURATION')})</td></tr>
+                    <tr><td><b>Current Status:</b></td><td><span class="${state}">${state}</span> for (${
+        getNagiosParam('SERVICEDURATION')
+    })</td></tr>
                     <tr><td><b>Status Information:</b></td><td>${htmlEscape(getNagiosParam('SERVICEOUTPUT'))}</td></tr>
                     <tr><td><b>Performance Data:</b></td><td>${htmlEscape(getNagiosParam('SERVICEPERFDATA'))}</td></tr>
-                    <tr><td><b>Current Attempt:</b></td><td>${getNagiosParam('SERVICEATTEMPT')}/${getNagiosParam('MAXSERVICEATTEMPTS')} (${getNagiosParam('SERVICESTATETYPE')} state)</td></tr>
+                    <tr><td><b>Current Attempt:</b></td><td>${getNagiosParam('SERVICEATTEMPT')}/${
+        getNagiosParam('MAXSERVICEATTEMPTS')
+    } (${getNagiosParam('SERVICESTATETYPE')} state)</td></tr>
                     <tr><td><b>Last Check Time:</b></td><td>${lastServiceCheck}</td></tr>
                     <tr><td><b>Check Type:</b></td><td>${getNagiosParam('SERVICECHECKTYPE')}</td></tr>
                     <tr><td><b>Check Latency:</b></td><td>${getNagiosParam('SERVICELATENCY')}</td></tr>
@@ -255,23 +264,31 @@ def getHostStatusHtml(buf) {
     def state = getNagiosParam('HOSTSTATE');
     def lastCheckTime = getNagiosParam("LASTHOSTCHECK");
     def lastStateChange = getNagiosParam("LASTHOSTSTATECHANGE");
-    try{
+    try {
         lastCheckTime = dateFormatter.format(Long.parseLong(lastCheckTime) * 1000L)
-    }catch(Throwable e){}
-    try{
+    } catch (Throwable e) {
+    }
+    try {
         lastStateChange = dateFormatter.format(Long.parseLong(lastStateChange) * 1000L)
-    }catch(Throwable e){}
+    } catch (Throwable e) {
+    }
     buf.append("""
         <div class="well">
             <table>
                 <tbody>
-                    <tr><td><b>Host:</b></td><td>${htmlEscape(getNagiosParam('HOSTALIAS'))} (${htmlEscape(getNagiosParam('HOSTNAME'))})</td></tr>
+                    <tr><td><b>Host:</b></td><td>${htmlEscape(getNagiosParam('HOSTALIAS'))} (${
+        htmlEscape(getNagiosParam('HOSTNAME'))
+    })</td></tr>
                     <tr><td><b>Address:</b></td><td>${htmlEscape(getNagiosParam('HOSTADDRESS'))}</td></tr>
                     <tr><td><b>Member of:</b></td><td>${htmlEscape(memberOf)}</td></tr>
-                    <tr><td><b>Current Status:</b></td><td><span class="${state}">${state}</span> for (${getNagiosParam('HOSTDURATION')})</td></tr>
+                    <tr><td><b>Current Status:</b></td><td><span class="${state}">${state}</span> for (${
+        getNagiosParam('HOSTDURATION')
+    })</td></tr>
                     <tr><td><b>Status Information:</b></td><td>${htmlEscape(getNagiosParam('HOSTOUTPUT'))}</td></tr>
                     <tr><td><b>Performance Data:</b></td><td>${htmlEscape(getNagiosParam('HOSTPERFDATA'))}</td></tr>
-                    <tr><td><b>Current Attempt:</b></td><td>${getNagiosParam('HOSTATTEMPT')}/${getNagiosParam('MAXHOSTATTEMPTS')} (${getNagiosParam('HOSTSTATETYPE')} state)</td></tr>
+                    <tr><td><b>Current Attempt:</b></td><td>${getNagiosParam('HOSTATTEMPT')}/${
+        getNagiosParam('MAXHOSTATTEMPTS')
+    } (${getNagiosParam('HOSTSTATETYPE')} state)</td></tr>
                     <tr><td><b>Last Check Time:</b></td><td>${lastCheckTime}</td></tr>
                     <tr><td><b>Check Type:</b></td><td>${getNagiosParam('HOSTCHECKTYPE')}</td></tr>
                     <tr><td><b>Check Latency:</b></td><td>${getNagiosParam('HOSTLATENCY')}</td></tr>
@@ -283,11 +300,13 @@ def getHostStatusHtml(buf) {
 }
 
 def getAlertHistogram(entity) {
-    return getImage("/nagios/cgi-bin/histogram.cgi", entity);
+    String url = getUrl("alert_histogram_image_url", "/nagios/cgi-bin/histogram.cgi")
+    return getImage(url, entity);
 }
 
 def getTrends(entity) {
-    return getImage("/nagios/cgi-bin/trends.cgi", entity);
+    String url = getUrl("trends_image_url", "/nagios/cgi-bin/trends.cgi")
+    return getImage(url, entity);
 }
 
 def getImage(url, entity) {
@@ -298,18 +317,15 @@ def getImage(url, entity) {
         url += "&service=" + URLEncoder.encode(service)
     }
     logger.warn("Sending request to url:" + url)
-    HttpGet httpGet = new HttpGet(url);
-    def response = HTTP_CLIENT.execute(TARGET_HOST, httpGet);
-    def code = response.getStatusLine().getStatusCode()
-    if (code == 200) {
+    def response = HTTP_CLIENT.get(url, [:])
+    if (response.getStatusCode() == 200) {
         logger.warn("Image received");
         println "Image received"
-        return EntityUtils.toByteArray(response.getEntity());
-    }
-    else {
-        def content = EntityUtils.toString(response.getEntity())
+        return response.getContent();
+    } else {
+        def content = response.getContentAsString()
         logger.warn("Could not get image from url ${url}. ResponseCode:${code} Reason:" + content)
-        println "Could not get image from url ${url}. ResponseCode:${code} Reason:"+content
+        println "Could not get image from url ${url}. ResponseCode:${code} Reason:" + content
         return null;
     }
 }
@@ -318,13 +334,41 @@ def htmlEscape(value) {
     return StringEscapeUtils.escapeHtml(value)
 }
 
-def getNagiosParam(paramName)
-{
-    def value = System.getenv("NAGIOS_"+paramName);
-    if(!value){
+def getNagiosParam(paramName) {
+    def value = System.getenv("NAGIOS_" + paramName);
+    if (!value) {
         value = params[paramName];
     }
     return value;
+}
+
+def createHttpClient() {
+    def timeout = conf["nagios.http.timeout"]
+    if(timeout == null){
+        timeout = 30000;
+    }
+    else{
+        timeout = timeout.toInteger();
+    }
+    def username = conf["nagios.user"]
+    def password = conf["nagios.password"]
+    ClientConfiguration clientConfiguration = new ClientConfiguration().setSocketTimeout(timeout)
+            .setCredentials(new UsernamePasswordCredentials(username, password))
+    return new OpsGenieHttpClient(clientConfiguration)
+}
+
+def getUrl(String confProperty, String backwardCompatabilityUrl) {
+    def url = conf["nagios."+confProperty]
+    if (url != null) {
+        return url;
+    } else {
+        //backward compatability
+        def scheme = conf["nagios.scheme"]
+        if (scheme == null) scheme = "http";
+        def port = conf["nagios.port"].toInteger();
+        def host = conf["nagios.host"];
+        return new HttpHost(host, port, scheme).toURI() + backwardCompatabilityUrl;
+    }
 }
 
 

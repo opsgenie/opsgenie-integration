@@ -1,28 +1,21 @@
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.util.EntityUtils;
-import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.HttpHost;
-import org.apache.http.params.BasicHttpParams;
-import org.apache.http.params.HttpConnectionParams;
-import org.apache.http.params.HttpParams;
+import com.ifountain.opsgenie.client.http.OpsGenieHttpClient
+import com.ifountain.opsgenie.client.util.ClientConfiguration
+import org.apache.commons.lang.StringEscapeUtils
+import org.apache.http.auth.UsernamePasswordCredentials
+
 import java.text.SimpleDateFormat
-import org.apache.commons.lang.StringEscapeUtils;
 
 /********************CONFIGURATIONS****************************/
 
 // Recipients should be specified here for automatic tools. 
 // Recipients can be users or groups created in OpsGenie
-RECIPIENTS="all"
+RECIPIENTS=conf["opennms.recipients"]
 SOURCE="OpenNMS"
 
 
 //OpenNMS credentials are needed for extra information to be fetched through REST API
-OPENNMS_USER = "admin"
-OPENNMS_PASSWORD = "admin"
-OPENNMS_HOST="localhost"
-OPENNMS_PORT=8980
+OPENNMS_USER = conf["opennms.user"]
+OPENNMS_PASSWORD = conf["opennms.password"]
 
 
 def nodeId = params.nodeId;
@@ -192,35 +185,45 @@ def createHtml(restResponse){
 }
 
 def restCall(nodeId){
-	def timeout = 30000;
-	logger.warn("Getting node outages");
-    println "Getting node outages"
-	HttpHost targetHost = new HttpHost(OPENNMS_HOST, OPENNMS_PORT, "http");
-	HttpParams httpClientParams = new BasicHttpParams();
-    HttpConnectionParams.setConnectionTimeout(httpClientParams, timeout);
-    HttpConnectionParams.setSoTimeout(httpClientParams, timeout);
-    HttpConnectionParams.setTcpNoDelay(httpClientParams, true);
-	DefaultHttpClient httpclient = new DefaultHttpClient(httpClientParams);
+    String url = getUrl(nodeId)
+	logger.warn("Getting node outages from url ${url}");
+    println "Getting node outages from url ${url}"
+    OpsGenieHttpClient httpClient = createHttpClient();
 	try {
-		AuthScope scope = new AuthScope(targetHost.getHostName(), targetHost.getPort());
-		httpclient.getCredentialsProvider().setCredentials(scope, new UsernamePasswordCredentials(OPENNMS_USER, OPENNMS_PASSWORD));
-		HttpGet httpGet = new HttpGet("/opennms/rest/outages/forNode/${nodeId}/");
-		
-		def response = httpclient.execute(targetHost, httpGet);
-		if(response.getStatusLine().getStatusCode() == 200){
+        def response = httpClient.get(getUrl(nodeId), [:])
+
+		if(response.getStatusCode() == 200){
 			logger.warn("Node outages received");
         	println "Node outages received"	
-			return EntityUtils.toString(response.getEntity());
+			return response.getContentAsString();
 		}
 		else{
-			logger.warn("Could not get node outages")
-			println "Could not get node outages"
+			logger.warn("Could not get node outages. Response:${response.getContentAsString()}")
+			println "Could not get node outages. Response:${response.getContentAsString()}"
 			return null;
 		}
 	}
 	finally{
-		httpclient.getConnectionManager().shutdown();
+        httpClient.close();
 	}
+}
+
+def createHttpClient() {
+    def timeout = conf["opennms.http.timeout"]
+    if(timeout == null){
+        timeout = 30000;
+    }
+    else{
+        timeout = timeout.toInteger();
+    }
+    ClientConfiguration clientConfiguration = new ClientConfiguration().setSocketTimeout(timeout).
+            setCredentials(new UsernamePasswordCredentials(OPENNMS_USER, OPENNMS_PASSWORD));
+    return new OpsGenieHttpClient(clientConfiguration)
+}
+
+def getUrl(String nodeId) {
+    def url = conf["opennms.outage_url"]
+    return  url+"/${nodeId}/"
 }
 
 def htmlEscape(value){

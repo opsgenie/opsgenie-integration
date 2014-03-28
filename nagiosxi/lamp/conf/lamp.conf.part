@@ -5,8 +5,9 @@ nagios.recipients=all
 nagios.nagiosServer=default
 
 ######################################## NAGIOS HTTP AUTHENTICATION CONFIGURATION #######################################
-nagios.host=localhost
-nagios.port=80
+nagios.attachFiles=true
+nagios.alert_histogram_image_url=http://localhost/nagiosxi/includes/components/nagioscore/ui/histogram.php
+nagios.trends_image_url=http://localhost/nagiosxi/includes/components/nagioscore/ui/trends.php
 nagios.user=nagiosadmin
 nagios.ticket=your-ticket
 nagios.http.timeout=30000

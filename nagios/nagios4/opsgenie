@@ -1,8 +1,5 @@
 #!/bin/sh
 
-# Specify the location of your JAVA path main folder
-export JAVA_HOME=/usr/lib/jvm/jre-1.x.x
-
 # Specify the location of the lamp utility
 LAMP_HOME=/usr/local/lamp
 

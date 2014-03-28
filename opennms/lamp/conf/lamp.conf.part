@@ -1,0 +1,9 @@
+######################################## NAGIOS ALERT RECIPIENTS CONFIGURATION #######################################
+opennms.recipients=all
+
+
+######################################## NAGIOS HTTP AUTHENTICATION CONFIGURATION #######################################
+opennms.outage_url=http://localhost:8090/opennms/rest/outages/forNode
+opennms.user=admin
+opennms.password=admin
+opennms.http.timeout=30000
