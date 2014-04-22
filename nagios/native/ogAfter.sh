@@ -1,0 +1,2 @@
+chmod 755 /usr/local/bin/opsgenie
+usermod -a -G opsgenie nagios
