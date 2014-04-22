@@ -1,6 +1,0 @@
-#!/bin/sh
-
-lamp executeScript --name ogCreateAlert.groovy -Dentity="$1"
-
-
-
