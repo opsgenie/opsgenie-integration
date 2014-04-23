@@ -2,4 +2,4 @@
 
 SET LAMP_HOME=C:\lamp
 
-CMD /c %LAMP_HOME%\lamp.bat executeScript --name ogNotifyUsers.groovy
+CMD /c %LAMP_HOME%\lamp executeScript --name ogNotifyUsers.groovy
