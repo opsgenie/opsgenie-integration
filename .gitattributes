@@ -1,3 +1,8 @@
 *.txt           text=auto
 *.sh            eol=lf
-opsgenie            eol=lf
+opsgenie        eol=lf
+nagios2opsgenie eol=lf
+*.properties    text=auto
+*.conf          text=auto
+*.cfg           text=auto
+*.part          text=auto

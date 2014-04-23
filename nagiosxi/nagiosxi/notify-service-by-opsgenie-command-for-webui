@@ -1,5 +1,0 @@
-service command {
-command_name    notify-service-by-opsgenie
-   command_line    /usr/local/bin/opsgenie service "$NOTIFICATIONTYPE$" "$SERVICESTATE$" "$LONGDATETIME$" "$SERVICEDESC$" "$SERVICEOUTPUT$" "$SERVICEGROUPNAME$" "$LASTSERVICECHECK$" "$LASTSERVICESTATECHANGE$" "$SERVICEDURATION$" "$SERVICEATTEMPT$" "$MAXSERVICEATTEMPTS$" "$SERVICESTATETYPE$" "$SERVICELATENCY$" "$HOSTNAME$" "$HOSTALIAS$" "$HOSTADDRESS$" "$HOSTDURATION$" "$HOSTSTATETYPE$" "$HOSTADDRESS$" 1>/usr/local/lamp/logs/opsgeniescriptout.log 2>/usr/local/lamp/logs/opsgeniescripterr.log
-​    command_type    misc command
-​}
