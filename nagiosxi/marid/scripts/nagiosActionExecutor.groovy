@@ -14,7 +14,7 @@ if (alertFromOpsgenie.size() > 0) {
     if(service) postParams.service = service;
     boolean discardAction = false;
     if(action == "Acknowledge"){
-        if(source != null && source.name == "nagios"){
+        if(source != null && source.name?.toLowerCase() == "nagios"){
             logger.warn("OpsGenie alert is already acknowledged by nagios. Discarding!!!");
             discardAction = true;
         }
