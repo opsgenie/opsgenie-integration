@@ -1,0 +1,19 @@
+
+######################################## EMC SMARTS BROKER CONFIGURATION #######################################
+###Change following EMC/Smarts broker configuration if you are going to use Smarts Integration
+smarts.broker=localhost:426
+smarts.username=admin
+smarts.password=changeme
+smarts.brokerUsername=BrokerNonsecure
+smarts.brokerPassword=Nonsecure
+
+
+########################################SMARTS INTEGRATION - ALERT ACTION CONFIGURATION ######################
+###Action Script will be used in Smarts Integration
+actions.AddNote.script=smartsActionExecutor.groovy
+actions.Acknowledge.script=smartsActionExecutor.groovy
+actions.TakeOwnership.script=smartsActionExecutor.groovy
+actions.unacknowledge.script=smartsActionExecutor.groovy
+actions.releaseownership.script=smartsActionExecutor.groovy
+
+##############################################################################################################

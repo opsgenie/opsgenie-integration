@@ -1,7 +1,0 @@
-
-
-######################################## Amazon AWS CONFIGURATION ############################################
-###Change following aws configuration if you are going to use AWS Integration
-AWS_ACCESS_KEY=<your_amazon_access_key>
-AWS_SECRET_KEY=<your_amazon_secret_key>
-##############################################################################################################

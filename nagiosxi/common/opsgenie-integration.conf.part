@@ -1,0 +1,29 @@
+######################################## NAGIOS CONFIGURATION #######################################
+nagios.recipients=all
+nagios.attachFiles=true
+nagios.alert_histogram_image_url=http://localhost/nagiosxi/includes/components/nagioscore/ui/histogram.php
+nagios.trends_image_url=http://localhost/nagiosxi/includes/components/nagioscore/ui/trends.php
+nagios.command_url=http://localhost/nagiosxi/includes/components/nagioscore/ui/cmd.php
+nagios.user=nagiosadmin
+nagios.ticket=your-ticket
+nagios.http.timeout=30000
+
+########################################NAGIOS INTEGRATION - ALERT ACTION CONFIGURATION ######################
+actions.Acknowledge.script=nagiosActionExecutor.groovy
+actions.AddNote.script=nagiosActionExecutor.groovy
+actions.TakeOwnership.script=nagiosActionExecutor.groovy
+actions.AssignOwnership.script=nagiosActionExecutor.groovy
+
+#You can use different nagiosServer values for each of your Nagios servers (used in lamp)
+
+nagios.nagiosServer=default
+
+
+#You can configure more than one Nagios Server like the following
+#In order to use feature you should also create your alerts with nagiosServer:server1 , check out lamp.cof
+#nagios.server1.command_url=http://localhost/nagiosxi/includes/components/nagioscore/ui/cmd.php
+#nagios.server1.user=nagiosadmin
+#nagios.server1.ticket=nagiosticket
+#nagios.server1.http.timeout=30000
+
+
