@@ -5,4 +5,3 @@ nagios2opsgenie eol=lf
 *.properties    text=auto
 *.conf          text=auto
 *.cfg           text=auto
-*.part          text=auto
