@@ -1,4 +1,5 @@
 
+
 ######################################## EMC SMARTS BROKER CONFIGURATION #######################################
 ###Change following EMC/Smarts broker configuration if you are going to use Smarts Integration
 smarts.broker=localhost:426
