@@ -318,7 +318,8 @@ def getImage(url, entity) {
     }
     logger.warn("Sending request to url:" + url)
     def response = HTTP_CLIENT.get(url, [:])
-    if (response.getStatusCode() == 200) {
+    def code = response.getStatusCode()
+    if (code == 200) {
         logger.warn("Image received");
         println "Image received"
         return response.getContent();
