@@ -1,11 +1,13 @@
 import com.ifountain.opsgenie.client.http.OpsGenieHttpClient
 import com.ifountain.opsgenie.client.util.ClientConfiguration
+import com.ifountain.opsgenie.client.util.Strings
 import org.apache.commons.lang.StringEscapeUtils
 import org.apache.http.HttpHost
 import org.apache.http.auth.UsernamePasswordCredentials
 
 import javax.imageio.ImageIO
 import java.awt.image.BufferedImage
+import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
@@ -136,13 +138,16 @@ def attach(alertId, entity) {
         ByteArrayOutputStream bout = createZip(htmlText, alertHistogram, trends)
         logger.warn("Attaching details");
         println "Attaching details"
-        response = opsgenie.attach([alertId: alertId, stream: new ByteArrayInputStream(bout.toByteArray()), fileName: "details.zip"])
+
+        String fileDate = new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss").format(new Date());
+        String fileName = "details_${fileDate}.zip";
+        response = opsgenie.attach([alertId: alertId, stream: new ByteArrayInputStream(bout.toByteArray()), fileName: fileName])
         if (response.success) {
-            logger.warn("Successfully attached details");
+            logger.warn("Successfully attached details ${fileName}");
             println "Successfully attached details"
         } else {
             println "Could not attach details"
-            logger.warn("Could not attach details");
+            logger.warn("Could not attach details ${fileName}");
         }
     }
     catch (e) {
