@@ -8,21 +8,21 @@ import (
 //	"net"
 //	"time"
 	"os"
-//	"bufio"
-//	"strings"
-//	"io"
+	"bufio"
+	"strings"
+	"io"
 	"log"
-//	"strconv"
+	"strconv"
 	"fmt"
 )
 
 //default configuration
-//var NAGIOS_SERVER = "default"
-//var API_KEY = ""
-//var TOTAL_TIME = 0
-//var parameters = map[string]string{"apiKey": API_KEY,"nagios_server": NAGIOS_SERVER}
+var NAGIOS_SERVER = "default"
+var API_KEY = ""
+var TOTAL_TIME = 0
+var parameters = map[string]string{"apiKey": API_KEY,"nagios_server": NAGIOS_SERVER}
 //var configPath = "nagios2opsgenie.conf"
-//var configPath = "/etc/opsgenie/nagios2opsgenie.conf"
+var configPath = "/etc/opsgenie/nagios2opsgenie.conf"
 var (
 	Trace   *log.Logger
 	Info    *log.Logger
@@ -33,13 +33,14 @@ var (
 func main() {
 	fmt.Println("started")
 	configureLogger()
+	configFile, err := os.Open(configPath)
+	fmt.Println("read config")
+	if err == nil{
+		readConfigFile(configFile)
+		fmt.Println("complete")
+	}
 	fmt.Println("finish")
-//	configFile, err := os.Open(configPath)
-//	if err == nil{
-//		readConfigFile(configFile)
-//		fmt.Println("read config")
-//	}
-//	parseFlags()
+	//	parseFlags()
 //	if parameters["notification_type"] == "" {
 //		Warning.Println("Stopping, Nagios NOTIFICATIONTYPE param has no value, please make sure your Nagios and OpsGenie files pass necessary parameters")
 //		return
@@ -62,28 +63,28 @@ func configureLogger (){
 	Error = log.New(file, "ERROR: ", log.Ldate|log.Lmicroseconds|log.Lshortfile)
 }
 
-//func readConfigFile(file io.Reader){
-//	reader := bufio.NewReader(file)
-//	for {
-//		line, err := reader.ReadString('\n')
-//		if err !=nil {
-//			if err == io.EOF && len(line) == 0 {
-//				break
-//			}else{
-//				Error.Println("Error occured: ", err)
-//				panic(err)
-//			}
-//		}
-//		line = strings.TrimSpace(line)
-//		if !strings.HasPrefix(line,"#") && line != "" {
-//			l := strings.Split(line,"=")
-//			parameters[l[0]] = l[1]
-//			if l[0] == "timeout"{
-//				TOTAL_TIME,_ = strconv.Atoi(l[1])
-//			}
-//		}
-//	}
-//}
+func readConfigFile(file io.Reader){
+	reader := bufio.NewReader(file)
+	for {
+		line, err := reader.ReadString('\n')
+		if err !=nil {
+			if err == io.EOF && len(line) == 0 {
+				break
+			}else{
+				Error.Println("Error occured: ", err)
+				panic(err)
+			}
+		}
+		line = strings.TrimSpace(line)
+		if !strings.HasPrefix(line,"#") && line != "" {
+			l := strings.Split(line,"=")
+			parameters[l[0]] = l[1]
+			if l[0] == "timeout"{
+				TOTAL_TIME,_ = strconv.Atoi(l[1])
+			}
+		}
+	}
+}
 
 //func getHttpClient (timeout int) *http.Client{
 //	seconds := (TOTAL_TIME/12)*2*timeout
