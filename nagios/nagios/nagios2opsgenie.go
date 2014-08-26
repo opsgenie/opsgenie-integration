@@ -33,7 +33,7 @@ var (
 func main() {
 	fmt.Println("started")
 	configureLogger()
-	fmt.Println("logger configured")
+	fmt.Println("finished")
 //	configFile, err := os.Open(configPath)
 //	if err == nil{
 //		readConfigFile(configFile)
