@@ -13,7 +13,6 @@ import (
 	"io"
 	"log"
 	"strconv"
-	"fmt"
 )
 
 //default configuration
@@ -30,22 +29,17 @@ var (
 )
 
 func main() {
-	fmt.Println("started")
 	configureLogger()
 	configFile, err := os.Open(configPath)
-	fmt.Println("read config")
 	if err == nil{
 		readConfigFile(configFile)
 	}
-	fmt.Println("finish")
 	parseFlags()
 	if parameters["notification_type"] == "" {
 		Warning.Println("Stopping, Nagios NOTIFICATIONTYPE param has no value, please make sure your Nagios and OpsGenie files pass necessary parameters")
 		return
 	}
-	fmt.Println("before")
 	http_post()
-	fmt.Println("post")
 
 }
 
@@ -73,7 +67,6 @@ func readConfigFile(file io.Reader){
 				panic(err)
 			}
 		}
-		fmt.Println(line)
 		line = strings.TrimSpace(line)
 		if !strings.HasPrefix(line,"#") && line != "" {
 			l := strings.Split(line,"=")
