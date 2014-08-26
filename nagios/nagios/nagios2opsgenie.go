@@ -44,8 +44,9 @@ func main() {
 		Warning.Println("Stopping, Nagios NOTIFICATIONTYPE param has no value, please make sure your Nagios and OpsGenie files pass necessary parameters")
 		return
 	}
-	fmt.Println("post")
+	fmt.Println("before")
 	http_post()
+	fmt.Println("post")
 
 }
 
