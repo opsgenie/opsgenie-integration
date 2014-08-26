@@ -13,6 +13,7 @@ import (
 	"io"
 	"log"
 	"strconv"
+	"fmt"
 )
 
 //default configuration
@@ -20,8 +21,8 @@ var NAGIOS_SERVER = "default"
 var API_KEY = ""
 var TOTAL_TIME = 0
 var parameters = map[string]string{"apiKey": API_KEY,"nagios_server": NAGIOS_SERVER}
-var configPath = "nagios2opsgenie.conf"
-//var configPath = "/etc/opsgenie/nagios2opsgenie.conf"
+//var configPath = "nagios2opsgenie.conf"
+var configPath = "/etc/opsgenie/nagios2opsgenie.conf"
 var (
 	Trace   *log.Logger
 	Info    *log.Logger
@@ -30,17 +31,22 @@ var (
 )
 
 func main() {
+	fmt.Println("started")
 	configureLogger()
+	fmt.Println("logger configured")
 	configFile, err := os.Open(configPath)
 	if err == nil{
 		readConfigFile(configFile)
+		fmt.Println("read config")
 	}
 	parseFlags()
 	if parameters["notification_type"] == "" {
 		Warning.Println("Stopping, Nagios NOTIFICATIONTYPE param has no value, please make sure your Nagios and OpsGenie files pass necessary parameters")
 		return
 	}
+	fmt.Println("post")
 	http_post()
+
 }
 
 func configureLogger (){
@@ -115,7 +121,7 @@ func http_post()  {
 		}else {
 			Error.Println("Failed to post data from Nagios to OpsGenie.")
 		}
-		defer resp.Body.Close()
+//		defer resp.Body.Close()
 	}
 }
 
