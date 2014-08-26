@@ -21,7 +21,6 @@ var NAGIOS_SERVER = "default"
 var API_KEY = ""
 var TOTAL_TIME = 0
 var parameters = map[string]string{"apiKey": API_KEY,"nagios_server": NAGIOS_SERVER}
-//var configPath = "nagios2opsgenie.conf"
 var configPath = "/etc/opsgenie/nagios2opsgenie.conf"
 var (
 	Trace   *log.Logger
