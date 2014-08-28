@@ -11,8 +11,9 @@ import (
 	"bufio"
 	"strings"
 	"io"
-	"log"
 	"strconv"
+	"github.com/alexcesaro/log/golog"
+	log "github.com/alexcesaro/log"
 )
 
 //default configuration
@@ -21,58 +22,51 @@ var API_KEY = ""
 var TOTAL_TIME = 0
 var parameters = map[string]string{"apiKey": API_KEY,"nagios_server": NAGIOS_SERVER}
 var configPath = "/etc/opsgenie/nagios2opsgenie.conf"
-var (
-	Trace   *log.Logger
-	Info    *log.Logger
-	Warning *log.Logger
-	Error   *log.Logger
-)
-
+var levels = map [string]log.Level{"info":log.Info,"debug":log.Debug,"warning":log.Warning,"error":log.Error}
+var logger log.Logger
 func main() {
-	configureLogger()
 	configFile, err := os.Open(configPath)
 	if err == nil{
 		readConfigFile(configFile)
 	}
+	logger = configureLogger()
 	parseFlags()
 	if parameters["notification_type"] == "" {
-		Warning.Println("Stopping, Nagios NOTIFICATIONTYPE param has no value, please make sure your Nagios and OpsGenie files pass necessary parameters")
+		logger.Warning("Stopping, Nagios NOTIFICATIONTYPE param has no value, please make sure your Nagios and OpsGenie files pass necessary parameters")
 		return
 	}
 	http_post()
-
 }
 
-func configureLogger (){
-	file, err := os.OpenFile("nagios2opsgenieout.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
-	if err != nil {
-		log.Fatalln("Failed to open log file", ":", err)
+func configureLogger ()log.Logger{
+	level := parameters["logger"]
+	delete(parameters,"logger")
+	file, err := os.OpenFile("/var/log/opsgenie/nagios2opsgenie.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	if err != nil{
+		panic(err)
 	}
 
-	Trace = log.New(file, "TRACE: ", log.Ldate|log.Lmicroseconds|log.Lshortfile)
-	Info = log.New(file, "INFO: ", log.Ldate|log.Lmicroseconds|log.Lshortfile)
-	Warning = log.New(file, "WARN: ", log.Ldate|log.Lmicroseconds|log.Lshortfile)
-	Error = log.New(file, "ERROR: ", log.Ldate|log.Lmicroseconds|log.Lshortfile)
+	return golog.New(file, levels[strings.ToLower(level)])
 }
 
 func readConfigFile(file io.Reader){
 	reader := bufio.NewReader(file)
 	for {
 		line, err := reader.ReadString('\n')
-		if err !=nil {
-			if err == io.EOF && len(line) == 0 {
+		if err != nil {
+			if err == io.EOF {
 				break
 			}else{
-				Error.Println("Error occured: ", err)
 				panic(err)
 			}
 		}
 		line = strings.TrimSpace(line)
 		if !strings.HasPrefix(line,"#") && line != "" {
 			l := strings.Split(line,"=")
-			parameters[l[0]] = l[1]
 			if l[0] == "timeout"{
 				TOTAL_TIME,_ = strconv.Atoi(l[1])
+			}else{
+			parameters[l[0]] = l[1]
 			}
 		}
 	}
@@ -85,7 +79,7 @@ func getHttpClient (timeout int) *http.Client{
 			Dial: func(netw, addr string) (net.Conn, error) {
 				conn, err := net.DialTimeout(netw, addr, time.Second * time.Duration(seconds))
 				if err != nil {
-					Error.Println("Error occured while connecting: ",err)
+					logger.Error("Error occured while connecting: ",err)
 					return nil, err
 				}
 				conn.SetDeadline(time.Now().Add(time.Second * time.Duration(seconds)))
@@ -105,17 +99,19 @@ func http_post()  {
 		body := bytes.NewBuffer(buf)
 		request, _ := http.NewRequest("POST", url, body)
 		client := getHttpClient(i)
-		Warning.Println("Trying to send data to OpsGenie with timeout: ",(TOTAL_TIME/12)*2*i)
+		logger.Info("Trying to send data to OpsGenie with timeout: ",(TOTAL_TIME/12)*2*i)
 		resp, error := client.Do(request)
 		if error == nil  && resp.StatusCode == 200{
-			Warning.Println("Data from Nagios posted to OpsGenie successfully.")
+			logger.Info("Data from Nagios posted to OpsGenie successfully.")
 			break
 		}else if i<3{
-			Error.Println("Error occured while sending data, will retry." )
+			logger.Warning("Error occured while sending data, will retry." )
 		}else {
-			Error.Println("Failed to post data from Nagios to OpsGenie.")
+			logger.Error("Failed to post data from Nagios to OpsGenie.")
 		}
-//		defer resp.Body.Close()
+		if resp != nil{
+			defer resp.Body.Close()
+		}
 	}
 }
 

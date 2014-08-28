@@ -70,6 +70,16 @@ finally {
     HTTP_CLIENT.close()
 }
 
+def _conf(confKey, boolean isMandatory){
+    def confVal = conf[CONF_PREFIX+confKey]
+    if(isMandatory && confVal == null){
+        def errorMessage = "${LOG_PREFIX} Skipping action, Mandatory Conf item ${CONF_PREFIX+confKey} is missing. Check your marid conf file.";
+        logger.warn(errorMessage);
+        throw new Exception(errorMessage);
+    }
+    return confVal
+}
+
 def createHttpClient() {
     def timeout = _conf("http.timeout", false);
     if(timeout == null){
@@ -82,31 +92,6 @@ def createHttpClient() {
             .setCredentials(new UsernamePasswordCredentials(_conf("user", true), _conf("password", true)))
     return new OpsGenieHttpClient(clientConfiguration)
 }
-
-def _conf(confKey, boolean isMandatory)
-{
-    def confVal = conf[CONF_PREFIX+confKey]
-    if(isMandatory && confVal == null){
-        def errorMessage = "${LOG_PREFIX} Skipping action, Mandatory Conf item ${CONF_PREFIX+confKey} is missing. Check your marid conf file.";
-        logger.warn(errorMessage);
-        throw new Exception(errorMessage);
-    }
-    return confVal
-}
-
-//def getUrl() {
-//    def url = _conf("command_url", true)
-//    if (url != null) {
-//        return url;
-//    } else {
-//        //backward compatability
-//        def scheme = _conf("http.scheme", false)
-//        if (scheme == null) scheme = "http";
-//        def port = _conf("port", true).toInteger();
-//        def host = _conf("host", true);
-//        return new HttpHost(host, port, scheme).toURI() + "/nagios/cgi-bin/cmd.cgi";
-//    }
-//}
 
 def getUrl(String confProperty, String backwardCompatabilityUrl, boolean  isMandatory) {
     def url = _conf(confProperty, isMandatory)

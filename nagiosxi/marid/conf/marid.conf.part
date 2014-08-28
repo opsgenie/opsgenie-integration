@@ -16,5 +16,6 @@ actions.Acknowledge.script=nagiosActionExecutor.groovy
 actions.AddNote.script=nagiosActionExecutor.groovy
 actions.TakeOwnership.script=nagiosActionExecutor.groovy
 actions.AssignOwnership.script=nagiosActionExecutor.groovy
+actions.Create.script=nagiosActionExecutor.groovy
 
 ##############################################################################################################

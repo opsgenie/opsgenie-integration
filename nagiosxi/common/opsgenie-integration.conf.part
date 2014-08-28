@@ -13,6 +13,7 @@ actions.Acknowledge.script=nagiosActionExecutor.groovy
 actions.AddNote.script=nagiosActionExecutor.groovy
 actions.TakeOwnership.script=nagiosActionExecutor.groovy
 actions.AssignOwnership.script=nagiosActionExecutor.groovy
+actions.Create.script=nagiosActionExecutor.groovy
 
 #You can use different nagiosServer values for each of your Nagios servers (used in lamp)
 
