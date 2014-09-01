@@ -14,13 +14,14 @@ import (
 	"strconv"
 	"github.com/alexcesaro/log/golog"
 	log "github.com/alexcesaro/log"
+	"fmt"
 )
 
 //default configuration
 var NAGIOS_SERVER = "default"
 var API_KEY = ""
 var TOTAL_TIME = 0
-var parameters = map[string]string{"apiKey": API_KEY,"nagios_server": NAGIOS_SERVER}
+var parameters = map[string]string{"apiKey": API_KEY,"nagios_server": NAGIOS_SERVER,"logger":"info"}
 var configPath = "/etc/opsgenie/nagios2opsgenie.conf"
 var levels = map [string]log.Level{"info":log.Info,"debug":log.Debug,"warning":log.Warning,"error":log.Error}
 var logger log.Logger
@@ -30,7 +31,12 @@ func main() {
 		readConfigFile(configFile)
 	}
 	logger = configureLogger()
+	version := flag.String("v","","")
 	parseFlags()
+	if *version != ""{
+		fmt.Println("Version: 1.0")
+		return
+	}
 	if parameters["notification_type"] == "" {
 		logger.Warning("Stopping, Nagios NOTIFICATIONTYPE param has no value, please make sure your Nagios and OpsGenie files pass necessary parameters")
 		return

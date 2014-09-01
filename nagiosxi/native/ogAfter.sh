@@ -1,4 +1,10 @@
+mkdir /tmp/marid
+
+chmod -R 775 /tmp/marid
 chmod 755 /usr/local/bin/nagios2opsgenie
+
+chown -R opsgenie:opsgenie /tmp/marid
+
 if id -u nagios >/dev/null 2>&1; then
         usermod -a -G opsgenie nagios
 else

@@ -317,7 +317,7 @@ def getImage(url, entity) {
         def service = alertFromOpsgenie.details.service_desc
         url += "&service=" + URLEncoder.encode(service)
     }
-    url += "?username=" + _conf("user", true)
+    url += "&username=" + _conf("user", true)
     url += "&ticket=" + _conf("ticket", true)
     logger.warn("Sending request to url:" + url)
     def response = HTTP_CLIENT.get(url, [:])
