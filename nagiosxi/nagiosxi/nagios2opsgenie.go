@@ -20,9 +20,12 @@ import (
 //default configuration
 var NAGIOS_SERVER = "default"
 var API_KEY = ""
-var TOTAL_TIME = 0
 var parameters = map[string]string{"apiKey": API_KEY,"nagios_server": NAGIOS_SERVER,"logger":"info"}
-var configPath = "/etc/opsgenie/nagios2opsgenie.conf"
+
+var TOTAL_TIME = 60
+
+var configPath = "/etc/opsgenie/conf/nagios2opsgenie.conf"
+var configMap = make(map[string]string)
 var levels = map [string]log.Level{"info":log.Info,"debug":log.Debug,"warning":log.Warning,"error":log.Error}
 var logger log.Logger
 func main() {
@@ -31,6 +34,7 @@ func main() {
 		readConfigFile(configFile)
 	}
 	logger = configureLogger()
+	printConfigToLog()
 	version := flag.String("v","","")
 	parseFlags()
 	if *version != ""{
@@ -47,12 +51,19 @@ func main() {
 func configureLogger ()log.Logger{
 	level := parameters["logger"]
 	delete(parameters,"logger")
-	file, err := os.OpenFile("/var/log/opsgenie/nagios2opsgenie.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	file, err := os.OpenFile("/var/log/nagios2opsgenie.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	if err != nil{
 		panic(err)
 	}
 
 	return golog.New(file, levels[strings.ToLower(level)])
+}
+
+func printConfigToLog(){
+	logger.Debug("Config:")
+	for k, v := range configMap {
+		logger.Debug(k +"="+v)
+	}
 }
 
 func readConfigFile(file io.Reader){
@@ -69,6 +80,7 @@ func readConfigFile(file io.Reader){
 		line = strings.TrimSpace(line)
 		if !strings.HasPrefix(line,"#") && line != "" {
 			l := strings.Split(line,"=")
+			configMap[l[0]]=l[1]
 			if l[0] == "timeout"{
 				TOTAL_TIME,_ = strconv.Atoi(l[1])
 			}else{
@@ -100,7 +112,8 @@ func http_post()  {
 	url := parameters["opsgenie_url"]
 	delete(parameters,"opsgenie_url")
 	var buf, _ = json.Marshal(parameters)
-
+	logger.Debug("Data to be posted to opsgenie:")
+	logger.Debug(parameters)
 	for i := 1; i <= 3; i++ {
 		body := bytes.NewBuffer(buf)
 		request, _ := http.NewRequest("POST", url, body)
