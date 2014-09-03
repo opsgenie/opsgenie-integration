@@ -1,0 +1,1 @@
+chmod 755 /etc/opsgenie/zabbix2opsgenie
