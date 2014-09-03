@@ -1,1 +1,1 @@
-chmod 755 /usr/local/bin/zabbix2opsgenie
+chmod 755 /etc/opsgenie/zabbix2opsgenie
