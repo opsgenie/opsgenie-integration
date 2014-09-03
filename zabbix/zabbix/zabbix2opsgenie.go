@@ -22,7 +22,7 @@ var API_KEY = ""
 var TOTAL_TIME = 60
 var parameters = map[string]string{}
 var configParameters = map[string]string{"apiKey": API_KEY, "opsgenie.api.url" : "https://api.opsgenie.com", "logger":"info"}
-var configPath = "/etc/opsgenie/opsgenie-integration.conf"
+var configPath = "/etc/opsgenie/conf/opsgenie-integration.conf"
 var levels = map [string]log.Level{"info":log.Info,"debug":log.Debug,"warning":log.Warning,"error":log.Error}
 var logger log.Logger
 
