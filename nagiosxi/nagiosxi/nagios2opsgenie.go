@@ -51,7 +51,7 @@ func main() {
 func configureLogger ()log.Logger{
 	level := parameters["logger"]
 	delete(parameters,"logger")
-	file, err := os.OpenFile("/var/log/nagios2opsgenie.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	file, err := os.OpenFile("/var/log/opsgenie/nagios2opsgenie.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	if err != nil{
 		panic(err)
 	}
@@ -119,6 +119,7 @@ func http_post()  {
 		request, _ := http.NewRequest("POST", url, body)
 		client := getHttpClient(i)
 		logger.Info("Trying to send data to OpsGenie with timeout: ",(TOTAL_TIME/12)*2*i)
+		logger.Debug(request)
 		resp, error := client.Do(request)
 		if error == nil  && resp.StatusCode == 200{
 			logger.Info("Data from Nagios posted to OpsGenie successfully.")
