@@ -1,4 +1,4 @@
-if [  -z $(getent group opsgenie) ]
+if [ $(getent group opsgenie) ]
 then
   groupadd opsgenie
 fi
