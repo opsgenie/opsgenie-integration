@@ -1,0 +1,1 @@
+mkdir -m 777 /etc/opsgenie
