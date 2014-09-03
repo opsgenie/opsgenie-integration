@@ -12,3 +12,5 @@ if id -u nagios >/dev/null 2>&1; then
 else
         echo "WARNING : nagios user does not exist. Please don't forget to add your nagios user to opsgenie group!"
 fi
+
+%config(noreplace) /etc/opsgenie/conf/*
