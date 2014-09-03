@@ -1,0 +1,10 @@
+######################################## ZABBIX CONFIGURATION #######################################
+zabbix.command_url=http://localhost/zabbix/api_jsonrpc.php
+zabbix.user=Admin
+zabbix.password=zabbix
+
+########################################ZABBIX INTEGRATION - ALERT ACTION CONFIGURATION ######################
+actions.Acknowledge.script=zabbixActionExecutor.groovy
+
+
+zabbix2opsgenie.logFile=/var/log/opsgenie/zabbix2opsgenie.log
