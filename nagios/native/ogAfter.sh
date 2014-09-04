@@ -18,5 +18,3 @@ if [ -d "/usr/local/nagios/etc/objects" ]; then
 else
         echo "WARNING : Could not find your NAGIOS_HOME directory. Please copy /etc/opsgenie/opsgenie.cfg file to your <NAGIOS_HOME>/etc/objects directory manually!"
 fi
-
-%config(noreplace) /etc/opsgenie/*
