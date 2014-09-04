@@ -99,8 +99,7 @@ func getHttpClient (timeout int) *http.Client{
 
 func http_post()  {
     apiUrl := configParameters["opsgenie.api.url"] + "/v1/json/zabbix"
-	useMarid := parameters["useMarid"]
-	delete(parameters,"useMarid")
+	useMarid := configParameters["useMarid"]
 	parameters["apiKey"] = configParameters["apiKey"]
 
 	logger.Debug("Data to be posted to opsgenie:")
@@ -135,7 +134,7 @@ func sendParametersToMarid(){
 
 	resp, error := http.PostForm(maridHost + ":" + maridPort + "/script/marid2opsgenie.groovy", values)
 	if error == nil {
-		logger.Warning("Sent data to marid")
+		logger.Info("Successfully sent data to marid")
 	}else {
 		logger.Error("Error occurred while sending data to marid")
 		panic(error)
@@ -184,7 +183,6 @@ func parseFlags()map[string]string{
 	itemKey := flag.String("itemKey","","ITEM.KEY")
 	itemValue := flag.String("itemValue", "", "ITEM.VALUE")
 	eventId := flag.String ("eventId","","EVENT.ID")
-	useMarid := flag.String("useMarid", "", "useMarid")
 
 	flag.Parse()
 
@@ -206,7 +204,6 @@ func parseFlags()map[string]string{
 	parameters["itemKey"] = *itemKey
 	parameters["itemValue"] = *itemValue
 	parameters["eventId"] = *eventId
-	parameters["useMarid"] = *useMarid
 
 	return parameters
 }

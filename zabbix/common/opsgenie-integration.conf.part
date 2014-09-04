@@ -8,3 +8,4 @@ actions.Acknowledge.script=zabbixActionExecutor.groovy
 
 
 zabbix2opsgenie.logFile=/var/log/opsgenie/zabbix2opsgenie.log
+#useMarid=false
