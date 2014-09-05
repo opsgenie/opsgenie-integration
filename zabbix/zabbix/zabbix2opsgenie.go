@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	"encoding/json"
-	"net/url"
 	"flag"
 	"net/http"
 	"net"
@@ -99,78 +98,54 @@ func getHttpClient (timeout int) *http.Client{
 }
 
 func http_post()  {
-    apiUrl := configParameters["opsgenie.api.url"] + "/v1/json/zabbix"
-	useMarid := configParameters["useMarid"]
 	parameters["apiKey"] = configParameters["apiKey"]
 
-	logger.Debug("Data to be posted to opsgenie:")
+	logger.Debug("Data to be posted:")
 	logger.Debug(parameters)
 
+    apiUrl := configParameters["opsgenie.api.url"] + "/v1/json/zabbix"
+	useMarid := configParameters["useMarid"]
+	target := ""
 	if useMarid == "true"{
-		sendParametersToMarid()
-	} else {
-		sendParametersToOpsGenie(apiUrl)
-	}
-}
+		var maridHost=""
+		var maridPort=""
+		if configParameters["http.server.enabled"] == "true"{
+			maridHost = "http://" + configParameters["http.server.host"]
+			maridPort = configParameters["http.server.port"]
+		} else if configParameters["https.server.enabled"] == "true"{
+			maridHost = "https://" +configParameters["https.server.host"]
+			maridPort = configParameters["https.server.port"]
+		} else{
 
-func sendParametersToMarid(){
-	logger.Info("Sending data to marid")
-	values := url.Values{}
-	for k, v := range parameters{
-		values.Set(k, v)
-	}
-	values.Add("async", "true")
-
-	var maridHost=""
-	var maridPort=""
-	if configParameters["http.server.enabled"] == "true"{
-		maridHost = "http://" + configParameters["http.server.host"]
-		maridPort = configParameters["http.server.port"]
-	} else if configParameters["https.server.enabled"] == "true"{
-		maridHost = "https://" +configParameters["https.server.host"]
-		maridPort = configParameters["https.server.port"]
-	} else{
-		panic("Http server is not enabled for Marid")
-	}
-
-	resp, error := http.PostForm(maridHost + ":" + maridPort + "/script/marid2opsgenie.groovy", values)
-	if error == nil {
-		body, err := ioutil.ReadAll(resp.Body)
-		if err == nil{
-			logger.Info("Successfully sent data to marid; response:" + string(body[:]))
-		}else{
-			logger.Warning("Couldn't read the response from Marid", err)
+			panic("Http server is not enabled for Marid")
 		}
-	}else {
-		logger.Error("Error occurred while sending data to marid", error)
-		panic(error)
-	}
-	defer resp.Body.Close()
-}
 
-func sendParametersToOpsGenie(apiUrl string){
+		apiUrl = maridHost + ":" + maridPort + "/script/marid2opsgenie.groovy" + "?async=true"
+		target = "Marid"
+	}else{
+		target = "OpsGenie"
+	}
+
 	var buf, _ = json.Marshal(parameters)
 	body := bytes.NewBuffer(buf)
-
 	request, _ := http.NewRequest("POST", apiUrl, body)
-
 	for i := 1; i <= 3; i++ {
 		client := getHttpClient(i)
-		logger.Info("Trying to send data to OpsGenie with timeout: ", (TOTAL_TIME/12)*2*i)
+		logger.Info("Trying to send data to " + target + " with timeout: ", (TOTAL_TIME/12)*2*i)
 		resp, error := client.Do(request)
 		if error == nil {
 			defer resp.Body.Close()
 			body, err := ioutil.ReadAll(resp.Body)
 			if err == nil{
-				logger.Info("Data from Zabbix posted to OpsGenie successfully; response:" + string(body[:]))
+				logger.Info("Data from Zabbix posted to " + target + " successfully; response:" + string(body[:]))
 			}else{
-				logger.Warning("Couldn't read the response from OpsGenie", err)
+				logger.Warning("Couldn't read the response from " + target, err)
 			}
 			break
 		}else if i < 3 {
 			logger.Warning("Error occurred while sending data, will retry.", error)
 		}else {
-			logger.Error("Failed to post data from Zabbix to OpsGenie.", error)
+			logger.Error("Failed to post data from Zabbix to " + target, error)
 		}
 		if resp != nil{
 			defer resp.Body.Close()
