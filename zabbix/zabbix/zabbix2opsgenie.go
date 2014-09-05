@@ -71,7 +71,7 @@ func readConfigFile(file io.Reader){
 
 func configureLogger ()log.Logger{
 	level := configParameters["logger"]
-	var logFilePath = configParameters["zabbix2opsgenie.logFile"]
+	var logFilePath = "/var/log/opsgenie/zabbix2opsgenie.log"
 	file, err := os.OpenFile(logFilePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	if err != nil {
 		panic(err)
