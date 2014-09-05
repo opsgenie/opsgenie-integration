@@ -16,12 +16,13 @@ import (
 	"github.com/alexcesaro/log/golog"
 	log "github.com/alexcesaro/log"
 	"fmt"
+	"io/ioutil"
 )
 
 var API_KEY = ""
 var TOTAL_TIME = 60
 var parameters = map[string]string{}
-var configParameters = map[string]string{"apiKey": API_KEY, "opsgenie.api.url" : "https://api.opsgenie.com", "logger":"info"}
+var configParameters = map[string]string{"apiKey": API_KEY, "opsgenie.api.url" : "https://api.opsgenie.com", "logger":"warning"}
 var configPath = "/etc/opsgenie/conf/opsgenie-integration.conf"
 var levels = map [string]log.Level{"info":log.Info,"debug":log.Debug,"warning":log.Warning,"error":log.Error}
 var logger log.Logger
@@ -136,7 +137,7 @@ func sendParametersToMarid(){
 	if error == nil {
 		logger.Info("Successfully sent data to marid")
 	}else {
-		logger.Error("Error occurred while sending data to marid")
+		logger.Error("Error occurred while sending data to marid", error)
 		panic(error)
 	}
 	defer resp.Body.Close()
@@ -152,13 +153,19 @@ func sendParametersToOpsGenie(apiUrl string){
 		client := getHttpClient(i)
 		logger.Info("Trying to send data to OpsGenie with timeout: ", (TOTAL_TIME/12)*2*i)
 		resp, error := client.Do(request)
-		if error == nil && resp.StatusCode == 200 {
-			logger.Info("Data from Zabbix posted to OpsGenie successfully.")
+		if error == nil {
+			defer resp.Body.Close()
+			body, err := ioutil.ReadAll(resp.Body)
+			if err == nil{
+				logger.Info("Data from Zabbix posted to OpsGenie successfully; response:" + string(body[:]))
+			}else{
+				logger.Warning("Couldn't read the response from OpsGenie", err)
+			}
 			break
 		}else if i < 3 {
-			logger.Warning("Error occured while sending data, will retry.")
+			logger.Warning("Error occured while sending data, will retry.", error)
 		}else {
-			logger.Error("Failed to post data from Zabbix to OpsGenie.")
+			logger.Error("Failed to post data from Zabbix to OpsGenie.", error)
 		}
 		if resp != nil{
 			defer resp.Body.Close()
