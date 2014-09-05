@@ -135,7 +135,12 @@ func sendParametersToMarid(){
 
 	resp, error := http.PostForm(maridHost + ":" + maridPort + "/script/marid2opsgenie.groovy", values)
 	if error == nil {
-		logger.Info("Successfully sent data to marid")
+		body, err := ioutil.ReadAll(resp.Body)
+		if err == nil{
+			logger.Info("Successfully sent data to marid; response:" + string(body[:]))
+		}else{
+			logger.Warning("Couldn't read the response from Marid", err)
+		}
 	}else {
 		logger.Error("Error occurred while sending data to marid", error)
 		panic(error)
@@ -163,7 +168,7 @@ func sendParametersToOpsGenie(apiUrl string){
 			}
 			break
 		}else if i < 3 {
-			logger.Warning("Error occured while sending data, will retry.", error)
+			logger.Warning("Error occurred while sending data, will retry.", error)
 		}else {
 			logger.Error("Failed to post data from Zabbix to OpsGenie.", error)
 		}
