@@ -7,3 +7,4 @@ zabbix.password=zabbix
 actions.Acknowledge.script=zabbixActionExecutor.groovy
 
 #useMarid=false
+#logger=warning
