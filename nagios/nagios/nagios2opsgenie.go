@@ -15,19 +15,18 @@ import (
 	"github.com/alexcesaro/log/golog"
 	log "github.com/alexcesaro/log"
 	"fmt"
+	"io/ioutil"
 )
 
-//default configuration
 var NAGIOS_SERVER = "default"
 var API_KEY = ""
-var parameters = map[string]string{"apiKey": API_KEY,"nagios_server": NAGIOS_SERVER,"logger":"info"}
-
 var TOTAL_TIME = 60
-
-var configPath = "/etc/opsgenie/conf/nagios2opsgenie.conf"
-var configMap = make(map[string]string)
+var configParameters = map[string]string{"apiKey": API_KEY,"nagios_server": NAGIOS_SERVER,"nagios2opsgenie.logger":"warning","opsgenie.api.url":"https://api.opsgenie.com"}
+var parameters = make(map[string]string)
+var configPath = "/etc/opsgenie/conf/opsgenie-integration.conf"
 var levels = map [string]log.Level{"info":log.Info,"debug":log.Debug,"warning":log.Warning,"error":log.Error}
 var logger log.Logger
+
 func main() {
 	configFile, err := os.Open(configPath)
 	if err == nil{
@@ -48,46 +47,40 @@ func main() {
 	http_post()
 }
 
+func printConfigToLog(){
+	logger.Debug("Config:")
+	for k, v := range configParameters {
+		logger.Debug(k +"="+v)
+	}
+}
+
+func readConfigFile(file io.Reader){
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan(){
+		line := scanner.Text()
+
+		line = strings.TrimSpace(line)
+		if !strings.HasPrefix(line,"#") && line != "" {
+			l := strings.Split(line,"=")
+			configParameters[l[0]]=l[1]
+			if l[0] == "nagios2opsgenie.timeout"{
+				TOTAL_TIME,_ = strconv.Atoi(l[1])
+			}
+		}
+	}
+	if err := scanner.Err(); err != nil {
+		panic(err)
+	}
+}
+
 func configureLogger ()log.Logger{
-	level := parameters["logger"]
-	delete(parameters,"logger")
+	level := configParameters["nagios2opsgenie.logger"]
 	file, err := os.OpenFile("/var/log/opsgenie/nagios2opsgenie.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	if err != nil{
 		panic(err)
 	}
 
 	return golog.New(file, levels[strings.ToLower(level)])
-}
-
-func printConfigToLog(){
-	logger.Debug("Config:")
-	for k, v := range configMap {
-		logger.Debug(k +"="+v)
-	}
-}
-
-func readConfigFile(file io.Reader){
-	reader := bufio.NewReader(file)
-	for {
-		line, err := reader.ReadString('\n')
-		if err != nil {
-			if err == io.EOF {
-				break
-			}else{
-				panic(err)
-			}
-		}
-		line = strings.TrimSpace(line)
-		if !strings.HasPrefix(line,"#") && line != "" {
-			l := strings.Split(line,"=")
-			configMap[l[0]]=l[1]
-			if l[0] == "timeout"{
-				TOTAL_TIME,_ = strconv.Atoi(l[1])
-			}else{
-			parameters[l[0]] = l[1]
-			}
-		}
-	}
 }
 
 func getHttpClient (timeout int) *http.Client{
@@ -109,24 +102,56 @@ func getHttpClient (timeout int) *http.Client{
 }
 
 func http_post()  {
-	url := parameters["opsgenie_url"]
-	delete(parameters,"opsgenie_url")
-	var buf, _ = json.Marshal(parameters)
-	logger.Debug("Data to be posted to opsgenie:")
+	logger.Debug("Data to be posted:")
 	logger.Debug(parameters)
+
+	apiUrl := configParameters["opsgenie.api.url"] + "/v1/json/nagios"
+	useMarid := configParameters["useMarid"]
+	target := ""
+
+	if useMarid == "true"{
+		var maridHost=""
+		var maridPort=""
+		if configParameters["http.server.enabled"] == "true"{
+			maridHost = "http://" + configParameters["http.server.host"]
+			maridPort = configParameters["http.server.port"]
+		} else if configParameters["https.server.enabled"] == "true"{
+			maridHost = "https://" +configParameters["https.server.host"]
+			maridPort = configParameters["https.server.port"]
+		} else{
+
+			panic("Http server is not enabled for Marid")
+		}
+
+		apiUrl = maridHost + ":" + maridPort + "/script/marid2opsgenie.groovy" + "?async=true"
+		target = "Marid"
+	}else{
+		target = "OpsGenie"
+	}
+
+	var buf, _ = json.Marshal(parameters)
 	for i := 1; i <= 3; i++ {
 		body := bytes.NewBuffer(buf)
-		request, _ := http.NewRequest("POST", url, body)
+		request, _ := http.NewRequest("POST", apiUrl, body)
 		client := getHttpClient(i)
+
 		logger.Info("Trying to send data to OpsGenie with timeout: ",(TOTAL_TIME/12)*2*i)
+		logger.Debug(request)
+
 		resp, error := client.Do(request)
-		if error == nil  && resp.StatusCode == 200{
-			logger.Info("Data from Nagios posted to OpsGenie successfully.")
+		if error == nil {
+			defer resp.Body.Close()
+			body, err := ioutil.ReadAll(resp.Body)
+			if err == nil{
+				logger.Info("Data from Nagios posted to " + target + " successfully; response:" + string(body[:]))
+			}else{
+				logger.Warning("Couldn't read the response from " + target, err)
+			}
 			break
-		}else if i<3{
-			logger.Warning("Error occured while sending data, will retry." )
+		}else if i < 3 {
+			logger.Warning("Error occurred while sending data, will retry.", error)
 		}else {
-			logger.Error("Failed to post data from Nagios to OpsGenie.")
+			logger.Error("Failed to post data from Nagios to " + target, error)
 		}
 		if resp != nil{
 			defer resp.Body.Close()
@@ -211,9 +236,13 @@ func parseFlags()map[string]string{
 
 	if *apiKey != ""{
 		parameters["apiKey"] = *apiKey
+	}else{
+		parameters["apiKey"] = configParameters ["apiKey"]
 	}
 	if *nagiosServer != ""{
 		parameters["nagios_server"] = *nagiosServer
+	}else{
+		parameters["nagios_server"] = configParameters["nagios_server"]
 	}
 	parameters["entity_type"] = *entityType
 

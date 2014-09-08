@@ -1,5 +1,12 @@
+################################### NAGIOS2OPSGENIE CONFIGURATION ###############################
+nagios2opsgenie.logger=debug
+nagios2opsgenie.timeout=60
+
+#You can use different nagiosServer values for each of your Nagios servers (see marid configuration below)
+nagios_server=default
+#useMarid=false
+
 ######################################## NAGIOS CONFIGURATION #######################################
-nagios.attachFiles=true
 nagios.alert_histogram_image_url=http://localhost/nagios/cgi-bin/histogram.cgi
 nagios.trends_image_url=http://localhost/nagios/cgi-bin/trends.cgi
 nagios.command_url=http://localhost/nagios/cgi-bin/cmd.cgi
