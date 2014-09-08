@@ -1,6 +1,12 @@
+################################### NAGIOS2OPSGENIE CONFIGURATION ###############################
+nagios2opsgenie.logger=debug
+nagios2opsgenie.timeout=60
+
+#You can use different nagiosServer values for each of your Nagios servers (see marid configuration below)
+nagios_server=default
+#useMarid=false
+
 ######################################## NAGIOS CONFIGURATION #######################################
-nagios.recipients=all
-nagios.attachFiles=true
 nagios.alert_histogram_image_url=http://localhost/nagiosxi/includes/components/nagioscore/ui/histogram.php
 nagios.trends_image_url=http://localhost/nagiosxi/includes/components/nagioscore/ui/trends.php
 nagios.command_url=http://localhost/nagiosxi/includes/components/nagioscore/ui/cmd.php

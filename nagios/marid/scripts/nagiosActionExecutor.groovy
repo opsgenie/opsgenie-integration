@@ -33,7 +33,7 @@ try{
             discardAction = true;
         }
         else if (action == "Acknowledge") {
-            if(source != null && source.name?.toLowerCase() == "nagios"){
+            if(source != null && source.name?.toLowerCase()?.startsWith("nagios")){
                 logger.warn("OpsGenie alert is already acknowledged by nagios. Discarding!!!");
                 discardAction = true;
             }
@@ -243,7 +243,6 @@ def getServicesStatusHtml(buf) {
         alertFromOpsgenie.details.max_service_attempts
     } (${alertFromOpsgenie.details.service_state_type} state)</td></tr>
                     <tr><td><b>Last Check Time:</b></td><td>${lastServiceCheck}</td></tr>
-                    <tr><td><b>Check Type:</b></td><td>${alertFromOpsgenie.details.service_check_type}</td></tr>
                     <tr><td><b>Check Latency:</b></td><td>${alertFromOpsgenie.details.service_latency}</td></tr>
                     <tr><td><b>Last State Change:</b></td><td>${lastStateChange}</td></tr>
                 </tbody>
@@ -285,7 +284,6 @@ def getHostStatusHtml(buf) {
         alertFromOpsgenie.details.max_host_attempts
     } (${alertFromOpsgenie.details.host_state_type} state)</td></tr>
                     <tr><td><b>Last Check Time:</b></td><td>${lastCheckTime}</td></tr>
-                    <tr><td><b>Check Type:</b></td><td>${alertFromOpsgenie.details.host_check_type}</td></tr>
                     <tr><td><b>Check Latency:</b></td><td>${alertFromOpsgenie.details.host_latency}</td></tr>
                     <tr><td><b>Last State Change:</b></td><td>${lastStateChange}</td></tr>
                 </tbody>
