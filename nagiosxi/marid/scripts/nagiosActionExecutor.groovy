@@ -2,7 +2,6 @@ import com.ifountain.opsgenie.client.http.OpsGenieHttpClient
 import com.ifountain.opsgenie.client.util.ClientConfiguration
 import org.apache.commons.lang.StringEscapeUtils
 import org.apache.http.HttpHost
-import org.apache.http.auth.UsernamePasswordCredentials
 
 import javax.imageio.ImageIO
 import java.awt.image.BufferedImage
@@ -83,7 +82,6 @@ def createHttpClient() {
     }
 
     ClientConfiguration clientConfiguration = new ClientConfiguration().setSocketTimeout(timeout)
-            .setCredentials(new UsernamePasswordCredentials(_conf("user", true), _conf("password", true)))
     return new OpsGenieHttpClient(clientConfiguration)
 }
 def _conf(confKey, boolean isMandatory)
