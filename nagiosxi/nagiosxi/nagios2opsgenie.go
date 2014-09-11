@@ -232,6 +232,9 @@ func parseFlags()map[string]string{
 	longServiceOutput := flag.String("lso", "", "LONGSERVICEOUTPUT")
 	servicePerfData := flag.String("spd", "", "SERVICEPERFDATA")
 
+	recipients := flag.String("recipients","","Recipients")
+	tags := flag.String("tags","","Tags")
+
 	flag.Parse()
 
 	if *apiKey != ""{
@@ -244,6 +247,19 @@ func parseFlags()map[string]string{
 	}else{
 		parameters["nagios_server"] = configParameters["nagios_server"]
 	}
+
+	if *recipients != ""{
+		parameters["recipients"] = *recipients
+	}else{
+		parameters["recipients"] = configParameters ["recipients"]
+	}
+
+	if *recipients != ""{
+		parameters["tags"] = *tags
+	}else{
+		parameters["tags"] = configParameters ["tags"]
+	}
+
 	parameters["entity_type"] = *entityType
 
 	parameters["notification_type"] = *notificationType
