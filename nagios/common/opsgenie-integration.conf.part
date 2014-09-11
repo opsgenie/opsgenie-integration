@@ -1,6 +1,6 @@
 ################################### NAGIOS2OPSGENIE CONFIGURATION ###############################
 #you can define log levels: warning, debug, info,error
-nagios2opsgenie.logger=debug
+nagios2opsgenie.logger=warning
 nagios2opsgenie.timeout=60
 #recipients=<comma_separated_list_of_recipients>
 #tags=<comma_separated_list_of_tags>
