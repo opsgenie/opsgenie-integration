@@ -170,6 +170,8 @@ func parseFlags()map[string]string{
 	itemKey := flag.String("itemKey","","ITEM.KEY")
 	itemValue := flag.String("itemValue", "", "ITEM.VALUE")
 	eventId := flag.String ("eventId","","EVENT.ID")
+	tags := flag.String ("tags","","tags")
+	recipients := flag.String ("recipients","","recipients")
 
 	flag.Parse()
 
@@ -191,6 +193,8 @@ func parseFlags()map[string]string{
 	parameters["itemKey"] = *itemKey
 	parameters["itemValue"] = *itemValue
 	parameters["eventId"] = *eventId
+	parameters["tags"] = *tags
+	parameters["recipients"] = *recipients
 
 	return parameters
 }
