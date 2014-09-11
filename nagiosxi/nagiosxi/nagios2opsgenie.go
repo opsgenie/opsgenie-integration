@@ -254,7 +254,7 @@ func parseFlags()map[string]string{
 		parameters["recipients"] = configParameters ["recipients"]
 	}
 
-	if *recipients != ""{
+	if *tags != ""{
 		parameters["tags"] = *tags
 	}else{
 		parameters["tags"] = configParameters ["tags"]

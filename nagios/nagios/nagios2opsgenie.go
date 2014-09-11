@@ -23,8 +23,7 @@ var API_KEY = ""
 var TOTAL_TIME = 60
 var configParameters = map[string]string{"apiKey": API_KEY,"nagios_server": NAGIOS_SERVER,"nagios2opsgenie.logger":"warning","opsgenie.api.url":"https://api.opsgenie.com"}
 var parameters = make(map[string]string)
-//var configPath = "/etc/opsgenie/conf/opsgenie-integration.conf"
-var configPath = "C:\\IdeaWorkspace\\OpsGenieIntegration\\nagios\\common\\opsgenie-integration.conf.part"
+var configPath = "/etc/opsgenie/conf/opsgenie-integration.conf"
 var levels = map [string]log.Level{"info":log.Info,"debug":log.Debug,"warning":log.Warning,"error":log.Error}
 var logger log.Logger
 
@@ -76,8 +75,7 @@ func readConfigFile(file io.Reader){
 
 func configureLogger ()log.Logger{
 	level := configParameters["nagios2opsgenie.logger"]
-	file, err := os.OpenFile("nagios2opsgenie.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
-//	file, err := os.OpenFile("/var/log/opsgenie/nagios2opsgenie.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	file, err := os.OpenFile("/var/log/opsgenie/nagios2opsgenie.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	if err != nil{
 		panic(err)
 	}
@@ -256,7 +254,7 @@ func parseFlags()map[string]string{
 		parameters["recipients"] = configParameters ["recipients"]
 	}
 
-	if *recipients != ""{
+	if *tags != ""{
 		parameters["tags"] = *tags
 	}else{
 		parameters["tags"] = configParameters ["tags"]

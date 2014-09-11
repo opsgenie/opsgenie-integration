@@ -1,6 +1,9 @@
 ################################### NAGIOS2OPSGENIE CONFIGURATION ###############################
-nagios2opsgenie.logger=warning
+#you can define log levels: warning, debug, info,error
+nagios2opsgenie.logger=debug
 nagios2opsgenie.timeout=60
+#recipients=<comma_separated__recipients>
+#tags=<comma_separated_tags>
 
 #You can use different nagiosServer values for each of your Nagios servers (see marid configuration below)
 nagios_server=default
