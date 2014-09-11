@@ -175,10 +175,6 @@ func parseFlags()map[string]string{
 
 	flag.Parse()
 
-	if *apiKey != ""{
-		configParameters["apiKey"] = *apiKey
-	}
-
 	parameters["triggerName"] = *triggerName
 	parameters["triggerId"] = *triggerId
 	parameters["triggerStatus"] = *triggerStatus
@@ -193,8 +189,22 @@ func parseFlags()map[string]string{
 	parameters["itemKey"] = *itemKey
 	parameters["itemValue"] = *itemValue
 	parameters["eventId"] = *eventId
-	parameters["tags"] = *tags
-	parameters["recipients"] = *recipients
+
+	if *apiKey != ""{
+		configParameters["apiKey"] = *apiKey
+	}
+
+	if *recipients != ""{
+		parameters["recipients"] = *recipients
+	}else{
+		parameters["recipients"] = configParameters ["recipients"]
+	}
+
+	if *tags != ""{
+		parameters["tags"] = *tags
+	}else{
+		parameters["tags"] = configParameters ["tags"]
+	}
 
 	return parameters
 }

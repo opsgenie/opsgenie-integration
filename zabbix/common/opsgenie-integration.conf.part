@@ -1,10 +1,13 @@
 ######################################## ZABBIX CONFIGURATION #######################################
-zabbix.command_url=http://localhost/zabbix/api_jsonrpc.php
-zabbix.user=Admin
-zabbix.password=zabbix
+#useMarid=false
+#logger=warning
+
+#recipients=<comma_separated_list_of_recipients>
+#tags=<comma_separated_list_of_tags>
 
 ########################################ZABBIX INTEGRATION - ALERT ACTION CONFIGURATION ######################
 actions.Acknowledge.script=zabbixActionExecutor.groovy
 
-#useMarid=false
-#logger=warning
+zabbix.command_url=http://localhost/zabbix/api_jsonrpc.php
+zabbix.user=Admin
+zabbix.password=zabbix
