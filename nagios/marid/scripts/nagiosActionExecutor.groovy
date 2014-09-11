@@ -19,8 +19,8 @@ alertFromOpsgenie = opsgenie.getAlert(alertId: alert.alertId)
 try{
     if (alertFromOpsgenie.size() > 0) {
 
-        def host = alertFromOpsgenie.details.host
-        def service = alertFromOpsgenie.details.service
+        def host = alertFromOpsgenie.details.host_name
+        def service = alertFromOpsgenie.details.service_desc
         def postParams = ["btnSubmit": "Commit", "cmd_mod": "2", "send_notification": "off", "host": host]
         if (service) postParams.service = service;
         boolean discardAction = false;

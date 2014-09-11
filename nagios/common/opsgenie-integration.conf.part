@@ -1,6 +1,9 @@
 ################################### NAGIOS2OPSGENIE CONFIGURATION ###############################
+#you can define log levels: warning, debug, info,error
 nagios2opsgenie.logger=debug
 nagios2opsgenie.timeout=60
+#recipients=<comma_separated_list_of_recipients>
+#tags=<comma_separated_list_of_tags>
 
 #You can use different nagiosServer values for each of your Nagios servers (see marid configuration below)
 nagios_server=default
@@ -20,11 +23,6 @@ actions.AddNote.script=nagiosActionExecutor.groovy
 actions.TakeOwnership.script=nagiosActionExecutor.groovy
 actions.AssignOwnership.script=nagiosActionExecutor.groovy
 actions.Create.script=nagiosActionExecutor.groovy
-
-
-#You can use different nagiosServer values for each of your Nagios servers (used in lamp)
-
-nagios.nagiosServer=default
 
 #You can configure more than one Nagios Server like the following (used in marid)
 #In order to use feature you should also create your alerts with nagiosServer:server1

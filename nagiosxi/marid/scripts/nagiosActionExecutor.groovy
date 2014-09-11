@@ -17,8 +17,8 @@ HTTP_CLIENT = createHttpClient();
 try{
     if (alertFromOpsgenie.size() > 0) {
 
-        def host = alertFromOpsgenie.details.host
-        def service = alertFromOpsgenie.details.service
+        def host = alertFromOpsgenie.details.host_name
+        def service = alertFromOpsgenie.details.service_desc
         def postParams = ["btnSubmit": "Commit", "cmd_mod": "2", "send_notification": "off", "host": host]
         if(service) postParams.service = service;
         boolean discardAction = false;
@@ -110,8 +110,9 @@ def getUrl(String confProperty, String backwardCompatabilityUrl, boolean  isMand
 
 def postToNagios(Map postParams){
     String url = getUrl("command_url", "/nagiosxi/includes/components/nagioscore/ui/cmd.php", true);
-    url += "?username=" + _conf("user", true)
-    url += "&ticket=" + _conf("ticket", true)
+    postParams["username"]= _conf("user", true)
+    postParams["ticket"]= _conf("ticket", true)
+
     logger.debug("${LOG_PREFIX} Posting to Nagios. Url ${url} params:${postParams}")
     def response = ((OpsGenieHttpClient) HTTP_CLIENT).post(url, postParams)
     if (response.getStatusCode() == 200) {
