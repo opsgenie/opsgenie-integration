@@ -3,4 +3,4 @@ then
   groupadd opsgenie
 fi
 
-export check_java_for_marid_only = "true"
+#define check_java_for_marid_only "true"
