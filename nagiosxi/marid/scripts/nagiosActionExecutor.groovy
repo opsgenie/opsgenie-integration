@@ -22,6 +22,22 @@ try{
         def postParams = ["btnSubmit": "Commit", "cmd_mod": "2", "send_notification": "off", "host": host]
         if(service) postParams.service = service;
         boolean discardAction = false;
+
+        //determine which Nagios server will be used by using the alert details prop nagios_server
+        def nagiosServer = alertFromOpsgenie.details.nagios_server
+        if (!nagiosServer || nagiosServer == "default") {
+            CONF_PREFIX = "nagios.";
+        } else {
+            CONF_PREFIX = "nagios." + nagiosServer + ".";
+        }
+
+        //if nagios_server from alert details does exist in this Marid conf file , it should be ignored
+        def command_url = _conf("command_url",false);
+        if(! command_url ){
+            logger.warn("Ignoring action ${action} from nagiosServer ${nagiosServer}, because ${CONF_PREFIX} does not exist in conf file, alert: ${alert.message}");
+            return;
+        }
+
         if (action == 'Create'){
             if(service){
                 attach(alert.alertId,"service")
@@ -53,13 +69,7 @@ try{
             postParams.com_data = "${alert.note} by ${alert.username}"
             postParams.cmd_typ = service ? "3" : "1";
         }
-        def nagiosServer=alertFromOpsgenie.details.nagiosServer
-        if (!nagiosServer || nagiosServer == "default"){
-            CONF_PREFIX = "nagios.";
-        }
-        else{
-            CONF_PREFIX = "nagios."+nagiosServer+".";
-        }
+
         if(!discardAction){
             postToNagios(postParams);
         }
