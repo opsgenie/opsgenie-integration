@@ -7,7 +7,7 @@ nagios2opsgenie.timeout=60
 
 #You can use different nagiosServer values for each of your Nagios servers (see marid configuration below)
 nagios_server=default
-#useMarid=false
+#viaMaridUrl=http://maridHost:port/script/marid2opsgenie.groovy?async=true
 
 ######################################## NAGIOS CONFIGURATION #######################################
 nagios.alert_histogram_image_url=http://localhost/nagiosxi/includes/components/nagioscore/ui/histogram.php
@@ -24,9 +24,11 @@ actions.TakeOwnership.script=nagiosActionExecutor.groovy
 actions.AssignOwnership.script=nagiosActionExecutor.groovy
 actions.Create.script=nagiosActionExecutor.groovy
 
-#You can configure more than one Nagios Server like the following
-#In order to use feature you should also create your alerts with nagiosServer:server1 , check out lamp.cof
-#nagios.server1.command_url=http://localhost/nagiosxi/includes/components/nagioscore/ui/cmd.php
+#You can configure more than one Nagios Server like the following (used in marid)
+#In order to use feature you should also set nagios_server:server1
+#nagios.server1.command_url=http://nagiosHost:port/nagiosxi/includes/components/nagioscore/ui/cmd.php
+#nagios.server1.alert_histogram_image_url=http://nagiosHost:port/nagiosxi/includes/components/nagioscore/ui/histogram.php
+#nagios.server1.trends_image_url=http://nagiosHost:port/nagiosxi/includes/components/nagioscore/ui/trends.php
 #nagios.server1.user=nagiosadmin
 #nagios.server1.ticket=nagiosticket
 #nagios.server1.http.timeout=30000

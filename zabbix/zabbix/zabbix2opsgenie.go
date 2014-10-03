@@ -104,23 +104,11 @@ func http_post()  {
 	logger.Debug(parameters)
 
     apiUrl := configParameters["opsgenie.api.url"] + "/v1/json/zabbix"
-	useMarid := configParameters["useMarid"]
+	viaMaridUrl := configParameters["viaMaridUrl"]
 	target := ""
-	if useMarid == "true"{
-		var maridHost=""
-		var maridPort=""
-		if configParameters["http.server.enabled"] == "true"{
-			maridHost = "http://" + configParameters["http.server.host"]
-			maridPort = configParameters["http.server.port"]
-		} else if configParameters["https.server.enabled"] == "true"{
-			maridHost = "https://" +configParameters["https.server.host"]
-			maridPort = configParameters["https.server.port"]
-		} else{
 
-			panic("Http server is not enabled for Marid")
-		}
-
-		apiUrl = maridHost + ":" + maridPort + "/script/marid2opsgenie.groovy" + "?async=true"
+	if viaMaridUrl != ""{
+		apiUrl = viaMaridUrl
 		target = "Marid"
 	}else{
 		target = "OpsGenie"
