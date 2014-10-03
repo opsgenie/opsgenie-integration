@@ -1,5 +1,5 @@
 ######################################## ZABBIX CONFIGURATION #######################################
-#useMarid=false
+#viaMaridUrl=http://maridHost:port/script/marid2opsgenie.groovy?async=true
 #logger=warning
 
 #recipients=<comma_separated_list_of_recipients>
