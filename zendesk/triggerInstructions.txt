@@ -1,0 +1,52 @@
+- From the "Triggers" page, click "add trigger".
+- Put "OpsGenie Create Alert" into "Trigger title".
+- Under "Meet all of the following conditions:", add two conditions as specified below:
+    - Ticket:Status Is not Solved
+    - Ticket: Is Created
+- Under "Perform these actions:", select "Notifications: Notify target" and pick the URL target you have added earlier for the integration.
+- Paste into "Message" the following template:
+action: create ||
+id: {{ticket.id}} ||
+status: {{ticket.status}} ||
+title: {{ticket.title}} ||
+tags: {{ticket.tags}} ||
+link: {{ticket.link}} ||
+external_id: {{ticket.external_id}} ||
+via: {{ticket.via}} ||
+priority: {{ticket.priority}} ||
+ticket_type: {{ticket.ticket_type}} ||
+score: {{ticket.score}} ||
+groupname: {{ticket.group.name}} ||
+due_date: {{ticket.due_date}} ||
+account: {{ticket.account}} ||
+assigneename: {{ticket.assignee.name}} ||
+requestername: {{ticket.requester.name}} ||
+organizationname: {{ticket.organization.name}} ||
+in_business_hours: {{ticket.in_business_hours}} ||
+description: {{ticket.description}}
+- Click "Create trigger".
+
+- After the trigger is saved, click "add trigger" to add the second trigger.
+- Put "OpsGenie Add Note" into "Trigger title".
+- Under "Meet all of the following conditions:", add a condition as specified below:
+    - Ticket: Is Updated
+- Under "Perform these actions:", select "Notifications: Notify target" and pick the URL target you have added earlier for the integration.
+- Paste into "Message" the following template:
+action: addnote ||
+id: {{ticket.id}} ||
+status: {{ticket.status}} ||
+latest_comment : {{ticket.latest_comment_formatted}}
+- Click "Create trigger".
+
+- Now click "add trigger" to add the last one.
+- Put "OpsGenie Close Alert" into "Trigger title".
+- Under "Meet any of the following conditions:", add two conditions as specified below:
+    - Ticket:Status Is Solved
+    - Ticket:Status Is Closed
+- Under "Perform these actions:", select "Notifications: Notify target" and pick the URL target you have added earlier for the integration.
+- Paste into "Message" the following template:
+action: close ||
+id: {{ticket.id}} ||
+status: {{ticket.status}} ||
+{{ticket.latest_comment_formatted}}
+- Click "Create trigger".
