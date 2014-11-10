@@ -11,6 +11,8 @@ import java.util.zip.ZipOutputStream
 
 LOG_PREFIX = "[${action}]:";
 logger.warn("${LOG_PREFIX} Will execute action for alertId ${alert.alertId}");
+
+ImageIO.setUseCache(false)
 CONF_PREFIX = "nagios.";
 alertFromOpsgenie = opsgenie.getAlert(alertId: alert.alertId)
 HTTP_CLIENT = createHttpClient();
