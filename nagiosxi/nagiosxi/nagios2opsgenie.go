@@ -31,6 +31,8 @@ func main() {
 	configFile, err := os.Open(configPath)
 	if err == nil{
 		readConfigFile(configFile)
+	}else{
+		panic(err)
 	}
 	logger = configureLogger()
 	printConfigToLog()
