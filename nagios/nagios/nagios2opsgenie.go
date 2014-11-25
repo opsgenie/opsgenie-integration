@@ -89,6 +89,7 @@ func getHttpClient (timeout int) *http.Client{
 	seconds := (TOTAL_TIME/12)*2*timeout
 	client := &http.Client{
 		Transport: &http.Transport{
+                        Proxy: http.ProxyFromEnvironment,
 			Dial: func(netw, addr string) (net.Conn, error) {
 				conn, err := net.DialTimeout(netw, addr, time.Second * time.Duration(seconds))
 				if err != nil {
