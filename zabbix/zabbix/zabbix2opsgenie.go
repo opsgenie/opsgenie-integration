@@ -30,6 +30,8 @@ func main() {
 	configFile, err := os.Open(configPath)
 	if err == nil{
 		readConfigFile(configFile)
+	}else{
+		panic(err)
 	}
 	logger = configureLogger()
 	printConfigToLog()
@@ -43,9 +45,11 @@ func main() {
 }
 
 func printConfigToLog(){
-	logger.Debug("Config:")
-	for k, v := range configParameters {
-		logger.Debug(k +"="+v)
+	if(logger.LogDebug()){
+		logger.Debug("Config:")
+		for k, v := range configParameters {
+			logger.Debug(k +"="+v)
+		}
 	}
 }
 
@@ -73,7 +77,7 @@ func configureLogger ()log.Logger{
 	var logFilePath = "/var/log/opsgenie/zabbix2opsgenie.log"
 	file, err := os.OpenFile(logFilePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	if err != nil {
-		panic(err)
+		fmt.Println("Logging disabled. Reason: ", err)
 	}
 
 	return golog.New(file, levels[strings.ToLower(level)])
@@ -83,10 +87,11 @@ func getHttpClient (timeout int) *http.Client{
 	seconds := (TOTAL_TIME/12)*2*timeout
 	client := &http.Client{
 		Transport: &http.Transport{
+			Proxy: http.ProxyFromEnvironment,
 			Dial: func(netw, addr string) (net.Conn, error) {
 				conn, err := net.DialTimeout(netw, addr, time.Second * time.Duration(seconds))
 				if err != nil {
-					logger.Error("Error occured while connecting: ",err)
+					logger.Error("Error occurred while connecting: ",err)
 					return nil, err
 				}
 				conn.SetDeadline(time.Now().Add(time.Second * time.Duration(seconds)))
@@ -99,6 +104,8 @@ func getHttpClient (timeout int) *http.Client{
 
 func http_post()  {
 	parameters["apiKey"] = configParameters["apiKey"]
+
+	var logPrefix = "[TriggerId: " + parameters["triggerId"] + ", HostName: " + parameters["hostName"] + "]"
 
 	logger.Debug("Data to be posted:")
 	logger.Debug(parameters)
@@ -119,21 +126,25 @@ func http_post()  {
 	request, _ := http.NewRequest("POST", apiUrl, body)
 	for i := 1; i <= 3; i++ {
 		client := getHttpClient(i)
-		logger.Info("Trying to send data to " + target + " with timeout: ", (TOTAL_TIME/12)*2*i)
+		logger.Warning(logPrefix + "Trying to send data to " + target + " with timeout: ", (TOTAL_TIME/12)*2*i)
 		resp, error := client.Do(request)
 		if error == nil {
 			defer resp.Body.Close()
 			body, err := ioutil.ReadAll(resp.Body)
 			if err == nil{
-				logger.Info("Data from Zabbix posted to " + target + " successfully; response:" + string(body[:]))
+				if resp.StatusCode == 200{
+					logger.Warning(logPrefix + "Data from Zabbix posted to " + target + " successfully; response:" + string(body[:]))
+				}else{
+					logger.Warning(logPrefix + "Couldn't post data from Zabbix to " + target + " successfully; Response code: " + strconv.Itoa(resp.StatusCode) + " Response Body: " + string(body[:]))
+				}
 			}else{
-				logger.Warning("Couldn't read the response from " + target, err)
+				logger.Warning(logPrefix + "Couldn't read the response from " + target, err)
 			}
 			break
 		}else if i < 3 {
-			logger.Warning("Error occurred while sending data, will retry.", error)
+			logger.Warning(logPrefix + "Error occurred while sending data, will retry.", error)
 		}else {
-			logger.Error("Failed to post data from Zabbix to " + target, error)
+			logger.Error(logPrefix + "Failed to post data from Zabbix to " + target, error)
 		}
 		if resp != nil{
 			defer resp.Body.Close()
