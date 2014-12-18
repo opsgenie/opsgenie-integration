@@ -1,0 +1,11 @@
+######################################## REDMINE CONFIGURATION #######################################
+redmine.url=http://myredmine.redmine.com
+redmine.projectId=1
+redmine.apiKey=RedmineApiAccessKey
+#redmine.customFieldId=1
+
+######################################## REDMINE INTEGRATION - ALERT ACTION CONFIGURATION ######################
+actions.AddNote.script=redmineActionExecutor.groovy
+actions.Create.script=redmineActionExecutor.groovy
+
+##############################################################################################################
