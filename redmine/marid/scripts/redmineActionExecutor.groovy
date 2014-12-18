@@ -47,50 +47,38 @@ try{
             } else {
                 logger.warn("${LOG_PREFIX} Could not execute at Redmine; response: ${response.statusCode} ${response.getContentAsString()}")
             }
-        }
-        else if(action == "AddNote"){
+        } else if(action ==  "Acknowledge"){
+            def customFieldId = _conf("customFieldId", false) as String
+            if (customFieldId) {
+                String issueId = getIssueIdFromRedmine(customFieldId)
+                if(issueId) {
+                    def inProgressStatusId = _conf("inProgressStatusId", false) as String
+                    if (inProgressStatusId) {
+                        updateIssueStatusInRedmine(issueId, inProgressStatusId)
+                    } else {
+                        addNoteToRedmineIssue(issueId, "Alert is acknowledged by ${alert.username}")
+                    }
+                }
+            }
+        } else if(action == "AddNote"){
             def customFieldId = _conf("customFieldId", false) as String
             if(customFieldId) {
-                String url = _conf("url", true) + "/issues.json"
-
-                def requestParameters = [:]
-                requestParameters.key = _conf("apiKey", true)
-                requestParameters.put("cf_${customFieldId}".toString(), alertFromOpsgenie.alertId)
-
-                logger.debug("${LOG_PREFIX} executing GET request. Url ${url} params:${requestParameters}")
-                def response = ((OpsGenieHttpClient) HTTP_CLIENT).get(url, requestParameters)
-                if (response.getStatusCode() < 299) {
-                    logger.info("${LOG_PREFIX} Successfully executed at Redmine.");
-                    logger.debug("${LOG_PREFIX} Redmine response: ${response.statusCode} ${response.getContentAsString()}")
-
-                    def responseMap = JsonUtils.parse(response.contentAsString)
-                    if(responseMap.total_count > 0){
-                        def issueId = responseMap.issues[0].id
-                        url = _conf("url", true) + "/issues/${issueId}.json"
-
-                        requestParameters = [:]
-                        requestParameters.key = _conf("apiKey", true)
-
-                        def contentParams = [:]
-                        def issueMap = [:]
-                        issueMap.notes = alert.note + " by " + alert.username
-                        contentParams.put("issue", issueMap)
-
-                        def put = ((OpsGenieHttpClient) HTTP_CLIENT).preparePutMethod(url, contentParams, requestParameters)
-                        ((StringEntity)put.getEntity()).setChunked(false)
-                        put.setHeader("Content-Type", "application/json")
-                        response = ((OpsGenieHttpClient) HTTP_CLIENT).executeHttpMethod(put)
-                        if (response.getStatusCode() < 299) {
-                            logger.info("${LOG_PREFIX} Successfully executed at Redmine.");
-                            logger.debug("${LOG_PREFIX} Redmine response: ${response.statusCode} ${response.getContentAsString()}")
-                        } else {
-                            logger.warn("${LOG_PREFIX} Could not execute at Redmine; response: ${response.statusCode} ${response.getContentAsString()}")
-                        }
-                    } else{
-                        logger.warn("${LOG_PREFIX} No issue could be found")
+                String issueId = getIssueIdFromRedmine(customFieldId)
+                if(issueId) {
+                    addNoteToRedmineIssue(issueId, alert.note + " by " + alert.username)
+                }
+            }
+        } else if (action == "Close") {
+            def customFieldId = _conf("customFieldId", false) as String
+            if (customFieldId) {
+                String issueId = getIssueIdFromRedmine(customFieldId)
+                if(issueId) {
+                    def closedStatusId = _conf("closedStatusId", false) as String
+                    if (closedStatusId) {
+                        updateIssueStatusInRedmine(issueId, closedStatusId)
+                    } else {
+                        addNoteToRedmineIssue(issueId, "Alert is closed by ${alert.username}")
                     }
-                } else {
-                    logger.warn("${LOG_PREFIX} Could not execute at Redmine; response: ${response.statusCode} ${response.getContentAsString()}")
                 }
             }
         }
@@ -101,6 +89,68 @@ try{
 }
 finally {
     HTTP_CLIENT.close()
+}
+
+String getIssueIdFromRedmine(String customFieldId) {
+    String url = _conf("url", true) + "/issues.json"
+
+    def requestParameters = [:]
+    requestParameters.key = _conf("apiKey", true)
+    requestParameters.put("cf_${customFieldId}".toString(), alertFromOpsgenie.alertId)
+
+    logger.debug("${LOG_PREFIX} executing GET request. Url ${url} params:${requestParameters}")
+    def response = ((OpsGenieHttpClient) HTTP_CLIENT).get(url, requestParameters)
+    if (response.getStatusCode() < 299) {
+        logger.info("${LOG_PREFIX} Successfully executed at Redmine.");
+        logger.debug("${LOG_PREFIX} Redmine response: ${response.statusCode} ${response.getContentAsString()}")
+
+        def responseMap = JsonUtils.parse(response.contentAsString)
+        if (responseMap.total_count > 0) {
+            return responseMap.issues[0].id
+        } else {
+            logger.warn("${LOG_PREFIX} No issue could be found")
+        }
+    } else {
+        logger.warn("${LOG_PREFIX} Could not execute at Redmine; response: ${response.statusCode} ${response.getContentAsString()}")
+    }
+    return null;
+}
+
+void updateIssueStatusInRedmine(String issueId, def statusId){
+    String url = _conf("url", true) + "/issues/${issueId}.json"
+    requestParameters = [:]
+    requestParameters.key = _conf("apiKey", true)
+    def contentParams = [:]
+    def issueMap = [:]
+    issueMap.status_id = statusId
+    contentParams.put("issue", issueMap)
+
+    doPutRequestToRedmine(url, contentParams, requestParameters)
+}
+
+void doPutRequestToRedmine(String url, Map contentParams, Map requestParameters){
+    def put = ((OpsGenieHttpClient) HTTP_CLIENT).preparePutMethod(url, contentParams, requestParameters)
+    ((StringEntity) put.getEntity()).setChunked(false)
+    put.setHeader("Content-Type", "application/json")
+    response = ((OpsGenieHttpClient) HTTP_CLIENT).executeHttpMethod(put)
+    if (response.getStatusCode() < 299) {
+        logger.info("${LOG_PREFIX} Successfully executed at Redmine.");
+        logger.debug("${LOG_PREFIX} Redmine response: ${response.statusCode} ${response.getContentAsString()}")
+    } else {
+        logger.warn("${LOG_PREFIX} Could not execute at Redmine; response: ${response.statusCode} ${response.getContentAsString()}")
+    }
+}
+
+void addNoteToRedmineIssue(String issueId, String note){
+    String url = _conf("url", true) + "/issues/${issueId}.json"
+    requestParameters = [:]
+    requestParameters.key = _conf("apiKey", true)
+    def contentParams = [:]
+    def issueMap = [:]
+    issueMap.notes = note
+    contentParams.put("issue", issueMap)
+
+    doPutRequestToRedmine(url, contentParams, requestParameters)
 }
 
 def createHttpClient() {
@@ -124,4 +174,3 @@ def _conf(confKey, boolean isMandatory)
     }
     return confVal
 }
-
