@@ -3,9 +3,13 @@ redmine.url=http://myredmine.redmine.com
 redmine.projectId=1
 redmine.apiKey=RedmineApiAccessKey
 #redmine.customFieldId=1
+#redmine.inProgressStatusId=1
+#redmine.closedStatusId=1
 
 ######################################## REDMINE INTEGRATION - ALERT ACTION CONFIGURATION ######################
-actions.AddNote.script=redmineActionExecutor.groovy
 actions.Create.script=redmineActionExecutor.groovy
+actions.AddNote.script=redmineActionExecutor.groovy
+actions.Acknowledge.script=redmineActionExecutor.groovy
+actions.Close.script=redmineActionExecutor.groovy
 
 ##############################################################################################################
