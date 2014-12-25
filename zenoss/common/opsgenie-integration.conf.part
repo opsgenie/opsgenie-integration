@@ -1,0 +1,18 @@
+################################### NAGIOS2OPSGENIE CONFIGURATION ###############################
+#you can define log levels: warning, debug, info,error
+zenoss2opsgenie.logger=warning
+zenoss2opsgenie.timeout=60
+
+#recipients=<comma_separated_list_of_recipients>
+#teams=<comma_separated_list_of_teams>
+#tags=<comma_separated_list_of_tags>
+
+#viaMaridUrl=http://maridHost:port/script/marid2opsgenie.groovy?async=true
+
+########################################ZENOSS INTEGRATION - ALERT ACTION CONFIGURATION ######################
+actions.Acknowledge.script=zenossActionExecutor.groovy
+actions.Close.script=zenossActionExecutor.groovy
+
+#zenoss.command_url=
+#zenoss.user=Admin
+#zenoss.password=zenoss
