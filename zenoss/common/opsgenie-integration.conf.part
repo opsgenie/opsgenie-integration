@@ -12,6 +12,7 @@ zenoss2opsgenie.timeout=60
 ########################################ZENOSS INTEGRATION - ALERT ACTION CONFIGURATION ######################
 actions.Acknowledge.script=zenossActionExecutor.groovy
 actions.Close.script=zenossActionExecutor.groovy
+
 zenoss.command_url=http://localhost:8080/zport/dmd/evconsole_router
-zenoss.user = Admin
-zenoss.password =zenoss
+zenoss.user=Admin
+zenoss.password=zenoss
