@@ -1,0 +1,36 @@
+################################### NAGIOS2OPSGENIE CONFIGURATION ###############################
+#you can define log levels: warning, debug, info,error
+nagios2opsgenie.logger=warning
+nagios2opsgenie.timeout=60
+#recipients=<comma_separated_list_of_recipients>
+#tags=<comma_separated_list_of_tags>
+
+#You can use different nagiosServer values for each of your Nagios servers (see marid configuration below)
+nagios_server=default
+#viaMaridUrl=http://maridHost:port/script/marid2opsgenie.groovy?async=true
+
+######################################## NAGIOS CONFIGURATION #######################################
+nagios.alert_histogram_image_url=http://localhost/icinga/cgi-bin/histogram.cgi
+nagios.trends_image_url=http://localhost/icinga/cgi-bin/trends.cgi
+nagios.command_url=http://localhost/icinga/cgi-bin/cmd.cgi
+nagios.user=nagiosadmin
+nagios.password=admin
+nagios.http.timeout=30000
+
+########################################NAGIOS INTEGRATION - ALERT ACTION CONFIGURATION ######################
+actions.Acknowledge.script=nagiosActionExecutor.groovy
+actions.AddNote.script=nagiosActionExecutor.groovy
+actions.TakeOwnership.script=nagiosActionExecutor.groovy
+actions.AssignOwnership.script=nagiosActionExecutor.groovy
+actions.Create.script=nagiosActionExecutor.groovy
+
+#You can configure more than one Nagios Server like the following (used in marid)
+#In order to use feature you should also set nagios_server:server1
+#nagios.server1.alert_histogram_image_url=http://icingaHost:port/icinga/cgi-bin/histogram.cgi
+#nagios.server1.trends_image_url=http://icingaHost:port/icinga/cgi-bin/trends.cgi
+#nagios.server1.command_url=http://icingaHost:port/icinga/cgi-bin/cmd.cgi
+#nagios.server1.user=nagiosadmin
+#nagios.server1.password=admin
+#nagios.server1.http.timeout=30000
+#nagios.server1.http.timeout=30000
+
