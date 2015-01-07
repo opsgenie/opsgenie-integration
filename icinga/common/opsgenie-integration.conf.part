@@ -1,7 +1,7 @@
-################################### NAGIOS2OPSGENIE CONFIGURATION ###############################
+################################### ICINGA2OPSGENIE CONFIGURATION ###############################
 #you can define log levels: warning, debug, info,error
-nagios2opsgenie.logger=warning
-nagios2opsgenie.timeout=60
+icinga2opsgenie.logger=warning
+icinga2opsgenie.timeout=60
 #recipients=<comma_separated_list_of_recipients>
 #tags=<comma_separated_list_of_tags>
 
@@ -13,16 +13,16 @@ nagios_server=default
 nagios.alert_histogram_image_url=http://localhost/icinga/cgi-bin/histogram.cgi
 nagios.trends_image_url=http://localhost/icinga/cgi-bin/trends.cgi
 nagios.command_url=http://localhost/icinga/cgi-bin/cmd.cgi
-nagios.user=nagiosadmin
-nagios.password=admin
+nagios.user=icingaadmin
+nagios.password=icingaadmin
 nagios.http.timeout=30000
 
 ########################################NAGIOS INTEGRATION - ALERT ACTION CONFIGURATION ######################
-actions.Acknowledge.script=nagiosActionExecutor.groovy
-actions.AddNote.script=nagiosActionExecutor.groovy
-actions.TakeOwnership.script=nagiosActionExecutor.groovy
-actions.AssignOwnership.script=nagiosActionExecutor.groovy
-actions.Create.script=nagiosActionExecutor.groovy
+actions.Acknowledge.script=icingaActionExecutor.groovy
+actions.AddNote.script=icingaActionExecutor.groovy
+actions.TakeOwnership.script=icingaActionExecutor.groovy
+actions.AssignOwnership.script=icingaActionExecutor.groovy
+actions.Create.script=icingaActionExecutor.groovy
 
 #You can configure more than one Nagios Server like the following (used in marid)
 #In order to use feature you should also set nagios_server:server1
@@ -33,4 +33,3 @@ actions.Create.script=nagiosActionExecutor.groovy
 #nagios.server1.password=admin
 #nagios.server1.http.timeout=30000
 #nagios.server1.http.timeout=30000
-
