@@ -9,6 +9,7 @@ chown -R opsgenie:opsgenie /tmp/marid
 
 if id -u icinga >/dev/null 2>&1; then
         usermod -a -G opsgenie icinga
+        chown -R icinga:opsgenie /var/log/opsgenie
 else
         echo "WARNING : icinga user does not exist. Please don't forget to add your icinga user to opsgenie group!"
 fi
