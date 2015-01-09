@@ -18,10 +18,10 @@ import (
 	"io/ioutil"
 )
 
-var NAGIOS_SERVER = "default"
+var ICINGA_SERVER = "default"
 var API_KEY = ""
 var TOTAL_TIME = 60
-var configParameters = map[string]string{"apiKey": API_KEY,"nagios_server": NAGIOS_SERVER,"icinga2opsgenie.logger":"warning","opsgenie.api.url":"https://api.opsgenie.com"}
+var configParameters = map[string]string{"apiKey": API_KEY,"icinga_server": ICINGA_SERVER,"icinga2opsgenie.logger":"warning","opsgenie.api.url":"https://api.opsgenie.com"}
 var parameters = make(map[string]string)
 var configPath = "/etc/opsgenie/conf/opsgenie-integration.conf"
 var levels = map [string]log.Level{"info":log.Info,"debug":log.Debug,"warning":log.Warning,"error":log.Error}
@@ -119,7 +119,7 @@ func http_post()  {
 	logger.Debug("Data to be posted:")
 	logger.Debug(parameters)
 
-	apiUrl := configParameters["opsgenie.api.url"] + "/v1/json/nagios"
+	apiUrl := configParameters["opsgenie.api.url"] + "/v1/json/icinga"
 	viaMaridUrl := configParameters["viaMaridUrl"]
 	target := ""
 
@@ -144,9 +144,9 @@ func http_post()  {
 			body, err := ioutil.ReadAll(resp.Body)
 			if err == nil{
 				if resp.StatusCode == 200{
-					logger.Warning(logPrefix + "Data from Nagios posted to " + target + " successfully; response:" + string(body[:]))
+					logger.Warning(logPrefix + "Data from Icinga posted to " + target + " successfully; response:" + string(body[:]))
 				}else{
-					logger.Warning(logPrefix + "Couldn't post data from Nagios to " + target + " successfully; Response code: " + strconv.Itoa(resp.StatusCode) + " Response Body: " + string(body[:]))
+					logger.Warning(logPrefix + "Couldn't post data from Icinga to " + target + " successfully; Response code: " + strconv.Itoa(resp.StatusCode) + " Response Body: " + string(body[:]))
 				}
 			}else{
 				logger.Warning(logPrefix + "Couldn't read the response from " + target, err)
@@ -155,7 +155,7 @@ func http_post()  {
 		}else if i < 3 {
 			logger.Warning(logPrefix + "Error occurred while sending data, will retry.", error)
 		}else {
-			logger.Error(logPrefix + "Failed to post data from Nagios to " + target, error)
+			logger.Error(logPrefix + "Failed to post data from Icinga to " + target, error)
 		}
 		if resp != nil{
 			defer resp.Body.Close()
@@ -165,7 +165,7 @@ func http_post()  {
 
 func parseFlags()map[string]string{
 	apiKey := flag.String("apiKey","","api key")
-	nagiosServer := flag.String("ns","","nagios server")
+	icingaServer := flag.String("is","","icinga server")
 
 	entityType := flag.String("entityType","","")
 
@@ -238,6 +238,7 @@ func parseFlags()map[string]string{
 
 	recipients := flag.String("recipients","","Recipients")
 	tags := flag.String("tags","","Tags")
+	teams := flag.String("teams","","Teams")
 
 	flag.Parse()
 
@@ -246,10 +247,10 @@ func parseFlags()map[string]string{
 	}else{
 		parameters["apiKey"] = configParameters ["apiKey"]
 	}
-	if *nagiosServer != ""{
-		parameters["nagios_server"] = *nagiosServer
+	if *icingaServer != ""{
+		parameters["icinga_server"] = *icingaServer
 	}else{
-		parameters["nagios_server"] = configParameters["nagios_server"]
+		parameters["icinga_server"] = configParameters["icinga_server"]
 	}
 
 	if *recipients != ""{
@@ -263,6 +264,13 @@ func parseFlags()map[string]string{
 	}else{
 		parameters["tags"] = configParameters ["tags"]
 	}
+
+	if *teams != ""{
+		parameters["teams"] = *teams
+	}else{
+		parameters["teams"] = configParameters ["teams"]
+	}
+
 
 	parameters["entity_type"] = *entityType
 

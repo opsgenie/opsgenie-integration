@@ -8,7 +8,7 @@ try {
     if (logger.isDebugEnabled()) {
         logger.debug("marid2opsgenie params:${contentParams}")
     }
-    opsgenie.sendToIntegration("/v1/json/nagios", contentParams, [:])
+    opsgenie.sendToIntegration("/v1/json/icinga", contentParams, [:])
 }
 catch (Throwable e){
     logger.warn("Exception occurred while sending request to OpsGenie, request ${request.getContent()}, Reason: ${e}",e)

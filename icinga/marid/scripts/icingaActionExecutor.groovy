@@ -14,7 +14,7 @@ LOG_PREFIX = "[${action}]:";
 logger.warn("${LOG_PREFIX} Will execute action for alertId ${alert.alertId}");
 
 ImageIO.setUseCache(false)
-CONF_PREFIX = "nagios.";
+CONF_PREFIX = "icinga.";
 HTTP_CLIENT = createHttpClient();
 alertFromOpsgenie = opsgenie.getAlert(alertId: alert.alertId)
 try{
@@ -26,18 +26,18 @@ try{
         if (service) postParams.hostservice = host + "^" + service;
         boolean discardAction = false;
 
-        //determine which Nagios server will be used by using the alert details prop nagios_server
-        def nagiosServer = alertFromOpsgenie.details.nagios_server
-        if (!nagiosServer || nagiosServer == "default") {
-            CONF_PREFIX = "nagios.";
+        //determine which icinga server will be used by using the alert details prop icinga_server
+        def icingaServer = alertFromOpsgenie.details.icinga_server
+        if (!icingaServer || icingaServer == "default") {
+            CONF_PREFIX = "icinga.";
         } else {
-            CONF_PREFIX = "nagios." + nagiosServer + ".";
+            CONF_PREFIX = "icinga." + icingaServer + ".";
         }
 
-        //if nagios_server from alert details does exist in this Marid conf file , it should be ignored
+        //if icinga_server from alert details does exist in this Marid conf file , it should be ignored
         def command_url = _conf("command_url",false);
         if(! command_url ){
-            logger.warn("Ignoring action ${action} from nagiosServer ${nagiosServer}, because ${CONF_PREFIX} does not exist in conf file, alert: ${alert.message}");
+            logger.warn("Ignoring action ${action} from icingaServer ${icingaServer}, because ${CONF_PREFIX} does not exist in conf file, alert: ${alert.message}");
             return;
         }
 
@@ -50,8 +50,8 @@ try{
             discardAction = true;
         }
         else if (action == "Acknowledge") {
-            if(source != null && source.name?.toLowerCase()?.startsWith("nagios")){
-                logger.warn("OpsGenie alert is already acknowledged by nagios. Discarding!!!");
+            if(source != null && source.name?.toLowerCase()?.startsWith("icinga")){
+                logger.warn("OpsGenie alert is already acknowledged by icinga. Discarding!!!");
                 discardAction = true;
             }
             else{
@@ -72,7 +72,7 @@ try{
 
 
         if(!discardAction){
-            postToNagios(postParams);
+            postToIcinga(postParams);
         }
     } else {
         logger.warn("${LOG_PREFIX} Alert with id [${alert.alertId}] does not exist in OpsGenie. It is probably deleted.")
@@ -119,20 +119,20 @@ def getUrl(String confProperty, String backwardCompatabilityUrl, boolean  isMand
     }
 }
 
-def postToNagios(Map<String, String> postParams) {
+def postToIcinga(Map<String, String> postParams) {
     String url = getUrl("command_url", "/icinga/cgi-bin/cmd.cgi", true);
-    logger.debug("${LOG_PREFIX} Posting to Nagios. Url ${url} params:${postParams}")
+    logger.debug("${LOG_PREFIX} Posting to Icinga. Url ${url} params:${postParams}")
     def response = ((OpsGenieHttpClient) HTTP_CLIENT).post(url, postParams)
     if (response.getStatusCode() == 200) {
-        logger.info("${LOG_PREFIX} Successfully executed at Nagios.");
-        logger.debug("${LOG_PREFIX} Nagios response: ${response.getContentAsString()}")
+        logger.info("${LOG_PREFIX} Successfully executed at Icinga.");
+        logger.debug("${LOG_PREFIX} Icinga response: ${response.getContentAsString()}")
     } else {
-        logger.warn("${LOG_PREFIX} Could not execute at Nagios. Nagios Resonse:${response.getContentAsString()}")
+        logger.warn("${LOG_PREFIX} Could not execute at Icinga. Icinga Resonse:${response.getContentAsString()}")
     }
 }
 
 def attach(alertId, entity) {
-    // will get alert histogram and trends charts from nagios and attach them to the alert
+    // will get alert histogram and trends charts from Icinga and attach them to the alert
     try {
         def alertHistogram = getAlertHistogram(entity);
         def trends = getTrends(entity);

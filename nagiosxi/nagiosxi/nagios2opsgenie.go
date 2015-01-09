@@ -66,6 +66,8 @@ func readConfigFile(file io.Reader){
 		line = strings.TrimSpace(line)
 		if !strings.HasPrefix(line,"#") && line != "" {
 			l := strings.Split(line,"=")
+			l[0] = strings.TrimSpace(l[0])
+			l[1] = strings.TrimSpace(l[1])
 			configParameters[l[0]]=l[1]
 			if l[0] == "nagios2opsgenie.timeout"{
 				TOTAL_TIME,_ = strconv.Atoi(l[1])
@@ -236,6 +238,7 @@ func parseFlags()map[string]string{
 
 	recipients := flag.String("recipients","","Recipients")
 	tags := flag.String("tags","","Tags")
+	teams := flag.String("teams","","Teams")
 
 	flag.Parse()
 
@@ -254,6 +257,12 @@ func parseFlags()map[string]string{
 		parameters["recipients"] = *recipients
 	}else{
 		parameters["recipients"] = configParameters ["recipients"]
+	}
+
+	if *teams != ""{
+		parameters["teams"] = *teams
+	}else{
+		parameters["teams"] = configParameters ["teams"]
 	}
 
 	if *tags != ""{
