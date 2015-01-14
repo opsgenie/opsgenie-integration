@@ -116,13 +116,15 @@ func getEventDetailsFromZenoss(){
 	var buf, _ = json.Marshal(zenossParams)
 	body := bytes.NewBuffer(buf)
 
+	logger.Warning(logPrefix + "Trying to get event details from Zenoss")
+
 	request, _ := http.NewRequest("POST", zenossApiUrl, body)
+	request.Header.Set("Content-Type", "application/json")
 	username := configParameters["zenoss.username"]
 	password := configParameters["zenoss.password"]
 	request.SetBasicAuth(username, password)
 	client := getHttpClient(1)
 
-	logger.Warning(logPrefix + "Trying to get event details from Zenoss")
 	resp, error := client.Do(request)
 	if error == nil {
 		defer resp.Body.Close()
@@ -130,6 +132,7 @@ func getEventDetailsFromZenoss(){
 		if err == nil{
 			if resp.StatusCode == 200{
 				logger.Warning(logPrefix + "Retrieved event data from Zenoss successfully;")
+				logger.Debug(logPrefix + "Response body: " + string(body[:]))
 				var data map[string]interface{}
 				if err := json.Unmarshal(body, &data); err != nil {
 					logErrorAndExit("Error occurred while unmarshalling event data: ",err)

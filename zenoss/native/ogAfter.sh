@@ -1,0 +1,1 @@
+chmod 755 /usr/local/bin/zenoss2opsgenie

@@ -66,7 +66,7 @@ def createHttpClient() {
         timeout = timeout.toInteger();
     }
     ClientConfiguration clientConfiguration = new ClientConfiguration().setSocketTimeout(timeout)
-            .setCredentials(new UsernamePasswordCredentials(_conf("user",true), _conf("password", true)))
+            .setCredentials(new UsernamePasswordCredentials(_conf("username",true), _conf("password", true)))
     return new OpsGenieHttpClient(clientConfiguration)
 }
 
