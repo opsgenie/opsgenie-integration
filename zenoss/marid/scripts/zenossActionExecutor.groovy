@@ -3,6 +3,9 @@ import com.ifountain.opsgenie.client.util.ClientConfiguration
 import com.ifountain.opsgenie.client.util.JsonUtils
 import org.apache.http.HttpHeaders
 import org.apache.http.auth.UsernamePasswordCredentials
+import org.apache.http.client.methods.HttpPost
+import org.apache.http.entity.StringEntity
+import org.apache.http.impl.auth.BasicScheme
 
 LOG_PREFIX = "[${action}]:";
 logger.warn("${LOG_PREFIX} Will execute action for alertId ${alert.alertId}");
@@ -11,7 +14,7 @@ CONF_PREFIX = "zenoss.";
 
 def alertFromOpsgenie = opsgenie.getAlert(alertId: alert.alertId)
 if (alertFromOpsgenie.size() > 0) {
-    def postParams = [action: "EventsRouter", data: [evids: [alertFromOpsgenie.alias]], type: "rpc", tid: alertFromOpsgenie.alertId]
+    def postParams = [action: "EventsRouter", data: [[evids: [alertFromOpsgenie.alias]]], type: "rpc", tid: alertFromOpsgenie.alertId]
     boolean discardAction = false;
     if (action == "Acknowledge") {
         if (source != null && source.name?.toLowerCase() == "zenoss") {
@@ -45,7 +48,13 @@ def postToZenoss(Map<String, Object> postParams) {
 
         Map contentTypeHeader = [:]
         contentTypeHeader[HttpHeaders.CONTENT_TYPE] = "application/json"
-        def response = HTTP_CLIENT.post(url, JsonUtils.toJson(postParams), contentTypeHeader)
+        def postMethod = ((OpsGenieHttpClient) HTTP_CLIENT).preparePostMethod(url,JsonUtils.toJson(postParams),contentTypeHeader,[:])
+        StringEntity entity = postMethod.getEntity() as StringEntity
+        entity.setChunked(false);
+        postMethod.addHeader(HttpHeaders.CONTENT_TYPE,"application/json")
+        def creds = new UsernamePasswordCredentials(_conf("username",true), _conf("password", true))
+        postMethod.addHeader(BasicScheme.authenticate(creds,"US-ASCII",false))
+        def response = HTTP_CLIENT.executeHttpMethod(postMethod)
         if (response.getStatusCode() == 200) {
             logger.info("${LOG_PREFIX} Successfully executed at Zenoss.");
             logger.debug("${LOG_PREFIX} Zenoss response: ${response.getContentAsString()}")
@@ -66,7 +75,6 @@ def createHttpClient() {
         timeout = timeout.toInteger();
     }
     ClientConfiguration clientConfiguration = new ClientConfiguration().setSocketTimeout(timeout)
-            .setCredentials(new UsernamePasswordCredentials(_conf("username",true), _conf("password", true)))
     return new OpsGenieHttpClient(clientConfiguration)
 }
 
