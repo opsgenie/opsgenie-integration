@@ -1,4 +1,4 @@
-chmod 755 /etc/opsgenie/zenoss2opsgenie
+chmod 755 /usr/local/bin/zenoss2opsgenie
 
 if id -u zenoss >/dev/null 2>&1; then
         usermod -a -G opsgenie zenoss
