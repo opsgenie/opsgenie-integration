@@ -1,0 +1,33 @@
+task prepareRedmine(dependsOn: 'generateIntegration') << {
+    def destination = "${project.buildDir}/redmine"
+    copy {
+        from "${project.buildDir}/opsgenie-integration"
+        into "${destination}/opsgenie-integration"
+    }
+
+    copy {
+        from "${project.projectDir}/redmine/marid"
+        into "${destination}/opsgenie-integration/marid"
+    }
+
+    mergeConfFile("${project.buildDir}/opsgenie-integration/conf/opsgenie-integration.conf",
+            "${project.projectDir}/redmine/common/conf/opsgenie-integration.conf.part",
+            "${destination}/opsgenie-integration/conf/opsgenie-integration.conf")
+}
+
+task packageRedmineZip(dependsOn: 'prepareRedmine', type: Zip) {
+    from "${project.buildDir}/redmine"
+    baseName = 'opsgenie-redmine'
+}
+
+task packageRedmineOS(dependsOn: ['generateIntegrationForNative', 'prepareRedmine']) << {
+    copyNativeFiles('redmine')
+
+    buildRpm('redmine', 'opsgenie-redmine', 'OpsGenie - Redmine integration files including lamp and marid',
+            [:], [:])
+
+    buildDeb('redmine', 'opsgenie-redmine', 'OpsGenie - Redmine integration files including lamp and marid',
+            [:], [:])
+}
+
+task packageRedmine(dependsOn: ['packageRedmineZip', 'packageRedmineOS'])

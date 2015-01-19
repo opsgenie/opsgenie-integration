@@ -1,0 +1,29 @@
+task prepareNetcool(dependsOn: 'generateIntegration') << {
+    def destination = "${project.buildDir}/netcool"
+    copy {
+        from "${project.buildDir}/opsgenie-integration"
+        into "${destination}/opsgenie-integration"
+    }
+
+    copy {
+        from "${project.projectDir}/netcool/marid"
+        into "${destination}/opsgenie-integration/marid"
+    }
+
+    copy {
+        from "${project.projectDir}/netcool/netcoolShellScripts"
+        into "${destination}/netcoolShellScripts"
+    }
+
+    copy {
+        from configurations.netcool
+        into "${destination}/opsgenie-integration/marid/lib"
+    }
+}
+
+task packageNetcoolZip(dependsOn: 'prepareNetcool', type: Zip) {
+    from "${project.buildDir}/netcool"
+    baseName = 'opsgenie-netcool'
+}
+
+task packageNetcool(dependsOn: ['packageNetcoolZip'])

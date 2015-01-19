@@ -1,0 +1,43 @@
+task prepareIcinga(dependsOn: 'generateIntegration') << {
+        def destination = "${project.buildDir}/icinga"
+        copy{
+            from "${project.buildDir}/opsgenie-integration"
+            into "${destination}/opsgenie-integration"
+        }
+
+        copy{
+            from "${project.projectDir}/icinga/marid"
+            into "${destination}/opsgenie-integration/marid"
+        }
+
+        copy{
+            from "${project.projectDir}/icinga/icinga"
+            into "${destination}/icinga"
+        }
+
+        mergeConfFile("${project.buildDir}/opsgenie-integration/conf/opsgenie-integration.conf",
+                "${project.projectDir}/icinga/common/opsgenie-integration.conf.part",
+                "${destination}/opsgenie-integration/conf/opsgenie-integration.conf")
+}
+
+task packageIcingaZip(dependsOn: 'prepareIcinga', type: Zip) {
+    from "${project.buildDir}/icinga"
+    baseName = 'opsgenie-icinga'
+}
+
+task packageIcingaOS(dependsOn: ['generateIntegrationForNative', 'prepareIcinga']) << {
+    copyNativeFiles('icinga')
+
+    def fileMapping = [
+            "${project.projectDir}/icinga/icinga/icinga2opsgenie":"usr/local/bin",
+            "${project.projectDir}/icinga/icinga/opsgenie.cfg":"etc/opsgenie",
+            "${project.projectDir}/icinga/icinga/icinga2opsgenie.go":"etc/opsgenie",
+    ]
+
+    def configFiles = [ "${project.projectDir}/icinga/icinga/opsgenie.cfg":"etc/opsgenie"]
+
+    buildRpm("icinga", "opsgenie-icinga", "OpsGenie - Nagios integrations files including marid and Nagios scripts", fileMapping, configFiles)
+    buildDeb("icinga", "opsgenie-icinga", "OpsGenie - Nagios integrations files including marid and Nagios scripts", fileMapping, configFiles)
+}
+
+task packageIcinga(dependsOn: ['packageIcingaZip', 'packageIcingaOS'])

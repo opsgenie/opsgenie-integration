@@ -1,0 +1,45 @@
+task prepareZenoss(dependsOn: 'generateIntegration') << {
+    def destination = "${project.buildDir}/zenoss"
+    copy {
+        from "${project.buildDir}/opsgenie-integration"
+        into "${destination}/opsgenie-integration"
+    }
+
+    copy {
+        from "${project.projectDir}/zenoss/marid"
+        into "${destination}/opsgenie-integration/marid"
+    }
+
+    copy {
+        from "${project.projectDir}/zenoss/zenoss"
+        into "${destination}/zenoss"
+    }
+
+    mergeConfFile("${project.buildDir}/opsgenie-integration/conf/opsgenie-integration.conf",
+            "${project.projectDir}/zenoss/common/opsgenie-integration.conf.part",
+            "${destination}/opsgenie-integration/conf/opsgenie-integration.conf")
+}
+
+task packageZenossZip(dependsOn: 'prepareZenoss', type: Zip) {
+    from "${project.buildDir}/zenoss"
+    baseName = 'opsgenie-zenoss'
+}
+
+
+task packageZenossOS(dependsOn: ['generateIntegrationForNative', 'prepareZenoss']) << {
+    copyNativeFiles('zenoss')
+
+    def fileMapping = [
+            "${project.projectDir}/zenoss/zenoss/zenoss2opsgenie"   : "/usr/bin",
+            "${project.projectDir}/zenoss/zabbix/zabbix2opsgenie.go": "etc/opsgenie",
+    ]
+
+    buildRpm('zenoss', 'opsgenie-zenoss', 'OpsGenie - Zenoss integration files including marid and Zenoss scripts',
+            fileMapping, [:])
+
+    buildDeb('zenoss', 'opsgenie-zenoss', 'OpsGenie - Zenoss integration files including marid and Zenoss scripts',
+            fileMapping, [:])
+
+}
+
+task packageZenoss(dependsOn: ['packageZenossZip', 'packageZenossOS'])

@@ -1,0 +1,45 @@
+task prepareNagiosXI(dependsOn: 'generateIntegration') << {
+    def destination = "${project.buildDir}/nagiosxi"
+    copy {
+        from "${project.buildDir}/opsgenie-integration"
+        into "${destination}/opsgenie-integration"
+    }
+
+    copy {
+        from "${project.projectDir}/nagiosxi/marid"
+        into "${destination}/opsgenie-integration/marid"
+    }
+
+    copy {
+        from "${project.projectDir}/nagiosxi/nagiosxi"
+        into "${destination}/nagiosxi"
+    }
+
+    mergeConfFile("${project.buildDir}/opsgenie-integration/conf/opsgenie-integration.conf", "${projectDir}/nagiosxi/common/opsgenie-integration.conf.part",
+            "${destination}/opsgenie-integration/conf/opsgenie-integration.conf")
+}
+
+task packageNagiosXIZip(dependsOn: 'prepareNagiosXI', type: Zip) {
+    from "${project.buildDir}/nagiosxi"
+    baseName = 'opsgenie-nagiosxi'
+}
+
+task packageNagiosXIOS(dependsOn: ['generateIntegrationForNative', 'prepareNagiosXI']) << {
+    copyNativeFiles('nagiosxi')
+    mergeConfFile("${project.buildDir}/native/ogAfter.sh",
+            "${project.projectDir}/nagiosxi/native/ogAfter.sh",
+            "${project.buildDir}/nagiosxi/native/ogAfter.sh")
+
+    def fileMapping = [
+            "${project.projectDir}/nagiosxi/nagiosxi/nagios2opsgenie"   : "usr/bin",
+            "${project.projectDir}/nagiosxi/nagiosxi/nagios2opsgenie.go": "etc/opsgenie"
+    ]
+
+    buildRpm('nagiosxi', 'opsgenie-nagiosxi', 'OpsGenie - Nagios XI integrations files including marid and Nagios scripts',
+            fileMapping, [:])
+
+    buildDeb('nagiosxi', 'opsgenie-nagiosxi', 'OpsGenie - Nagios XI integrations files including marid and Nagios scripts',
+            fileMapping, [:])
+}
+
+task packageNagiosXI(dependsOn: ['packageNagiosXIZip', 'packageNagiosXIOS'])
