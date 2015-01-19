@@ -1,0 +1,11 @@
+.gradle
+build/
+
+# Ignore Gradle GUI config
+gradle-app.setting
+.idea
+*.iml
+.classpath
+.project
+.settings
+Test.properties
