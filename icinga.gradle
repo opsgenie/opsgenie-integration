@@ -23,6 +23,7 @@ task prepareIcinga(dependsOn: 'generateIntegration') << {
 task packageIcingaZip(dependsOn: 'prepareIcinga', type: Zip) {
     from "${project.buildDir}/icinga"
     baseName = 'opsgenie-icinga'
+    version = project.ext.versions.getProperty('icinga') + project.ext.versionSuffix
 }
 
 task packageIcingaOS(dependsOn: ['generateIntegrationForNative', 'prepareIcinga']) << {

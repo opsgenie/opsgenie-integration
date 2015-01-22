@@ -1,5 +1,14 @@
 group = "com.ifountain.opsgenie-integration"
-version = "2.0.0-SNAPSHOT"
+
+project.ext.versions = new Properties();
+project.ext.versions.load(new FileInputStream("${projectDir}/version.properties"))
+if(gradle.startParameter.taskNames.contains('removeSnapshot')) {
+    project.ext.versionSuffix = ''
+} else {
+    project.ext.versionSuffix = '-SNAPSHOT'
+}
+
+version = project.ext.versions.getProperty('client') + project.ext.versionSuffix
 
 buildscript {
     repositories {
@@ -14,9 +23,10 @@ buildscript {
 subprojects  {
     apply plugin: 'java'
     apply plugin: 'groovy'
+    apply plugin: 'maven'
 
     group = "com.ifountain.opsgenie-integration"
-    version = "2.0.0-SNAPSHOT"
+    version = rootProject.version
 
     repositories {
         mavenCentral()
@@ -91,10 +101,12 @@ def copyNativeFiles(String sourceDir) {
 def buildRpm(String sourceDir, String name, String descrpt, Map fileMapping, Map configFiles) {
     def taskName = "generateRpm${sourceDir}"
     task "${taskName}"(type: Rpm) {
+
+        def packageVersion = project.ext.versions.getProperty(sourceDir) + project.ext.versionSuffix
+
         packageName = name
         description = descrpt
-        version = project.version.toString().replace("-", ".");
-        release project.version.toString().replace('-', '.')
+        version = packageVersion.replace("-", ".");
         os = LINUX
         user = 'root'
 
@@ -149,6 +161,10 @@ def buildRpm(String sourceDir, String name, String descrpt, Map fileMapping, Map
 }
 
 def buildDeb(String sourceDir, String name, String descrpt, Map fileMapping, Map configFiles) {
+
+    def packageVersion = project.ext.versions.getProperty(sourceDir) + project.ext.versionSuffix
+    packageVersion = packageVersion.replace("-", ".")
+
     def taskName = "prepareDeb${sourceDir}"
     def dataDir = "${project.buildDir}/${sourceDir}/debian/data"
     def controlDir = "${project.buildDir}/${sourceDir}/debian/control"
@@ -210,7 +226,7 @@ def buildDeb(String sourceDir, String name, String descrpt, Map fileMapping, Map
             from "${project.buildDir}/${sourceDir}/native/control_deb"
             filter {
                 it.replace('[description]', descrpt)
-                        .replace('[version]', project.version.toString().replace("-", "."))
+                        .replace('[release]', packageVersion)
                         .replace('[package-name]', "${name}")
             }
             into controlDir
@@ -235,7 +251,7 @@ def buildDeb(String sourceDir, String name, String descrpt, Map fileMapping, Map
         ant {
             taskdef(name: 'deb', classname: 'org.vafer.jdeb.ant.DebAntTask', classpath: configurations.debian.asPath)
         }
-        ant.deb(destfile: "${project.buildDir}/distributions/${name}_${version}_all.deb", control: controlDir) {
+        ant.deb(destfile: "${project.buildDir}/distributions/${name}_${packageVersion}_all.deb", control: controlDir) {
             ant.data(src: dataDir, type: 'directory', dst: '/')
         }
     }
@@ -246,6 +262,8 @@ def buildDeb(String sourceDir, String name, String descrpt, Map fileMapping, Map
 task wrapper(type: Wrapper) {
     gradleVersion = '2.2'
 }
+
+apply from: 'release.gradle'
 
 //apply scripts
 apply from: 'smarts.gradle'
@@ -259,21 +277,14 @@ apply from: 'redmine.gradle'
 apply from: 'zenoss.gradle'
 apply from: 'icinga.gradle'
 
-task packageAllOS(dependsOn: ['packageNagiosOS',
-                              'packageNagiosXIOS',
-                              'packageZabbixOS',
-                              'packageZenossOS',
-                              'packageIcingaOS'])
-
-task packageAllZip(dependsOn: ['packageSmartsZip',
-                               'packageSplunkZip',
-                               'packageOpenNMSZip',
-                               'packageNagiosZip',
-                               'packageNagiosXIZip',
-                               'packageNetcoolZip',
-                               'packageZabbixZip',
-                               'packageRedmineZip',
-                               'packageZenossZip',
-                               'packageIcingaZip'
+task packageAll(dependsOn: ['packageSmarts',
+                               'packageSplunk',
+                               'packageOpennms',
+                               'packageNagios',
+                               'packageNagiosxi',
+                               'packageNetcool',
+                               'packageZabbix',
+                               'packageRedmine',
+                               'packageZenoss',
+                               'packageIcinga'
 ])
-task packageAll(dependsOn: ['packageAllOS' , 'packageAllZip'])

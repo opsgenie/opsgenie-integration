@@ -16,9 +16,10 @@ task prepareOpenNMS(dependsOn: 'generateIntegration') << {
     }
 }
 
-task packageOpenNMSZip(dependsOn: 'prepareOpenNMS', type: Zip) {
+task packageOpennmsZip(dependsOn: 'prepareOpenNMS', type: Zip) {
     from "${project.buildDir}/opennms"
     baseName = 'opsgenie-opennms'
+    version = project.ext.versions.getProperty('opennms') + project.ext.versionSuffix
 }
 
-task packageOpenNMS(dependsOn: 'packageOpenNMSZip')
+task packageOpennms(dependsOn: 'packageOpennmsZip')

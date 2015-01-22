@@ -52,6 +52,7 @@ task prepareSmarts(dependsOn: 'generateIntegration') {
 task packageSmartsZip(dependsOn: 'prepareSmarts', type: Zip) {
     from "${project.buildDir}/smarts"
     baseName = 'opsgenie-smarts'
+    version = project.ext.versions.getProperty('redmine') + project.ext.versionSuffix
 }
 
 task packageSmarts(dependsOn: ['packageSmartsZip']) {

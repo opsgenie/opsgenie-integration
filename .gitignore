@@ -9,3 +9,5 @@ gradle-app.setting
 .project
 .settings
 Test.properties
+uploadOptions.properties
+version.old.properties

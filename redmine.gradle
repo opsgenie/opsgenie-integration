@@ -18,6 +18,7 @@ task prepareRedmine(dependsOn: 'generateIntegration') << {
 task packageRedmineZip(dependsOn: 'prepareRedmine', type: Zip) {
     from "${project.buildDir}/redmine"
     baseName = 'opsgenie-redmine'
+    version = project.ext.versions.getProperty('redmine') + project.ext.versionSuffix
 }
 
 task packageRedmineOS(dependsOn: ['generateIntegrationForNative', 'prepareRedmine']) << {

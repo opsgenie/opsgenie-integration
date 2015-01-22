@@ -23,6 +23,7 @@ task prepareNagios(dependsOn: 'generateIntegration') << {
 task packageNagiosZip(dependsOn: 'prepareNagios', type: Zip) {
     from "${project.buildDir}/nagios"
     baseName = 'opsgenie-nagios'
+    version = project.ext.versions.getProperty('nagios') + project.ext.versionSuffix
 }
 
 task packageNagiosOS(dependsOn: ['generateIntegrationForNative', 'prepareNagios']) << {

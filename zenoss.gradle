@@ -23,6 +23,7 @@ task prepareZenoss(dependsOn: 'generateIntegration') << {
 task packageZenossZip(dependsOn: 'prepareZenoss', type: Zip) {
     from "${project.buildDir}/zenoss"
     baseName = 'opsgenie-zenoss'
+    version = project.ext.versions.getProperty('zenoss') + project.ext.versionSuffix
 }
 
 

@@ -23,6 +23,7 @@ task prepareZabbix(dependsOn: 'generateIntegration') << {
 task packageZabbixZip(dependsOn: 'prepareZabbix', type: Zip) {
     from "${project.buildDir}/zabbix"
     baseName = 'opsgenie-zabbix'
+    version = project.ext.versions.getProperty('zabbix') + project.ext.versionSuffix
 }
 
 task packageZabbixOS(dependsOn: ['generateIntegrationForNative', 'prepareZabbix']) << {

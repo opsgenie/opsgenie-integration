@@ -19,12 +19,13 @@ task prepareNagiosXI(dependsOn: 'generateIntegration') << {
             "${destination}/opsgenie-integration/conf/opsgenie-integration.conf")
 }
 
-task packageNagiosXIZip(dependsOn: 'prepareNagiosXI', type: Zip) {
+task packageNagiosxiZip(dependsOn: 'prepareNagiosXI', type: Zip) {
     from "${project.buildDir}/nagiosxi"
     baseName = 'opsgenie-nagiosxi'
+    version = project.ext.versions.getProperty('nagiosxi') + project.ext.versionSuffix
 }
 
-task packageNagiosXIOS(dependsOn: ['generateIntegrationForNative', 'prepareNagiosXI']) << {
+task packageNagiosxiOS(dependsOn: ['generateIntegrationForNative', 'prepareNagiosXI']) << {
     copyNativeFiles('nagiosxi')
     mergeConfFile("${project.buildDir}/native/ogAfter.sh",
             "${project.projectDir}/nagiosxi/native/ogAfter.sh",
@@ -42,4 +43,4 @@ task packageNagiosXIOS(dependsOn: ['generateIntegrationForNative', 'prepareNagio
             fileMapping, [:])
 }
 
-task packageNagiosXI(dependsOn: ['packageNagiosXIZip', 'packageNagiosXIOS'])
+task packageNagiosxi(dependsOn: ['packageNagiosxiZip', 'packageNagiosxiOS'])

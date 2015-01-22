@@ -24,6 +24,7 @@ task prepareNetcool(dependsOn: 'generateIntegration') << {
 task packageNetcoolZip(dependsOn: 'prepareNetcool', type: Zip) {
     from "${project.buildDir}/netcool"
     baseName = 'opsgenie-netcool'
+    version = project.ext.versions.getProperty('netcool') + project.ext.versionSuffix
 }
 
 task packageNetcool(dependsOn: ['packageNetcoolZip'])

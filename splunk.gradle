@@ -24,6 +24,7 @@ task prepareSplunk(dependsOn: 'generateIntegration') << {
 task packageSplunkZip(dependsOn: 'prepareSplunk', type: Zip) {
     from "${project.buildDir}/splunk"
     baseName = 'opsgenie-splunk'
+    version = project.ext.versions.getProperty('splunk') + project.ext.versionSuffix
 }
 
 task packageSplunk(dependsOn: 'packageSplunkZip')
