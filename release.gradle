@@ -72,6 +72,7 @@ task removeSnapshot << {
 }
 
 task release() << {
+
     def tasksToExecute = ['removeSnapshot', 'clean']
     if(!project.hasProperty('args')) {
         throw new IllegalArgumentException("Please give integrations as args to release! E.g. gradle release -Pargs=nagios,redmine")
@@ -81,14 +82,17 @@ task release() << {
 
     if(args.contains('all') || args.contains('client')) {
         tasksToExecute << 'packageAll'
+        tasksToExecute << 'uploadJavaDocToS3'
+        tasksToExecute << 'uploadSdkJarToS3'
+        tasksToExecute << 'uploadClientPackagesToS3'
+        tasksToExecute << 'uploadIntegrationsToS3'
     } else {
         for(String integration : args) {
             String taskName = "package${Character.toUpperCase(integration.charAt(0))}${integration.substring(1)}"
             tasksToExecute << taskName
+            tasksToExecute << 'uploadIntegrationsToS3'
         }
     }
-    tasksToExecute << 'uploadS3'
-    tasksToExecute << 'sdk:uploadArchives'
     project.ext.suffixVersion = ''
     task doRelease(type: org.gradle.api.tasks.GradleBuild) {
         tasks = tasksToExecute
