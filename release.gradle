@@ -39,7 +39,7 @@ def increaseVersion(String type) {
         rename 'release.properties', 'release.old.properties'
     }
     println "${type} versions icreased for ${args}"
-    versions.store(new FileOutputStream("${projectDir}/release.properties"), "")
+    versions.store(new FileOutputStream("${projectDir}/version.properties"), "")
 }
 
 def increseAll(String type) {
@@ -51,12 +51,12 @@ def increseAll(String type) {
         versions.setProperty(integration, newVersion)
     }
     copy {
-        from "${projectDir}/release.properties"
+        from "${projectDir}/version.properties"
         into "${projectDir}"
-        rename 'release.properties', 'release.old.properties'
+        rename 'release.properties', 'version.old.properties'
     }
     println "All ${type} versions icreased!"
-    versions.store(new FileOutputStream("${projectDir}/release.properties"), "")
+    versions.store(new FileOutputStream("${projectDir}/version.properties"), "")
 }
 
 task newMinor << {
