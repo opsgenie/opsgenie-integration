@@ -21,7 +21,7 @@ def getUploadOptions() {
     return properties
 }
 
-task uploadS3(dependsOn: ['jar', 'packageAll', 'sdk:javadoc']) << {
+task uploadS3(dependsOn: ['jar', 'packageAll', 'sdk:javadoc', 'sdk:shadowJar']) << {
 
     def props = getUploadOptions()
 
@@ -79,7 +79,7 @@ task uploadS3(dependsOn: ['jar', 'packageAll', 'sdk:javadoc']) << {
     integrations.include '*.deb'
     integrations.include '*.rpm'
     println '[Package] Started to upload integration packages'
-    sdkJars.each { File file ->
+    integrations.each { File file ->
         logger.info("Uploading " + file.getAbsolutePath())
         PutObjectRequest request = new PutObjectRequest(downloadsBucket, "client/${file.getName()}", file)
         request.setCannedAcl(CannedAccessControlList.PublicRead)

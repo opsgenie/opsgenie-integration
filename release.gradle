@@ -87,7 +87,8 @@ task release() << {
             tasksToExecute << taskName
         }
     }
-    tasksToExecute << 'uploadS3'
+//    tasksToExecute << 'uploadS3'
+    tasksToExecute << 'sdk:uploadArchives'
     project.ext.suffixVersion = ''
     task doRelease(type: org.gradle.api.tasks.GradleBuild) {
         tasks = tasksToExecute
