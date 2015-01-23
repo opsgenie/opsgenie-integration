@@ -92,8 +92,8 @@ task release() << {
         for(String integration : args) {
             String taskName = "package${Character.toUpperCase(integration.charAt(0))}${integration.substring(1)}"
             tasksToExecute << taskName
-            tasksToExecute << 'uploadIntegrationsToS3'
         }
+        tasksToExecute << 'uploadIntegrationsToS3'
     }
     project.ext.suffixVersion = ''
     task doRelease(type: org.gradle.api.tasks.GradleBuild) {
