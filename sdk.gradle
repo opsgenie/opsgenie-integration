@@ -1,0 +1,23 @@
+
+task generateSdk(dependsOn: ['sdk:jar', 'sdk:shadowJar', 'sdk:javadoc']) << {
+    def destination = "${project.buildDir}/sdk"
+    copy {
+        from "${project(':sdk').buildDir}/libs"
+        into destination
+    }
+
+    copy {
+        from project(':sdk').configurations.runtime
+        into "${destination}/third_party"
+    }
+
+    copy {
+        from "${project(':sdk').buildDir}/docs/javadoc"
+        into "${destination}/javadoc"
+    }
+}
+
+task packageSdk(dependsOn: ['generateSdk'], type: Zip) {
+    from "${project.buildDir}/sdk"
+    baseName = 'opsgenie-java-sdk'
+}
