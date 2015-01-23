@@ -87,6 +87,7 @@ task release() << {
 //        tasksToExecute << 'uploadSdkJarToS3'
         tasksToExecute << 'uploadClientPackagesToS3'
         tasksToExecute << 'uploadIntegrationsToS3'
+        tasksToExecute << 'uploadArchives'
     } else {
         for(String integration : args) {
             String taskName = "package${Character.toUpperCase(integration.charAt(0))}${integration.substring(1)}"
