@@ -82,6 +82,7 @@ task release() << {
 
     if(args.contains('all') || args.contains('client')) {
         tasksToExecute << 'packageAll'
+        tasksToExecute << 'packageSdk'
         tasksToExecute << 'uploadJavaDocToS3'
 //        tasksToExecute << 'uploadSdkJarToS3'
         tasksToExecute << 'uploadClientPackagesToS3'
