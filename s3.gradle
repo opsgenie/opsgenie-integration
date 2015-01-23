@@ -106,7 +106,7 @@ task uploadClientPackagesToS3(dependsOn: ['createDownloadBucketIfNonExist','pack
     def downloadsBucket = props.getProperty('amazonDownloadsBucket')
 
     println '[Package] Started to upload packages'
-    FileTree packages = fileTree(dir: "${project(':sdk')}/distributions")
+    FileTree packages = fileTree(dir: "${project(':package').buildDir}/distributions")
     packages.include '*.zip'
     packages.include '*.deb'
     packages.include '*.rpm'
