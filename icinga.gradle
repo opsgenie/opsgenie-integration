@@ -30,7 +30,7 @@ task packageIcingaOS(dependsOn: ['generateIntegrationForNative', 'prepareIcinga'
     copyNativeFiles('icinga')
 
     def fileMapping = [
-            "${project.projectDir}/icinga/icinga/icinga2opsgenie":"usr/local/bin",
+            "${project.projectDir}/icinga/icinga/icinga2opsgenie":"usr/bin",
             "${project.projectDir}/icinga/icinga/opsgenie.cfg":"etc/opsgenie",
             "${project.projectDir}/icinga/icinga/icinga2opsgenie.go":"etc/opsgenie",
     ]
