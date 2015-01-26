@@ -116,7 +116,7 @@ task release() << {
         tasksToExecute << 'uploadIntegrationsToS3'
     }
 
-    tasksToExecute << 'generadeDownloadsProperties'
+    tasksToExecute << 'generateDownloadsProperties'
     tasksToExecute << 'uploadDownloadsPropertiesToS3'
 
     project.ext.suffixVersion = ''
