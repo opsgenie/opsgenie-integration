@@ -72,8 +72,15 @@ task removeSnapshot << {
 }
 
 task generateDownloadsProperties << {
+    def downloadsFile
+    if(project.hasProperty("downloads")) {
+        downloadsFile = project.downloads
+    } else {
+        downloadsFile = "${project.projectDir}/downloads.template.properties"
+    }
+
     copy {
-        from "${project.projectDir}/downloads_template.properties"
+        from downloadsFile
         filter {
             it.replace('[[client]]', project.ext.versions.getProperty('client'))
                     .replace('[[splunk]]', project.ext.versions.getProperty('splunk'))
@@ -88,7 +95,7 @@ task generateDownloadsProperties << {
                     .replace('[[zenoss]]', project.ext.versions.getProperty('zenoss'))
         }
         into "${buildDir}/distributions"
-        rename "downloads_template.properties", "downloads.properties"
+        rename "downloads.template.properties", "downloads.properties"
     }
 }
 

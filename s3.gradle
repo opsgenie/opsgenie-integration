@@ -16,8 +16,14 @@ import com.amazonaws.services.s3.AmazonS3Client
 import com.amazonaws.services.s3.model.*
 
 def getUploadOptions() {
+    def options
+    if(project.hasProperty('options')) {
+        options = project.options;
+    } else {
+        options = "${projectDir}/uploadOptions.properties";
+    }
     Properties properties = new Properties();
-    properties.load(new FileInputStream("${projectDir}/uploadOptions.properties"))
+    properties.load(new FileInputStream(options))
     return properties
 }
 

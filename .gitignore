@@ -11,3 +11,4 @@ gradle-app.setting
 Test.properties
 uploadOptions.properties
 version.old.properties
+downloads.template.properties
