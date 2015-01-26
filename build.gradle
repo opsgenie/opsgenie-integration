@@ -106,7 +106,6 @@ def buildRpm(String sourceDir, String name, String descrpt, Map fileMapping, Map
         packageName = name
         description = descrpt
         version = packageVersion.replace("-", ".");
-        release = 2
         os = LINUX
         user = 'root'
 
