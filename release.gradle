@@ -53,7 +53,7 @@ def increseAll(String type) {
     copy {
         from "${projectDir}/version.properties"
         into "${projectDir}"
-        rename 'release.properties', 'version.old.properties'
+        rename 'version.properties', 'version.old.properties'
     }
     println "All ${type} versions icreased!"
     versions.store(new FileOutputStream("${projectDir}/version.properties"), "")
@@ -84,7 +84,6 @@ task release() << {
         tasksToExecute << 'packageAll'
         tasksToExecute << 'packageSdk'
         tasksToExecute << 'uploadJavaDocToS3'
-//        tasksToExecute << 'uploadSdkJarToS3'
         tasksToExecute << 'uploadClientPackagesToS3'
         tasksToExecute << 'uploadIntegrationsToS3'
         tasksToExecute << 'uploadArchives'

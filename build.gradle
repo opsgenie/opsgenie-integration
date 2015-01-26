@@ -106,6 +106,7 @@ def buildRpm(String sourceDir, String name, String descrpt, Map fileMapping, Map
         packageName = name
         description = descrpt
         version = packageVersion.replace("-", ".");
+        release = 2
         os = LINUX
         user = 'root'
 
@@ -225,7 +226,7 @@ def buildDeb(String sourceDir, String name, String descrpt, Map fileMapping, Map
             from "${project.buildDir}/${sourceDir}/native/control_deb"
             filter {
                 it.replace('[description]', descrpt)
-                        .replace('[release]', packageVersion)
+                        .replace('[version]', packageVersion)
                         .replace('[package-name]', "${name}")
             }
             into controlDir
