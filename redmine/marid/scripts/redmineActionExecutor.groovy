@@ -1,6 +1,7 @@
 import com.ifountain.opsgenie.client.http.OpsGenieHttpClient
 import com.ifountain.opsgenie.client.util.ClientConfiguration
 import com.ifountain.opsgenie.client.util.JsonUtils
+import org.apache.commons.lang.StringUtils
 import org.apache.http.entity.StringEntity
 
 LOG_PREFIX = "[${action}]:";
@@ -44,6 +45,9 @@ try{
             if (response.getStatusCode() < 299) {
                 logger.info("${LOG_PREFIX} Successfully executed at Redmine.");
                 logger.debug("${LOG_PREFIX} Redmine response: ${response.statusCode} ${response.getContentAsString()}")
+
+                String issueId = getIssueIdFromRedmine(customFieldId)
+                opsgenie.addNote([alertId:alertFromOpsgenie.alertId, note:"Redmine Issue Id : ${issueId}"]);
             } else {
                 logger.warn("${LOG_PREFIX} Could not execute at Redmine; response: ${response.statusCode} ${response.getContentAsString()}")
             }
@@ -65,7 +69,11 @@ try{
             if(customFieldId) {
                 String issueId = getIssueIdFromRedmine(customFieldId)
                 if(issueId) {
-                    addNoteToRedmineIssue(issueId, alert.note + " by " + alert.username)
+                    if(alert.note.startsWith("spent-time")) {
+                        createTimeEntryInRedmine(issueId)
+                    } else{
+                        addNoteToRedmineIssue(issueId, alert.note + " by " + alert.username)
+                    }
                 }
             }
         } else if (action == "Close") {
@@ -128,19 +136,6 @@ void updateIssueStatusInRedmine(String issueId, def statusId){
     doPutRequestToRedmine(url, contentParams, requestParameters)
 }
 
-void doPutRequestToRedmine(String url, Map contentParams, Map requestParameters){
-    def put = ((OpsGenieHttpClient) HTTP_CLIENT).preparePutMethod(url, contentParams, requestParameters)
-    ((StringEntity) put.getEntity()).setChunked(false)
-    put.setHeader("Content-Type", "application/json")
-    response = ((OpsGenieHttpClient) HTTP_CLIENT).executeHttpMethod(put)
-    if (response.getStatusCode() < 299) {
-        logger.info("${LOG_PREFIX} Successfully executed at Redmine.");
-        logger.debug("${LOG_PREFIX} Redmine response: ${response.statusCode} ${response.getContentAsString()}")
-    } else {
-        logger.warn("${LOG_PREFIX} Could not execute at Redmine; response: ${response.statusCode} ${response.getContentAsString()}")
-    }
-}
-
 void addNoteToRedmineIssue(String issueId, String note){
     String url = _conf("url", true) + "/issues/${issueId}.json"
     requestParameters = [:]
@@ -151,6 +146,43 @@ void addNoteToRedmineIssue(String issueId, String note){
     contentParams.put("issue", issueMap)
 
     doPutRequestToRedmine(url, contentParams, requestParameters)
+}
+
+void createTimeEntryInRedmine(String issueId){
+    def hoursSpent = StringUtils.substringAfter(alert.note, ":")
+    String url = _conf("url", true) + "/time_entries.json"
+    requestParameters = [:]
+    requestParameters.key = _conf("apiKey", true)
+    def contentParams = [:]
+    def timeEntryMap = [:]
+    timeEntryMap.issue_id = issueId
+    timeEntryMap.hours = hoursSpent
+    timeEntryMap.comments = "Time entry created by ${alert.username}".toString()
+    contentParams.put("time_entry", timeEntryMap)
+
+    doPostRequestToRedmine(url, contentParams, requestParameters)
+}
+
+void doPutRequestToRedmine(String url, Map contentParams, Map requestParameters){
+    def put = ((OpsGenieHttpClient) HTTP_CLIENT).preparePutMethod(url, contentParams, requestParameters)
+    sendHttpRequestToRedmine(put)
+}
+
+void doPostRequestToRedmine(String url, Map contentParams, Map requestParameters){
+    def post = ((OpsGenieHttpClient) HTTP_CLIENT).preparePostMethod(url, JsonUtils.toJson(contentParams), [:], requestParameters)
+    sendHttpRequestToRedmine(post)
+}
+
+void sendHttpRequestToRedmine(def httpMethod){
+    ((StringEntity) httpMethod.getEntity()).setChunked(false)
+    httpMethod.setHeader("Content-Type", "application/json")
+    response = ((OpsGenieHttpClient) HTTP_CLIENT).executeHttpMethod(httpMethod)
+    if (response.getStatusCode() < 299) {
+        logger.info("${LOG_PREFIX} Successfully executed at Redmine.");
+        logger.debug("${LOG_PREFIX} Redmine response: ${response.statusCode} ${response.getContentAsString()}")
+    } else {
+        logger.warn("${LOG_PREFIX} Could not execute at Redmine; response: ${response.statusCode} ${response.getContentAsString()}")
+    }
 }
 
 def createHttpClient() {
