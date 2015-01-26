@@ -131,8 +131,20 @@ task uploadIntegrationsToS3(dependsOn: 'createDownloadBucketIfNonExist') << {
     println '[Package] Started to upload integration packages'
     integrations.each { File file ->
         logger.info("Uploading " + file.getAbsolutePath())
-        PutObjectRequest request = new PutObjectRequest(downloadsBucket, "client/${file.getName()}", file)
+        PutObjectRequest request = new PutObjectRequest(downloadsBucket, "integration/${file.getName()}", file)
         request.setCannedAcl(CannedAccessControlList.PublicRead)
         client.putObject(request)
     }
+}
+
+task uploadDownloadsPropertiesToS3(dependsOn: 'generateDownloadsProperties') << {
+    def client = getAWSClient()
+    def props = getUploadOptions()
+    def downloadsBucket = props.getProperty('amazonDownloadsBucket')
+
+    def file = file("${buildDir}/distributions/downloads.properties")
+    logger.info("Uploading " + file.getAbsolutePath())
+    PutObjectRequest request = new PutObjectRequest(downloadsBucket, "${file.getName()}", file)
+    request.setCannedAcl(CannedAccessControlList.PublicRead)
+    client.putObject(request)
 }

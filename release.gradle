@@ -71,6 +71,27 @@ task removeSnapshot << {
 
 }
 
+task generateDownloadsProperties << {
+    copy {
+        from "${project.projectDir}/downloads_template.properties"
+        filter {
+            it.replace('[[client]]', project.ext.versions.getProperty('client'))
+                    .replace('[[splunk]]', project.ext.versions.getProperty('splunk'))
+                    .replace('[[smarts]]', project.ext.versions.getProperty('smarts'))
+                    .replace('[[opennms]]', project.ext.versions.getProperty('opennms'))
+                    .replace('[[nagios]]', project.ext.versions.getProperty('nagios'))
+                    .replace('[[nagiosxi]]', project.ext.versions.getProperty('nagiosxi'))
+                    .replace('[[icinga]]', project.ext.versions.getProperty('icinga'))
+                    .replace('[[redmine]]', project.ext.versions.getProperty('redmine'))
+                    .replace('[[netcool]]', project.ext.versions.getProperty('netcool'))
+                    .replace('[[zabbix]]', project.ext.versions.getProperty('zabbix'))
+                    .replace('[[zenoss]]', project.ext.versions.getProperty('zenoss'))
+        }
+        into "${buildDir}/distributions"
+        rename "downloads_template.properties", "downloads.properties"
+    }
+}
+
 task release() << {
 
     def tasksToExecute = ['removeSnapshot', 'clean']
@@ -94,6 +115,10 @@ task release() << {
         }
         tasksToExecute << 'uploadIntegrationsToS3'
     }
+
+    tasksToExecute << 'generadeDownloadsProperties'
+    tasksToExecute << 'uploadDownloadsPropertiesToS3'
+
     project.ext.suffixVersion = ''
     task doRelease(type: org.gradle.api.tasks.GradleBuild) {
         tasks = tasksToExecute
