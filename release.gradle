@@ -274,6 +274,7 @@ def generateReleaseTasks() {
     if(isReleaseForAll()) {
         tasks << 'packageAll'
         tasks << 'packageSdk'
+        tasks << 'uploadArchives'
     } else {
         for(String integration : args) {
             String taskName = "package${Character.toUpperCase(integration.charAt(0))}${integration.substring(1)}"
@@ -285,17 +286,16 @@ def generateReleaseTasks() {
 
 task release(type: GradleBuild ) {
     doFirst{
-        generateDownloadsProperties()
         tasks = generateReleaseTasks();
     }
     doLast{
         createDownloadBucketIfNonExist()
+        generateDownloadsProperties()
         uploadDownloadsPropertiesToS3()
         uploadIntegrationsToS3()
         if(isReleaseForAll()) {
             uploadJavaDocToS3()
             uploadClientPackagesToS3()
-            uploadArchives()
         }
     }
 }
