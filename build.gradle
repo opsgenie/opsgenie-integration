@@ -20,9 +20,6 @@ buildscript {
     }
 }
 
-sourceCompatibility = 1.6
-targetCompatibility = 1.6
-
 subprojects  {
     apply plugin: 'java'
     apply plugin: 'groovy'
@@ -54,6 +51,10 @@ subprojects  {
 
 apply plugin: 'java'
 apply plugin: 'nebula.os-package-base'
+
+sourceCompatibility = 1.6
+targetCompatibility = 1.6
+
 
 repositories {
     mavenCentral()
