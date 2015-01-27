@@ -138,7 +138,7 @@ def buildRpm(String sourceDir, String name, String descrpt, Map fileMapping, Map
 
         for (def source : configFiles.keySet()) {
             def dest = configFiles.get(source)
-            logger.info(source + " - " + dest)
+            logger.info("config " + source + " - " + dest)
             from(source) {
                 fileType CONFIG
                 into(dest)
