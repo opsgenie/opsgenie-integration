@@ -299,7 +299,3 @@ task release(type: GradleBuild ) {
         }
     }
 }
-
-task testX <<{
-    createDownloadBucketIfNonExist()
-}
