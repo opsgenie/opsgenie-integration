@@ -1,3 +1,21 @@
+buildscript {
+    repositories {
+        jcenter()
+    }
+
+    dependencies {
+        classpath 'com.netflix.nebula:gradle-ospackage-plugin:2.0.3'
+    }
+}
+
+plugins {
+    id "nebula.os-package-base" version "2.0.3"
+}
+apply plugin: 'java'
+
+sourceCompatibility = 1.6
+targetCompatibility = 1.6
+
 group = "com.ifountain.opsgenie-integration"
 
 project.ext.versions = new Properties();
@@ -9,16 +27,6 @@ if(gradle.startParameter.taskNames.contains('removeSnapshot')) {
 }
 
 version = project.ext.versions.getProperty('client') + project.ext.versionSuffix
-
-buildscript {
-    repositories {
-        jcenter()
-    }
-
-    dependencies {
-        classpath 'com.netflix.nebula:gradle-ospackage-plugin:2.0.3'
-    }
-}
 
 subprojects  {
     apply plugin: 'java'
@@ -47,14 +55,6 @@ subprojects  {
     }
 
 }
-
-
-apply plugin: 'java'
-apply plugin: 'nebula.os-package-base'
-
-sourceCompatibility = 1.6
-targetCompatibility = 1.6
-
 
 repositories {
     mavenCentral()
@@ -117,30 +117,28 @@ def buildRpm(String sourceDir, String name, String descrpt, Map fileMapping, Map
         user = 'root'
 
         configFiles.put("${project.buildDir}/${sourceDir}/opsgenie-integration/conf/opsgenie-integration.conf", 'etc/opsgenie/conf')
-        configFiles.put("${project.buildDir}/${sourceDir}/opsgenie-integration/lamp/log.properties", 'etc/opsgenie/conf/lamp')
-        configFiles.put("${project.buildDir}/${sourceDir}/opsgenie-integration/marid/log.properties", 'etc/opsgenie/conf/marid')
+        configFiles.put("${project.buildDir}/${sourceDir}/opsgenie-integration/lamp/conf/log.properties", 'etc/opsgenie/conf/lamp')
+        configFiles.put("${project.buildDir}/${sourceDir}/opsgenie-integration/marid/conf/log.properties", 'etc/opsgenie/conf/marid')
 
-        fileMapping.put("${project.buildDir}/${sourceDir}/opsgenie-integration/lamp/conf", 'etc/opsgenie/lamp')
         fileMapping.put("${project.buildDir}/${sourceDir}/opsgenie-integration/lamp/lib", 'var/lib/opsgenie/lamp')
         fileMapping.put("${project.buildDir}/${sourceDir}/opsgenie-integration/lamp/scripts", 'var/opsgenie/lamp/scripts')
         fileMapping.put("${project.buildDir}/${sourceDir}/opsgenie-integration/marid/scripts", 'var/opsgenie/marid/scripts')
-        fileMapping.put("${project.buildDir}/${sourceDir}/opsgenie-integration/marid/conf", 'etc/opsgenie/marid')
+        fileMapping.put("${project.buildDir}/${sourceDir}/opsgenie-integration/marid/conf/.keystore", 'etc/opsgenie/marid')
         fileMapping.put("${project.buildDir}/${sourceDir}/opsgenie-integration/marid/lib", 'var/lib/opsgenie/marid')
-        fileMapping.put("${project.buildDir}/${sourceDir}/opsgenie-integration/conf", 'etc/opsgenie/conf')
-
-        for(def source : fileMapping.keySet()) {
-            def dest = fileMapping.get(source)
-            logger.info(source + " - " + dest)
-            from(source) {
-                into(dest)
-            }
-        }
 
         for (def source : configFiles.keySet()) {
             def dest = configFiles.get(source)
             logger.info("config " + source + " - " + dest)
             from(source) {
                 fileType CONFIG
+                into(dest)
+            }
+        }
+
+        for(def source : fileMapping.keySet()) {
+            def dest = fileMapping.get(source)
+            logger.info(source + " - " + dest)
+            from(source) {
                 into(dest)
             }
         }
