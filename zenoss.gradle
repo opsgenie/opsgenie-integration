@@ -43,4 +43,4 @@ task packageZenossOS(dependsOn: ['generateIntegrationForNative', 'prepareZenoss'
 
 }
 
-task packageZenoss(dependsOn: ['packageZenossZip', 'packageZenossOS'])
+task packageZenoss(dependsOn: ['packageZenossOS'])

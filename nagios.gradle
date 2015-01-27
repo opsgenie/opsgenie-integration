@@ -46,4 +46,4 @@ task packageNagiosOS(dependsOn: ['generateIntegrationForNative', 'prepareNagios'
             fileMapping, configFiles)
 }
 
-task packageNagios(dependsOn: ['packageNagiosZip', 'packageNagiosOS'])
+task packageNagios(dependsOn: ['packageNagiosOS'])

@@ -49,4 +49,4 @@ task packageZabbixOS(dependsOn: ['generateIntegrationForNative', 'prepareZabbix'
             fileMapping, [:])
 }
 
-task packageZabbix(dependsOn: ['packageZabbixZip', 'packageZabbixOS'])
+task packageZabbix(dependsOn: ['packageZabbixOS'])

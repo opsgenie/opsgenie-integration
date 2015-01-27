@@ -43,4 +43,4 @@ task packageNagiosxiOS(dependsOn: ['generateIntegrationForNative', 'prepareNagio
             fileMapping, [:])
 }
 
-task packageNagiosxi(dependsOn: ['packageNagiosxiZip', 'packageNagiosxiOS'])
+task packageNagiosxi(dependsOn: ['packageNagiosxiOS'])
