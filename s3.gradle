@@ -45,7 +45,7 @@ def getAWSClient() {
     return client
 }
 
-task createDownloadBucketIfNonExist << {
+def createDownloadBucketIfNonExist() {
     def client = getAWSClient()
     def props = getUploadOptions()
     def downloadsBucket = props.getProperty('amazonDownloadsBucket')
@@ -57,7 +57,7 @@ task createDownloadBucketIfNonExist << {
     }
 }
 
-task uploadJavaDocToS3(dependsOn: ['sdk:javadoc']) << {
+def uploadJavaDocToS3() {
 
     def client = getAWSClient()
     def props = getUploadOptions()
@@ -65,7 +65,7 @@ task uploadJavaDocToS3(dependsOn: ['sdk:javadoc']) << {
     def javadocBucket = props.getProperty('amazonJavadocBucket')
     def javadocBucketExists = buckets.find {it.getName() == javadocBucket}
 
-    println '[Package] Started to upload JavaDoc'
+    println '[Release] Started to upload JavaDoc'
     if (javadocBucketExists) {
         logger.info("Bucket [" + javadocBucket + "] deleted")
         ObjectListing objects = client.listObjects(new ListObjectsRequest().withBucketName(javadocBucket));
@@ -87,31 +87,15 @@ task uploadJavaDocToS3(dependsOn: ['sdk:javadoc']) << {
         request.setCannedAcl(CannedAccessControlList.PublicRead)
         client.putObject(request)
     }
-    println '[Package] Upload success'
+    println '[Release] Upload success'
 }
 
-task uploadSdkJarToS3(dependsOn: ['createDownloadBucketIfNonExist','sdk:jar', 'sdk:shadowJar']) << {
+def uploadClientPackagesToS3() {
     def client = getAWSClient()
     def props = getUploadOptions()
     def downloadsBucket = props.getProperty('amazonDownloadsBucket')
 
-    FileTree sdkJars = fileTree(dir: "${project(':sdk').buildDir}/libs")
-    sdkJars.include '*.jar'
-    println '[Package] Started to upload sdk jars'
-    sdkJars.each { File file ->
-        logger.info("Uploading " + file.getAbsolutePath())
-        PutObjectRequest request = new PutObjectRequest(downloadsBucket, "client/${file.getName()}", file)
-        request.setCannedAcl(CannedAccessControlList.PublicRead)
-        client.putObject(request)
-    }
-}
-
-task uploadClientPackagesToS3(dependsOn: ['createDownloadBucketIfNonExist','package:packageAll']) << {
-    def client = getAWSClient()
-    def props = getUploadOptions()
-    def downloadsBucket = props.getProperty('amazonDownloadsBucket')
-
-    println '[Package] Started to upload packages'
+    println '[Release] Started to upload packages'
     FileTree packages = fileTree(dir: "${project(':package').buildDir}/distributions")
     packages.include '*.zip'
     packages.include '*.deb'
@@ -125,7 +109,7 @@ task uploadClientPackagesToS3(dependsOn: ['createDownloadBucketIfNonExist','pack
     }
 }
 
-task uploadIntegrationsToS3(dependsOn: 'createDownloadBucketIfNonExist') << {
+def uploadIntegrationsToS3() {
     def client = getAWSClient()
     def props = getUploadOptions()
     def downloadsBucket = props.getProperty('amazonDownloadsBucket')
@@ -134,7 +118,7 @@ task uploadIntegrationsToS3(dependsOn: 'createDownloadBucketIfNonExist') << {
     integrations.include '*.zip'
     integrations.include '*.deb'
     integrations.include '*.rpm'
-    println '[Package] Started to upload integration packages'
+    println '[Release] Started to upload integration packages'
     integrations.each { File file ->
         logger.info("Uploading " + file.getAbsolutePath())
         PutObjectRequest request = new PutObjectRequest(downloadsBucket, "integration/${file.getName()}", file)
@@ -143,14 +127,31 @@ task uploadIntegrationsToS3(dependsOn: 'createDownloadBucketIfNonExist') << {
     }
 }
 
-task uploadDownloadsPropertiesToS3(dependsOn: 'generateDownloadsProperties') << {
+def uploadDownloadsPropertiesToS3() {
     def client = getAWSClient()
     def props = getUploadOptions()
     def downloadsBucket = props.getProperty('amazonDownloadsBucket')
 
     def file = file("${buildDir}/distributions/downloads.properties")
+    println '[Release] Started to upload integration packages'
     logger.info("Uploading " + file.getAbsolutePath())
     PutObjectRequest request = new PutObjectRequest(downloadsBucket, "${file.getName()}", file)
     request.setCannedAcl(CannedAccessControlList.PublicRead)
     client.putObject(request)
 }
+
+//def uploadSdkJarToS3() {
+//    def client = getAWSClient()
+//    def props = getUploadOptions()
+//    def downloadsBucket = props.getProperty('amazonDownloadsBucket')
+//
+//    FileTree sdkJars = fileTree(dir: "${project(':sdk').buildDir}/libs")
+//    sdkJars.include '*.jar'
+//    println '[Package] Started to upload sdk jars'
+//    sdkJars.each { File file ->
+//        logger.info("Uploading " + file.getAbsolutePath())
+//        PutObjectRequest request = new PutObjectRequest(downloadsBucket, "client/${file.getName()}", file)
+//        request.setCannedAcl(CannedAccessControlList.PublicRead)
+//        client.putObject(request)
+//    }
+//}

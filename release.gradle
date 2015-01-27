@@ -71,16 +71,19 @@ task removeSnapshot << {
 
 }
 
-task generateDownloadsProperties << {
+def getDownloadsTemplate() {
     def downloadsFile
     if(project.hasProperty("downloads")) {
         downloadsFile = project.downloads
     } else {
         downloadsFile = "${project.projectDir}/downloads.template.properties"
     }
+    return downloadsFile
+}
 
+def generateDownloadsProperties() {
     copy {
-        from downloadsFile
+        from getDownloadsTemplate()
         filter {
             it.replace('[[client]]', project.ext.versions.getProperty('client'))
                     .replace('[[splunk]]', project.ext.versions.getProperty('splunk'))
@@ -99,37 +102,44 @@ task generateDownloadsProperties << {
     }
 }
 
-task release() << {
+def isReleaseForAll() {
+    def args = project.args.toString().split('\\,')
+    return args.contains('all') || args.contains('client')
+}
 
-    def tasksToExecute = ['removeSnapshot', 'clean']
+def generateReleaseTasks() {
+    def tasks = ['removeSnapshot', 'clean']
     if(!project.hasProperty('args')) {
         throw new IllegalArgumentException("Please give integrations as args to release! E.g. gradle release -Pargs=nagios,redmine")
     }
 
     def args = project.args.toString().split('\\,')
 
-    if(args.contains('all') || args.contains('client')) {
-        tasksToExecute << 'packageAll'
-        tasksToExecute << 'packageSdk'
-        tasksToExecute << 'uploadJavaDocToS3'
-        tasksToExecute << 'uploadClientPackagesToS3'
-        tasksToExecute << 'uploadIntegrationsToS3'
-        tasksToExecute << 'uploadArchives'
+    if(isReleaseForAll()) {
+        tasks << 'packageAll'
+        tasks << 'packageSdk'
     } else {
         for(String integration : args) {
             String taskName = "package${Character.toUpperCase(integration.charAt(0))}${integration.substring(1)}"
-            tasksToExecute << taskName
+            tasks << taskName
         }
-        tasksToExecute << 'uploadIntegrationsToS3'
     }
-
-    tasksToExecute << 'generateDownloadsProperties'
-    tasksToExecute << 'uploadDownloadsPropertiesToS3'
-
-    project.ext.suffixVersion = ''
-    task doRelease(type: org.gradle.api.tasks.GradleBuild) {
-        tasks = tasksToExecute
-    }
-    tasks.doRelease.execute()
+    return tasks
 }
 
+task release(type: GradleBuild ) {
+    doFirst{
+        generateDownloadsProperties()
+        tasks = generateReleaseTasks();
+    }
+    doLast{
+        createDownloadBucketIfNonExist()
+        uploadDownloadsPropertiesToS3()
+        uploadIntegrationsToS3()
+        if(isReleaseForAll()) {
+            uploadJavaDocToS3()
+            uploadClientPackagesToS3()
+            uploadArchives()
+        }
+    }
+}
