@@ -1,5 +1,3 @@
-apply from: 's3.gradle'
-
 def getIncreasedMinor(String version) {
     String[] versions = version.split('\\.')
     int minor = Integer.valueOf(versions[2]) + 1
