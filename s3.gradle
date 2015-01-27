@@ -15,7 +15,7 @@ import com.amazonaws.services.s3.AmazonS3
 import com.amazonaws.services.s3.AmazonS3Client
 import com.amazonaws.services.s3.model.*
 
-def getUploadOptions() {
+public def getUploadOptions() {
     def options
     if(project.hasProperty('options')) {
         options = project.options;
@@ -27,7 +27,7 @@ def getUploadOptions() {
     return properties
 }
 
-def getAWSClient() {
+public def getAWSClient() {
     def props = getUploadOptions()
 
     def amazonAccessKey = props.getProperty('amazonAccessKey')
@@ -45,7 +45,7 @@ def getAWSClient() {
     return client
 }
 
-def createDownloadBucketIfNonExist() {
+public def createDownloadBucketIfNonExist() {
     def client = getAWSClient()
     def props = getUploadOptions()
     def downloadsBucket = props.getProperty('amazonDownloadsBucket')
@@ -57,7 +57,7 @@ def createDownloadBucketIfNonExist() {
     }
 }
 
-def uploadJavaDocToS3() {
+public def uploadJavaDocToS3() {
 
     def client = getAWSClient()
     def props = getUploadOptions()
@@ -90,7 +90,7 @@ def uploadJavaDocToS3() {
     println '[Release] Upload success'
 }
 
-def uploadClientPackagesToS3() {
+public def uploadClientPackagesToS3() {
     def client = getAWSClient()
     def props = getUploadOptions()
     def downloadsBucket = props.getProperty('amazonDownloadsBucket')
@@ -109,7 +109,7 @@ def uploadClientPackagesToS3() {
     }
 }
 
-def uploadIntegrationsToS3() {
+public def uploadIntegrationsToS3() {
     def client = getAWSClient()
     def props = getUploadOptions()
     def downloadsBucket = props.getProperty('amazonDownloadsBucket')
@@ -127,7 +127,7 @@ def uploadIntegrationsToS3() {
     }
 }
 
-def uploadDownloadsPropertiesToS3() {
+public def uploadDownloadsPropertiesToS3() {
     def client = getAWSClient()
     def props = getUploadOptions()
     def downloadsBucket = props.getProperty('amazonDownloadsBucket')
