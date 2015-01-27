@@ -269,6 +269,7 @@ task wrapper(type: Wrapper) {
     gradleVersion = '2.2'
 }
 
+apply from: 's3.gradle'
 apply from: 'release.gradle'
 apply from: 'sdk.gradle'
 
