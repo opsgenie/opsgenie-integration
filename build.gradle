@@ -36,7 +36,7 @@ subprojects  {
     sourceCompatibility = 1.6
     targetCompatibility = 1.6
 
-    group = "com.ifountain.opsgenie-integration"
+    group = "com.opsgenie.integration"
     version = rootProject.version
 
     repositories {
@@ -48,6 +48,20 @@ subprojects  {
 
     test.onlyIf {
         false
+    }
+
+    jar {
+        manifest {
+            attributes("Built-By": "http://www.opsgenie.com",
+                    "Specification-Title": project.name[0].toUpperCase() + project.name[1..-1],
+                    "Specification-Product": project.name,
+                    "Specification-Version": project.version,
+                    "Specification-Vendor": "http://www.opsgenie.com",
+                    "Implementation-Title" : project.name[0].toUpperCase() + project.name[1..-1],
+                    "Implementation-Product": project.name,
+                    "Implementation-Vendor":"http://www.opsgenie.com"
+            )
+        }
     }
 
     dependencies {
