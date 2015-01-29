@@ -16,6 +16,7 @@ import (
 	log "github.com/alexcesaro/log"
 	"fmt"
 	"io/ioutil"
+	"crypto/tls"
 )
 
 var ICINGA_SERVER = "default"
@@ -93,6 +94,7 @@ func getHttpClient (timeout int) *http.Client{
 	seconds := (TOTAL_TIME/12)*2*timeout
 	client := &http.Client{
 		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify : true},
 			Proxy: http.ProxyFromEnvironment,
 			Dial: func(netw, addr string) (net.Conn, error) {
 				conn, err := net.DialTimeout(netw, addr, time.Second * time.Duration(seconds))

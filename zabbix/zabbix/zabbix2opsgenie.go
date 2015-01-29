@@ -16,6 +16,7 @@ import (
 	log "github.com/alexcesaro/log"
 	"fmt"
 	"io/ioutil"
+	"crypto/tls"
 )
 
 var API_KEY = ""
@@ -61,6 +62,8 @@ func readConfigFile(file io.Reader){
 		line = strings.TrimSpace(line)
 		if !strings.HasPrefix(line,"#") && line != "" {
 			l := strings.Split(line,"=")
+			l[0] = strings.TrimSpace(l[0])
+			l[1] = strings.TrimSpace(l[1])
 			configParameters[l[0]] = l[1]
 			if l[0] == "timeout"{
 				TOTAL_TIME,_ = strconv.Atoi(l[1])
@@ -87,6 +90,7 @@ func getHttpClient (timeout int) *http.Client{
 	seconds := (TOTAL_TIME/12)*2*timeout
 	client := &http.Client{
 		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify : true},
 			Proxy: http.ProxyFromEnvironment,
 			Dial: func(netw, addr string) (net.Conn, error) {
 				conn, err := net.DialTimeout(netw, addr, time.Second * time.Duration(seconds))
