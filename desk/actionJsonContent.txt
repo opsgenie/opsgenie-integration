@@ -1,0 +1,20 @@
+{
+ "caseId":"{{case.id}}",
+ "caseSubject":"{{case.subject}}",
+ "caseDescription":"{{case.description}}",
+ "caseLabels":"{{case.labels}}",
+ "caseStatusName":"{{case.status.name}}",
+ "caseGroupName":"{{case.group.name}}",
+ "caseChannel":"{{case.channel}}",
+ "casePriority":"{{case.priority}}",
+ "caseUserId":"{{case.user.id}}",
+ "caseUserName":"{{case.user.name}}",
+ "caseOpenedAt":"{{case.opened_at}}",
+ "caseCreatedAt":"{{case.created_at}}",
+ "caseUpdatedAt":"{{case.updated_at}}",
+ "customerId":"{{customer.id}}",
+ "customerName":"{{customer.name}}",
+ "customerEmail":"{{customer.email}}",
+ "customerPhone":"{{customer.phone}}",
+ "customerCompany":"{{customer.company}}"
+ }
