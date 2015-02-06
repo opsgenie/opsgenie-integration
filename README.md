@@ -26,9 +26,9 @@ The project includes OpsGenie's specific integration packages:
 **Available tasks**
 
 * **packageSdk:** Packages sdk as zip file that includes jars, javadoc and third_party under build/distributions
-* **package<Integration_name>:** Packages the integration specific rpm, deb or zip files.
-* **package<Integration_name>Zip:** Packages the integration's zip archive only if available
-* **package<Integration_name>OS:** Packages the integration's rpm and deb archives only if available
+* **package\<Integration_name\>:** Packages the integration specific rpm, deb or zip files.
+* **package\<Integration_name\>Zip:** Packages the integration's zip archive only if available
+* **package\<Integration_name\>OS:** Packages the integration's rpm and deb archives only if available
 * **packageAll:** Packages all zip, rpm and rpm archives for all integrations.
 
 You can run the tasks:
