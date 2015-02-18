@@ -16,6 +16,7 @@ import (
 	log "github.com/alexcesaro/log"
 	"fmt"
 	"io/ioutil"
+	"crypto/tls"
 )
 
 var API_KEY = ""
@@ -90,6 +91,7 @@ func getHttpClient (tryNumber int) *http.Client{
 	timeout := (TOTAL_TIME/12)*2*tryNumber
 	client := &http.Client{
 		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify : true},
 			Proxy: http.ProxyFromEnvironment,
 			Dial: func(netw, addr string) (net.Conn, error) {
 				conn, err := net.DialTimeout(netw, addr, time.Second * time.Duration(timeout))
