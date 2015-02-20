@@ -1,0 +1,25 @@
+task prepareOpenNMS(dependsOn: 'generateIntegration') << {
+    def destination = "${project.buildDir}/opennms"
+    copy {
+        from "${project.buildDir}/opsgenie-integration"
+        into "${destination}/opsgenie-integration"
+    }
+
+    copy {
+        from "${project.projectDir}/opennms/opennmsShellScripts"
+        into "${destination}/opennmsShellScripts"
+    }
+
+    copy {
+        from "${project.projectDir}/opennms/lamp"
+        into "${destination}/opsgenie-integration/lamp"
+    }
+}
+
+task packageOpennmsZip(dependsOn: 'prepareOpenNMS', type: Zip) {
+    from "${project.buildDir}/opennms"
+    baseName = 'opsgenie-opennms'
+    version = project.ext.versions.getProperty('opennms') + project.ext.versionSuffix
+}
+
+task packageOpennms(dependsOn: 'packageOpennmsZip')

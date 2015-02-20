@@ -1,0 +1,60 @@
+task prepareSmarts(dependsOn: 'generateIntegration') {
+    doLast {
+        def destination = "${project.buildDir}/smarts"
+        copy{
+            from "${project.buildDir}/opsgenie-integration"
+            into "${destination}/opsgenie-integration"
+        }
+
+        copy{
+            from "${project.projectDir}/smarts/marid"
+            into "${destination}/opsgenie-integration/marid"
+        }
+
+        //TEST OVERWRITE
+        copy{
+            from"${project.projectDir}/smarts/common"
+            into "${destination}/opsgenie-integration/marid"
+        }
+
+        copy{
+            from"${project.projectDir}/smarts/lamp"
+            into "${destination}/opsgenie-integration/lamp"
+        }
+
+        copy{
+            from"${project.projectDir}/smarts/common"
+            into "${destination}/opsgenie-integration/lamp"
+        }
+
+        copy{
+            from"${project.projectDir}/smarts/smartsShellScripts"
+            into "${destination}/smartsShellScripts"
+        }
+
+        copy {
+            from configurations.smarts
+            into "${destination}/opsgenie-integration/lamp/lib"
+        }
+
+        copy {
+            from configurations.smarts
+            into "${destination}/opsgenie-integration/marid/lib"
+        }
+
+        mergeConfFile("${project.buildDir}/opsgenie-integration/conf/opsgenie-integration.conf",
+                "${project.projectDir}/smarts/common/conf/opsgenie-integration.conf.part",
+                "${destination}/opsgenie-integration/conf/opsgenie-integration.conf"
+        )
+    }
+}
+
+task packageSmartsZip(dependsOn: 'prepareSmarts', type: Zip) {
+    from "${project.buildDir}/smarts"
+    baseName = 'opsgenie-smarts'
+    version = project.ext.versions.getProperty('smarts') + project.ext.versionSuffix
+}
+
+task packageSmarts(dependsOn: ['packageSmartsZip']) {
+
+}

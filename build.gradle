@@ -1,0 +1,309 @@
+buildscript {
+    repositories {
+        jcenter()
+    }
+
+    dependencies {
+        classpath 'com.netflix.nebula:gradle-ospackage-plugin:2.0.3'
+    }
+}
+
+plugins {
+    id "nebula.os-package-base" version "2.0.3"
+}
+apply plugin: 'java'
+
+sourceCompatibility = 1.6
+targetCompatibility = 1.6
+
+group = "com.ifountain.opsgenie-integration"
+
+project.ext.versions = new Properties();
+project.ext.versions.load(new FileInputStream("${projectDir}/version.properties"))
+if(gradle.startParameter.taskNames.contains('removeSnapshot')) {
+    project.ext.versionSuffix = ''
+} else {
+    project.ext.versionSuffix = '-SNAPSHOT'
+}
+
+version = project.ext.versions.getProperty('client') + project.ext.versionSuffix
+
+subprojects  {
+    apply plugin: 'java'
+    apply plugin: 'groovy'
+    apply plugin: 'maven'
+
+    sourceCompatibility = 1.6
+    targetCompatibility = 1.6
+
+    group = "com.opsgenie.integration"
+    version = rootProject.version
+
+    repositories {
+        mavenCentral()
+        maven {
+            url "http://repo.opsgenie.com:9393/content/groups/public/"
+        }
+    }
+
+    test.onlyIf {
+        false
+    }
+
+    jar {
+        manifest {
+            attributes("Built-By": "http://www.opsgenie.com",
+                    "Specification-Title": project.name[0].toUpperCase() + project.name[1..-1],
+                    "Specification-Product": project.name,
+                    "Specification-Version": project.version,
+                    "Specification-Vendor": "http://www.opsgenie.com",
+                    "Implementation-Title" : project.name[0].toUpperCase() + project.name[1..-1],
+                    "Implementation-Product": project.name,
+                    "Implementation-Vendor":"http://www.opsgenie.com"
+            )
+        }
+    }
+
+    dependencies {
+        compile 'log4j:log4j:1.2.16'
+    }
+
+}
+
+repositories {
+    mavenCentral()
+    maven {
+        url "http://repo.opsgenie.com:9393/content/groups/public/"
+    }
+}
+
+configurations {
+    netcool
+    smarts
+    splunk
+    debian
+}
+
+dependencies {
+    netcool 'com.sybase.jdbc:sybase:5.5.OG'
+    smarts 'com.smarts:net:1.0.OG'
+    smarts 'com.smarts:platform:1.0.OG'
+    smarts 'com.smarts:skclient:1.0.OG'
+    splunk 'org.jfree:jcommon:1.0.17'
+    splunk 'org.jfree:jfreechart:1.0.14'
+    splunk 'org.apache.commons:commons-csv:1.0'
+    debian 'org.vafer:jdeb:1.3'
+}
+
+task generateIntegration(dependsOn: 'package:generateBaseForIntegration') {}
+
+task generateIntegrationForNative(dependsOn: 'generateIntegration') << {
+    copy {
+        from("${project(':common').projectDir}/native")
+        into("${project.buildDir}/native")
+    }
+}
+
+def mergeConfFile(String mainConfFile, String partialConfFilePath, String destinationFilePath){
+    def partialConfFile = new File(partialConfFilePath)
+    String wholeConfFile = new File(mainConfFile).getText() +"\n"+ partialConfFile.getText();
+    def destFile = new File(destinationFilePath)
+    destFile.setText(wholeConfFile);
+}
+
+def copyNativeFiles(String sourceDir) {
+    copy {
+        from("${project.buildDir}/native")
+        into("${project.buildDir}/${sourceDir}/native")
+    }
+}
+
+def buildRpm(String sourceDir, String name, String descrpt, Map fileMapping, Map configFiles) {
+    def taskName = "generateRpm${sourceDir}"
+    task "${taskName}"(type: Rpm) {
+
+        def packageVersion = project.ext.versions.getProperty(sourceDir) + project.ext.versionSuffix
+
+        packageName = name
+        description = descrpt
+        version = packageVersion.replace("-", ".");
+        os = LINUX
+        user = 'root'
+
+        configFiles.put("${project.buildDir}/${sourceDir}/opsgenie-integration/conf/opsgenie-integration.conf", 'etc/opsgenie/conf')
+        configFiles.put("${project.buildDir}/${sourceDir}/opsgenie-integration/lamp/conf/log.properties", 'etc/opsgenie/conf/lamp')
+        configFiles.put("${project.buildDir}/${sourceDir}/opsgenie-integration/marid/conf/log.properties", 'etc/opsgenie/conf/marid')
+
+        fileMapping.put("${project.buildDir}/${sourceDir}/opsgenie-integration/lamp/lib", 'var/lib/opsgenie/lamp')
+        fileMapping.put("${project.buildDir}/${sourceDir}/opsgenie-integration/lamp/scripts", 'var/opsgenie/lamp/scripts')
+        fileMapping.put("${project.buildDir}/${sourceDir}/opsgenie-integration/marid/scripts", 'var/opsgenie/marid/scripts')
+        fileMapping.put("${project.buildDir}/${sourceDir}/opsgenie-integration/marid/conf/.keystore", 'etc/opsgenie/marid')
+        fileMapping.put("${project.buildDir}/${sourceDir}/opsgenie-integration/marid/lib", 'var/lib/opsgenie/marid')
+
+        for (def source : configFiles.keySet()) {
+            def dest = configFiles.get(source)
+            logger.info("config " + source + " - " + dest)
+            from(source) {
+                fileType CONFIG
+                into(dest)
+            }
+        }
+
+        for(def source : fileMapping.keySet()) {
+            def dest = fileMapping.get(source)
+            logger.info(source + " - " + dest)
+            from(source) {
+                into(dest)
+            }
+        }
+
+        from("${project.buildDir}/${sourceDir}/native/lamp_rpm"){
+            into("usr/bin")
+            rename "lamp_rpm", "lamp"
+        }
+
+        from("${project.buildDir}/${sourceDir}/native/profile"){
+            into("etc/opsgenie")
+        }
+
+        from("${project.buildDir}/${sourceDir}/native/marid_rpm"){
+            into("etc/init.d")
+            rename 'marid_rpm', 'marid'
+        }
+
+        preInstall file("${project.buildDir}/${sourceDir}/native/ogBefore.sh")
+        postInstall file("${project.buildDir}/${sourceDir}/native/ogAfter.sh")
+    }
+
+    tasks[taskName].execute()
+}
+
+def buildDeb(String sourceDir, String name, String descrpt, Map fileMapping, Map configFiles) {
+
+    def packageVersion = project.ext.versions.getProperty(sourceDir) + project.ext.versionSuffix
+    packageVersion = packageVersion.replace("-", ".")
+
+    def taskName = "prepareDeb${sourceDir}"
+    def dataDir = "${project.buildDir}/${sourceDir}/debian/data"
+    def controlDir = "${project.buildDir}/${sourceDir}/debian/control"
+    task "${taskName}" << {
+
+        configFiles.put("${project.buildDir}/${sourceDir}/opsgenie-integration/conf/opsgenie-integration.conf", 'etc/opsgenie/conf')
+        configFiles.put("${project.buildDir}/${sourceDir}/opsgenie-integration/lamp/log.properties", 'etc/opsgenie/conf/lamp')
+        configFiles.put("${project.buildDir}/${sourceDir}/opsgenie-integration/marid/log.properties", 'etc/opsgenie/conf/marid')
+
+        fileMapping.put("${project.buildDir}/${sourceDir}/opsgenie-integration/lamp/conf", 'etc/opsgenie/lamp')
+        fileMapping.put("${project.buildDir}/${sourceDir}/opsgenie-integration/lamp/lib", 'var/lib/opsgenie/lamp')
+        fileMapping.put("${project.buildDir}/${sourceDir}/opsgenie-integration/lamp/scripts", 'var/opsgenie/lamp/scripts')
+        fileMapping.put("${project.buildDir}/${sourceDir}/opsgenie-integration/marid/scripts", 'var/opsgenie/marid/scripts')
+        fileMapping.put("${project.buildDir}/${sourceDir}/opsgenie-integration/marid/conf", 'etc/opsgenie/marid')
+        fileMapping.put("${project.buildDir}/${sourceDir}/opsgenie-integration/marid/lib", 'var/lib/opsgenie/marid')
+        fileMapping.put("${project.buildDir}/${sourceDir}/opsgenie-integration/conf", 'etc/opsgenie/conf')
+
+        for(def source : fileMapping.keySet()) {
+            def dest = fileMapping.get(source)
+            logger.info(source + " - " + dest)
+            copy {
+                from(source)
+                into("${dataDir}/${dest}")
+            }
+        }
+
+        //conf files
+        StringBuilder appender = new StringBuilder()
+        for (def source : configFiles.keySet()) {
+            def dest = configFiles.get(source)
+            logger.info(source + " - " + dest)
+            copy {
+                from(source)
+                into("${dataDir}/${dest}")
+            }
+
+            appender.append("/${dest}/${source.tokenize('/')[-1]}\n")
+        }
+
+
+        copy {
+            from("${project.buildDir}/${sourceDir}/native/lamp_rpm")
+            into("${dataDir}/usr/bin")
+            rename "lamp_rpm", "lamp"
+        }
+
+        copy {
+            from("${project.buildDir}/${sourceDir}/native/profile")
+            into("${dataDir}/etc/opsgenie")
+        }
+
+        copy {
+            from("${project.buildDir}/${sourceDir}/native/marid_deb")
+            into("${dataDir}/etc/init.d")
+            rename 'marid_deb', 'marid'
+        }
+
+        copy {
+            from "${project.buildDir}/${sourceDir}/native/control_deb"
+            filter {
+                it.replace('[description]', descrpt)
+                        .replace('[version]', packageVersion)
+                        .replace('[package-name]', "${name}")
+            }
+            into controlDir
+            rename "control_deb", "control"
+        }
+
+        copy {
+            from "${project.buildDir}/${sourceDir}/native/ogBefore.sh"
+            into controlDir
+            rename "ogBefore.sh", "preinst"
+        }
+
+        copy {
+            from "${project.buildDir}/${sourceDir}/native/ogAfter.sh"
+            into controlDir
+            rename "ogAfter.sh", "postinst"
+        }
+
+        def conffiles = new File("${controlDir}/conffiles")
+        conffiles.setText(appender.toString())
+
+        ant {
+            taskdef(name: 'deb', classname: 'org.vafer.jdeb.ant.DebAntTask', classpath: configurations.debian.asPath)
+        }
+        ant.deb(destfile: "${project.buildDir}/distributions/${name}_${packageVersion}_all.deb", control: controlDir) {
+            ant.data(src: dataDir, type: 'directory', dst: '/')
+        }
+    }
+
+    tasks[taskName].execute()
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.2'
+}
+
+apply from: 'release.gradle'
+apply from: 'sdk.gradle'
+
+//apply scripts
+apply from: 'smarts.gradle'
+apply from: 'splunk.gradle'
+apply from: 'opennms.gradle'
+apply from: 'nagios.gradle'
+apply from: 'nagiosxi.gradle'
+apply from: 'netcool.gradle'
+apply from: 'zabbix.gradle'
+apply from: 'redmine.gradle'
+apply from: 'zenoss.gradle'
+apply from: 'icinga.gradle'
+
+task packageAll(dependsOn: ['packageSmarts',
+                               'packageSplunk',
+                               'packageOpennms',
+                               'packageNagios',
+                               'packageNagiosxi',
+                               'packageNetcool',
+                               'packageZabbix',
+                               'packageRedmine',
+                               'packageZenoss',
+                               'packageIcinga'
+])

@@ -3,7 +3,7 @@ if [ ! -d "/tmp/marid" ]; then
 fi
 
 chmod -R 775 /tmp/marid
-chmod 755 /usr/local/bin/nagios2opsgenie
+chmod 755 /usr/bin/nagios2opsgenie
 
 chown -R opsgenie:opsgenie /tmp/marid
 

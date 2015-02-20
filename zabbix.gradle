@@ -1,0 +1,52 @@
+task prepareZabbix(dependsOn: 'generateIntegration') << {
+    def destination = "${project.buildDir}/zabbix"
+    copy {
+        from "${project.buildDir}/opsgenie-integration"
+        into "${destination}/opsgenie-integration"
+    }
+
+    copy {
+        from "${project.projectDir}/zabbix/marid"
+        into "${destination}/opsgenie-integration/marid"
+    }
+
+    copy {
+        from "${project.projectDir}/zabbix/zabbix"
+        into "${destination}/zabbix"
+    }
+
+    mergeConfFile("${project.buildDir}/opsgenie-integration/conf/opsgenie-integration.conf",
+            "${project.projectDir}/zabbix/common/opsgenie-integration.conf.part",
+            "${destination}/opsgenie-integration/conf/opsgenie-integration.conf")
+}
+
+task packageZabbixZip(dependsOn: 'prepareZabbix', type: Zip) {
+    from "${project.buildDir}/zabbix"
+    baseName = 'opsgenie-zabbix'
+    version = project.ext.versions.getProperty('zabbix') + project.ext.versionSuffix
+}
+
+task packageZabbixOS(dependsOn: ['generateIntegrationForNative', 'prepareZabbix']) << {
+    copyNativeFiles('zabbix')
+    mergeConfFile("${project.buildDir}/native/ogAfter.sh",
+            "${project.projectDir}/zabbix/native/ogAfter.sh",
+            "${project.buildDir}/zabbix/native/ogAfter.sh")
+
+    mergeConfFile("${project.buildDir}/native/ogBefore.sh",
+            "${project.projectDir}/zabbix/native/ogBefore.sh",
+            "${project.buildDir}/zabbix/native/ogBefore.sh")
+
+    def fileMapping = [
+            "${project.projectDir}/zabbix/zabbix/zabbix2opsgenie"   : "etc/opsgenie",
+            "${project.projectDir}/zabbix/zabbix/zabbix2opsgenie.go": "etc/opsgenie",
+            "${project.projectDir}/zabbix/zabbix/actionCommand.txt" : "etc/opsgenie"
+    ]
+
+    buildRpm('zabbix', 'opsgenie-zabbix', 'OpsGenie - Zabbix integration files including lamp, marid and Zabbix scripts',
+            fileMapping, [:])
+
+    buildDeb('zabbix', 'opsgenie-zabbix', 'OpsGenie - Zabbix integration files including lamp, marid and Zabbix scripts',
+            fileMapping, [:])
+}
+
+task packageZabbix(dependsOn: ['packageZabbixOS'])

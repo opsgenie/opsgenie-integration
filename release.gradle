@@ -1,0 +1,301 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath 'com.amazonaws:aws-java-sdk:1.7.8.1'
+    }
+}
+
+import com.amazonaws.*
+import com.amazonaws.auth.AWSCredentials;
+import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.services.s3.AmazonS3
+import com.amazonaws.services.s3.AmazonS3Client
+import com.amazonaws.services.s3.model.*
+
+def getUploadOptions() {
+    def options
+    if(project.hasProperty('options')) {
+        options = project.options;
+    } else {
+        options = "${projectDir}/uploadOptions.properties";
+    }
+    Properties properties = new Properties();
+    properties.load(new FileInputStream(options))
+    return properties
+}
+
+def getAWSClient() {
+    def props = getUploadOptions()
+
+    def amazonAccessKey = props.getProperty('amazonAccessKey')
+    def amazonSecretKey = props.getProperty('amazonSecretKey')
+    def amazonConnectionTimeout = Integer.valueOf(props.getProperty('amazonConnectionTimeout'))
+    def amazonMaxConnections = Integer.valueOf(props.getProperty('amazonMaxConnections'))
+    def amazonMaxErrorRetry = Integer.valueOf(props.getProperty('amazonMaxErrorRetry'))
+
+    AWSCredentials awsCredentials = new BasicAWSCredentials(amazonAccessKey, amazonSecretKey)
+    ClientConfiguration clientConfiguration = new ClientConfiguration()
+    clientConfiguration.setConnectionTimeout(amazonConnectionTimeout);
+    clientConfiguration.setMaxConnections(amazonMaxConnections);
+    clientConfiguration.setMaxErrorRetry(amazonMaxErrorRetry);
+    AmazonS3 client = new AmazonS3Client(awsCredentials, clientConfiguration)
+    return client
+}
+
+def createDownloadBucketIfNonExist() {
+    def client = getAWSClient()
+    def props = getUploadOptions()
+    def downloadsBucket = props.getProperty('amazonDownloadsBucket')
+    def buckets = client.listBuckets();
+    def downloadBucketExists = buckets.find {it.getName() == downloadsBucket}
+
+    if (!downloadBucketExists) {
+        client.createBucket(downloadsBucket)
+    }
+}
+
+def uploadJavaDocToS3() {
+
+    def client = getAWSClient()
+    def props = getUploadOptions()
+    def buckets = client.listBuckets();
+    def javadocBucket = props.getProperty('amazonJavadocBucket')
+    def javadocBucketExists = buckets.find {it.getName() == javadocBucket}
+
+    println '[Release] Started to upload JavaDoc'
+    if (javadocBucketExists) {
+        logger.info("Bucket [" + javadocBucket + "] deleted")
+        ObjectListing objects = client.listObjects(new ListObjectsRequest().withBucketName(javadocBucket));
+        List<S3ObjectSummary> objectSummaries = objects.getObjectSummaries();
+        for (S3ObjectSummary next : objectSummaries) {
+            client.deleteObject(new DeleteObjectRequest(next.getBucketName(), next.getKey()));
+        }
+        println("Bucket [" + javadocBucket + "] deleted")
+        client.deleteBucket(javadocBucket);
+    }
+    client.createBucket(javadocBucket)
+    println("Bucket [" + javadocBucket + "] created")
+    client.setBucketWebsiteConfiguration(javadocBucket, new BucketWebsiteConfiguration("index.html"))
+    FileTree javadoc = fileTree(dir: "${project(':sdk').buildDir}/docs/javadoc")
+    javadoc.each { File file ->
+        logger.info("Uploading " + file.getAbsolutePath())
+        def fileName = file.getCanonicalPath().replace("${project(':sdk').buildDir}/docs/javadoc/", '')
+        PutObjectRequest request = new PutObjectRequest(javadocBucket, fileName, file)
+        request.setCannedAcl(CannedAccessControlList.PublicRead)
+        client.putObject(request)
+    }
+    println '[Release] Upload success'
+}
+
+def uploadClientPackagesToS3() {
+    def client = getAWSClient()
+    def props = getUploadOptions()
+    def downloadsBucket = props.getProperty('amazonDownloadsBucket')
+
+    println '[Release] Started to upload packages'
+    FileTree packages = fileTree(dir: "${project(':package').buildDir}/distributions")
+    packages.include '*.zip'
+    packages.include '*.deb'
+    packages.include '*.rpm'
+
+    packages.each { File file ->
+        logger.info("Uploading " + file.getAbsolutePath())
+        PutObjectRequest request = new PutObjectRequest(downloadsBucket, "client/${file.getName()}", file)
+        request.setCannedAcl(CannedAccessControlList.PublicRead)
+        client.putObject(request)
+    }
+}
+
+def uploadIntegrationsToS3() {
+    def client = getAWSClient()
+    def props = getUploadOptions()
+    def downloadsBucket = props.getProperty('amazonDownloadsBucket')
+
+    FileTree integrations = fileTree(dir: "${buildDir}/distributions")
+    integrations.include '*.zip'
+    integrations.include '*.deb'
+    integrations.include '*.rpm'
+    println '[Release] Started to upload integration packages'
+    integrations.each { File file ->
+        logger.info("Uploading " + file.getAbsolutePath())
+        PutObjectRequest request = new PutObjectRequest(downloadsBucket, "integration/${file.getName()}", file)
+        request.setCannedAcl(CannedAccessControlList.PublicRead)
+        client.putObject(request)
+    }
+}
+
+def uploadDownloadsPropertiesToS3() {
+    def client = getAWSClient()
+    def props = getUploadOptions()
+    def downloadsBucket = props.getProperty('amazonDownloadsBucket')
+
+    def file = file("${buildDir}/distributions/downloads.properties")
+    println '[Release] Started to upload integration packages'
+    logger.info("Uploading " + file.getAbsolutePath())
+    PutObjectRequest request = new PutObjectRequest(downloadsBucket, "${file.getName()}", file)
+    request.setCannedAcl(CannedAccessControlList.PublicRead)
+    client.putObject(request)
+}
+
+//def uploadSdkJarToS3() {
+//    def client = getAWSClient()
+//    def props = getUploadOptions()
+//    def downloadsBucket = props.getProperty('amazonDownloadsBucket')
+//
+//    FileTree sdkJars = fileTree(dir: "${project(':sdk').buildDir}/libs")
+//    sdkJars.include '*.jar'
+//    println '[Package] Started to upload sdk jars'
+//    sdkJars.each { File file ->
+//        logger.info("Uploading " + file.getAbsolutePath())
+//        PutObjectRequest request = new PutObjectRequest(downloadsBucket, "client/${file.getName()}", file)
+//        request.setCannedAcl(CannedAccessControlList.PublicRead)
+//        client.putObject(request)
+//    }
+//}
+
+def getIncreasedMinor(String version) {
+    String[] versions = version.split('\\.')
+    int minor = Integer.valueOf(versions[2]) + 1
+    return versions[0] + "." + versions[1] + "." + minor
+}
+
+def getIncreasedMajor(String version) {
+    String[] versions = version.split("\\.")
+    int major = Integer.valueOf(versions[1]) + 1
+    return versions[0] + "." + major + ".0"
+}
+
+def increaseVersion(String type) {
+    def args
+    if(!project.hasProperty('args')) {
+        println "You must add integrations e.g -Pargs=redmine,nagios"
+    }
+
+    args = project.args.split(',')
+    if(args.contains('client') || args.contains('all')) {
+        increseAll(type)
+        return
+    }
+
+    Properties versions = project.ext.versions
+    for(def arg : args) {
+        String oldVersion = versions.getProperty(arg)
+        if(oldVersion == null) {
+            throw new IllegalArgumentException("Integration ${arg} does not exist!")
+        }
+        String newVersion = type.equals("minor") ? getIncreasedMinor(oldVersion) : getIncreasedMajor(oldVersion)
+        versions.setProperty(arg, newVersion)
+    }
+    copy {
+        from "${projectDir}/release.properties"
+        into "${projectDir}"
+        rename 'release.properties', 'release.old.properties'
+    }
+    println "${type} versions icreased for ${args}"
+    versions.store(new FileOutputStream("${projectDir}/version.properties"), "")
+}
+
+def increseAll(String type) {
+    Properties versions = project.ext.versions
+    for (String integration : versions.stringPropertyNames()) {
+        String oldVersion = versions.getProperty(integration)
+        String newVersion = type.equals('minor') ? getIncreasedMinor(oldVersion) : getIncreasedMajor(oldVersion)
+        println integration
+        versions.setProperty(integration, newVersion)
+    }
+    copy {
+        from "${projectDir}/version.properties"
+        into "${projectDir}"
+        rename 'version.properties', 'version.old.properties'
+    }
+    println "All ${type} versions icreased!"
+    versions.store(new FileOutputStream("${projectDir}/version.properties"), "")
+}
+
+task newMinor << {
+    increaseVersion('minor')
+}
+
+task newMajor << {
+    increaseVersion('major')
+}
+
+task removeSnapshot << {
+
+}
+
+def getDownloadsTemplate() {
+    def downloadsFile
+    if(project.hasProperty("downloads")) {
+        downloadsFile = project.downloads
+    } else {
+        downloadsFile = "${project.projectDir}/downloads.template.properties"
+    }
+    return downloadsFile
+}
+
+def generateDownloadsProperties() {
+    copy {
+        from getDownloadsTemplate()
+        filter {
+            it.replace('[[client]]', project.ext.versions.getProperty('client'))
+                    .replace('[[splunk]]', project.ext.versions.getProperty('splunk'))
+                    .replace('[[smarts]]', project.ext.versions.getProperty('smarts'))
+                    .replace('[[opennms]]', project.ext.versions.getProperty('opennms'))
+                    .replace('[[nagios]]', project.ext.versions.getProperty('nagios'))
+                    .replace('[[nagiosxi]]', project.ext.versions.getProperty('nagiosxi'))
+                    .replace('[[icinga]]', project.ext.versions.getProperty('icinga'))
+                    .replace('[[redmine]]', project.ext.versions.getProperty('redmine'))
+                    .replace('[[netcool]]', project.ext.versions.getProperty('netcool'))
+                    .replace('[[zabbix]]', project.ext.versions.getProperty('zabbix'))
+                    .replace('[[zenoss]]', project.ext.versions.getProperty('zenoss'))
+        }
+        into "${buildDir}/distributions"
+        rename "downloads.template.properties", "downloads.properties"
+    }
+}
+
+def isReleaseForAll() {
+    def args = project.args.toString().split('\\,')
+    return args.contains('all') || args.contains('client')
+}
+
+def generateReleaseTasks() {
+    def tasks = ['removeSnapshot', 'clean']
+    if(!project.hasProperty('args')) {
+        throw new IllegalArgumentException("Please give integrations as args to release! E.g. gradle release -Pargs=nagios,redmine")
+    }
+
+    def args = project.args.toString().split('\\,')
+
+    if(isReleaseForAll()) {
+        tasks << 'packageAll'
+        tasks << 'packageSdk'
+        tasks << 'uploadArchives'
+    } else {
+        for(String integration : args) {
+            String taskName = "package${Character.toUpperCase(integration.charAt(0))}${integration.substring(1)}"
+            tasks << taskName
+        }
+    }
+    return tasks
+}
+
+task release(type: GradleBuild ) {
+    doFirst{
+        tasks = generateReleaseTasks();
+    }
+    doLast{
+        createDownloadBucketIfNonExist()
+        generateDownloadsProperties()
+        uploadDownloadsPropertiesToS3()
+        uploadIntegrationsToS3()
+        if(isReleaseForAll()) {
+            uploadJavaDocToS3()
+            uploadClientPackagesToS3()
+        }
+    }
+}

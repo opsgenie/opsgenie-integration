@@ -1,0 +1,30 @@
+task prepareSplunk(dependsOn: 'generateIntegration') << {
+    def destination = "${project.buildDir}/splunk"
+    copy {
+        from "${project.buildDir}/opsgenie-integration"
+        into "${destination}/opsgenie-integration"
+    }
+
+    copy {
+        from "${project.projectDir}/splunk/lamp"
+        into "${destination}/opsgenie-integration/lamp"
+    }
+
+    copy {
+        from "${project.projectDir}/splunk/splunkActionScripts"
+        into "${destination}/splunkActionScripts"
+    }
+
+    copy {
+        from configurations.splunk
+        into "${destination}/opsgenie-integration/lamp/lib"
+    }
+}
+
+task packageSplunkZip(dependsOn: 'prepareSplunk', type: Zip) {
+    from "${project.buildDir}/splunk"
+    baseName = 'opsgenie-splunk'
+    version = project.ext.versions.getProperty('splunk') + project.ext.versionSuffix
+}
+
+task packageSplunk(dependsOn: 'packageSplunkZip')
