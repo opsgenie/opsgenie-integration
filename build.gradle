@@ -130,13 +130,15 @@ def mergeConfFile(String mainConfFile, String partialConfFilePath, String destin
 def copyNativeFiles(String sourceDir) {
     copy {
         from("${project.buildDir}/native")
-        into("${project.buildDir}/${sourceDir}/native")
+        into("${project.buildDir}/os_client/${sourceDir}")
     }
 }
 
 def buildRpm(String sourceDir, String name, String descrpt, Map fileMapping, Map configFiles) {
     def taskName = "generateRpm${sourceDir}"
     task "${taskName}"(type: Rpm) {
+
+        def nativeSource = "${project.buildDir}/os_client/${sourceDir}";
 
         def packageVersion = project.ext.versions.getProperty(sourceDir) + project.ext.versionSuffix
 
@@ -145,6 +147,7 @@ def buildRpm(String sourceDir, String name, String descrpt, Map fileMapping, Map
         version = packageVersion.replace("-", ".");
         os = LINUX
         user = 'root'
+
 
         configFiles.put("${project.buildDir}/${sourceDir}/opsgenie-integration/conf/opsgenie-integration.conf", 'etc/opsgenie/conf')
         configFiles.put("${project.buildDir}/${sourceDir}/opsgenie-integration/lamp/conf/log.properties", 'etc/opsgenie/conf/lamp')
@@ -173,22 +176,22 @@ def buildRpm(String sourceDir, String name, String descrpt, Map fileMapping, Map
             }
         }
 
-        from("${project.buildDir}/${sourceDir}/native/lamp_rpm"){
+        from("${nativeSource}/lamp_rpm"){
             into("usr/bin")
             rename "lamp_rpm", "lamp"
         }
 
-        from("${project.buildDir}/${sourceDir}/native/profile"){
+        from("${nativeSource}/profile"){
             into("etc/opsgenie")
         }
 
-        from("${project.buildDir}/${sourceDir}/native/marid_rpm"){
+        from("${nativeSource}/marid_rpm"){
             into("etc/init.d")
             rename 'marid_rpm', 'marid'
         }
 
-        preInstall file("${project.buildDir}/${sourceDir}/native/ogBefore.sh")
-        postInstall file("${project.buildDir}/${sourceDir}/native/ogAfter.sh")
+        preInstall file("${nativeSource}/ogBefore.sh")
+        postInstall file("${nativeSource}/ogAfter.sh")
     }
 
     tasks[taskName].execute()
@@ -200,13 +203,15 @@ def buildDeb(String sourceDir, String name, String descrpt, Map fileMapping, Map
     packageVersion = packageVersion.replace("-", ".")
 
     def taskName = "prepareDeb${sourceDir}"
-    def dataDir = "${project.buildDir}/${sourceDir}/debian/data"
-    def controlDir = "${project.buildDir}/${sourceDir}/debian/control"
+    def dataDir = "${project.buildDir}/debian_tmp/${sourceDir}/data"
+    def controlDir = "${project.buildDir}/debian_tmp/${sourceDir}/control"
     task "${taskName}" << {
 
-        configFiles.put("${project.buildDir}/${sourceDir}/opsgenie-integration/conf/opsgenie-integration.conf", 'etc/opsgenie/conf')
-        configFiles.put("${project.buildDir}/${sourceDir}/opsgenie-integration/lamp/log.properties", 'etc/opsgenie/conf/lamp')
-        configFiles.put("${project.buildDir}/${sourceDir}/opsgenie-integration/marid/log.properties", 'etc/opsgenie/conf/marid')
+        def nativeSource = "${project.buildDir}/os_client/${sourceDir}";
+
+        fileMapping.put("${project.buildDir}/${sourceDir}/opsgenie-integration/conf/opsgenie-integration.conf", 'etc/opsgenie/conf')
+        fileMapping.put("${project.buildDir}/${sourceDir}/opsgenie-integration/lamp/log.properties", 'etc/opsgenie/conf/lamp')
+        fileMapping.put("${project.buildDir}/${sourceDir}/opsgenie-integration/marid/log.properties", 'etc/opsgenie/conf/marid')
 
         fileMapping.put("${project.buildDir}/${sourceDir}/opsgenie-integration/lamp/conf", 'etc/opsgenie/lamp')
         fileMapping.put("${project.buildDir}/${sourceDir}/opsgenie-integration/lamp/lib", 'var/lib/opsgenie/lamp')
@@ -225,6 +230,12 @@ def buildDeb(String sourceDir, String name, String descrpt, Map fileMapping, Map
             }
         }
 
+        copy {
+            from("${buildDir}/os_client/${sourceDir}/conffiles_deb")
+            into("${controlDir}")
+            rename "conffiles_deb", 'conffiles'
+        }
+
         //conf files
         StringBuilder appender = new StringBuilder()
         for (def source : configFiles.keySet()) {
@@ -238,26 +249,28 @@ def buildDeb(String sourceDir, String name, String descrpt, Map fileMapping, Map
             appender.append("/${dest}/${source.tokenize('/')[-1]}\n")
         }
 
+        def conffiles = new File("${controlDir}/conffiles")
+        conffiles.setText(appender.toString())
 
         copy {
-            from("${project.buildDir}/${sourceDir}/native/lamp_rpm")
+            from("${nativeSource}/lamp_rpm")
             into("${dataDir}/usr/bin")
             rename "lamp_rpm", "lamp"
         }
 
         copy {
-            from("${project.buildDir}/${sourceDir}/native/profile")
+            from("${nativeSource}/profile")
             into("${dataDir}/etc/opsgenie")
         }
 
         copy {
-            from("${project.buildDir}/${sourceDir}/native/marid_deb")
+            from("${nativeSource}/marid_deb")
             into("${dataDir}/etc/init.d")
             rename 'marid_deb', 'marid'
         }
 
         copy {
-            from "${project.buildDir}/${sourceDir}/native/control_deb"
+            from "${nativeSource}/control_deb"
             filter {
                 it.replace('[description]', descrpt)
                         .replace('[version]', packageVersion)
@@ -268,19 +281,16 @@ def buildDeb(String sourceDir, String name, String descrpt, Map fileMapping, Map
         }
 
         copy {
-            from "${project.buildDir}/${sourceDir}/native/ogBefore.sh"
+            from "${nativeSource}/ogBefore.sh"
             into controlDir
             rename "ogBefore.sh", "preinst"
         }
 
         copy {
-            from "${project.buildDir}/${sourceDir}/native/ogAfter.sh"
+            from "${nativeSource}/ogAfter.sh"
             into controlDir
             rename "ogAfter.sh", "postinst"
         }
-
-        def conffiles = new File("${controlDir}/conffiles")
-        conffiles.setText(appender.toString())
 
         ant {
             taskdef(name: 'deb', classname: 'org.vafer.jdeb.ant.DebAntTask', classpath: configurations.debian.asPath)
@@ -288,6 +298,8 @@ def buildDeb(String sourceDir, String name, String descrpt, Map fileMapping, Map
         ant.deb(destfile: "${project.buildDir}/distributions/${name}_${packageVersion}_all.deb", control: controlDir) {
             ant.data(src: dataDir, type: 'directory', dst: '/')
         }
+
+        delete "${project.buildDir}/distributions/${name}_${packageVersion}_all.changes"
     }
 
     tasks[taskName].execute()

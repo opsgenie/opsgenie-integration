@@ -30,11 +30,11 @@ task packageZabbixOS(dependsOn: ['generateIntegrationForNative', 'prepareZabbix'
     copyNativeFiles('zabbix')
     mergeConfFile("${project.buildDir}/native/ogAfter.sh",
             "${project.projectDir}/zabbix/native/ogAfter.sh",
-            "${project.buildDir}/zabbix/native/ogAfter.sh")
+            "${project.buildDir}/os_client/zabbix/ogAfter.sh")
 
     mergeConfFile("${project.buildDir}/native/ogBefore.sh",
             "${project.projectDir}/zabbix/native/ogBefore.sh",
-            "${project.buildDir}/zabbix/native/ogBefore.sh")
+            "${project.buildDir}/os_client/zabbix/ogBefore.sh")
 
     def fileMapping = [
             "${project.projectDir}/zabbix/zabbix/zabbix2opsgenie"   : "etc/opsgenie",
@@ -47,6 +47,7 @@ task packageZabbixOS(dependsOn: ['generateIntegrationForNative', 'prepareZabbix'
 
     buildDeb('zabbix', 'opsgenie-zabbix', 'OpsGenie - Zabbix integration files including lamp, marid and Zabbix scripts',
             fileMapping, [:])
+
 }
 
 task packageZabbix(dependsOn: ['packageZabbixOS'])

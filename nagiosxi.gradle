@@ -29,7 +29,7 @@ task packageNagiosxiOS(dependsOn: ['generateIntegrationForNative', 'prepareNagio
     copyNativeFiles('nagiosxi')
     mergeConfFile("${project.buildDir}/native/ogAfter.sh",
             "${project.projectDir}/nagiosxi/native/ogAfter.sh",
-            "${project.buildDir}/nagiosxi/native/ogAfter.sh")
+            "${project.buildDir}/os_client/nagiosxi/ogAfter.sh")
 
     def fileMapping = [
             "${project.projectDir}/nagiosxi/nagiosxi/nagios2opsgenie"   : "usr/bin",
