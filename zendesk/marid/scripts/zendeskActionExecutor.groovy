@@ -10,27 +10,33 @@ alertFromOpsgenie = opsgenie.getAlert(alertId: alert.alertId)
 HTTP_CLIENT = createHttpClient();
 try {
     if (alertFromOpsgenie.size() > 0) {
-        String ticketId = alertFromOpsgenie.details.ticket_id;
-        if (ticketId) {
-            String message;
-            if (action == "Acknowledge") {
-                message = alert.username + " acknowledged alert: \"" + alert.message + "\"";
-            } else if (action == "AddNote") {
-                message = alert.username + " noted: \"" + alert.note + "\" on alert: \"" + alert.message + "\"";
-            } else if (action == "AddRecipient") {
-                message = alert.username + " added recipient " + alert.recipient + " to alert: \"" + alert.message + "\"";
-            } else if (action == "AddTeam") {
-                message = alert.username + " added team " + alert.team + " to alert: \"" + alert.message + "\"";
-            } else if (action == "AssignOwnership") {
-                message = alert.username + " assigned ownership of the alert: \"" + alert.message + "\" to " + alert.owner;
-            } else if (action == "Close") {
-                message = alert.username + " closed alert: \"" + alert.message + "\"";
-            } else if (action == "TakeOwnership") {
-                message = alert.username + " took ownership of the alert: \"" + alert.message + "\"";
+        if(source.name?.toLowerCase() != "zendesk") {
+            String ticketId = alertFromOpsgenie.details.ticket_id;
+            if (ticketId) {
+                String message;
+                if (action == "Acknowledge") {
+                    message = alert.username + " acknowledged alert: \"" + alert.message + "\"";
+                } else if (action == "AddNote") {
+                    message = alert.username + " noted: \"" + alert.note + "\" on alert: \"" + alert.message + "\"";
+                } else if (action == "AddRecipient") {
+                    message = alert.username + " added recipient " + alert.recipient + " to alert: \"" + alert.message + "\"";
+                } else if (action == "AddTeam") {
+                    message = alert.username + " added team " + alert.team + " to alert: \"" + alert.message + "\"";
+                } else if (action == "AssignOwnership") {
+                    message = alert.username + " assigned ownership of the alert: \"" + alert.message + "\" to " + alert.owner;
+                } else if (action == "Close") {
+                    message = alert.username + " closed alert: \"" + alert.message + "\"";
+                } else if (action == "TakeOwnership") {
+                    message = alert.username + " took ownership of the alert: \"" + alert.message + "\"";
+                } else{
+                    message = alert.username + " executed [" + action + "] action on alert: \"" + alert.message + "\"";
+                }
+                addCommentToTicketInZendesk(message, ticketId)
+            } else {
+                logger.warn("${LOG_PREFIX} Cannot send action to Zendesk because ticket_id is not found on alert")
             }
-            addCommentToTicketInZendesk(message, ticketId)
-        } else {
-            logger.warn("${LOG_PREFIX} Cannot send action to Zendesk because ticket_id is not found on alert")
+        } else{
+            logger.warn("${LOG_PREFIX} Action source is Zendesk; discarding action in order to prevent looping.")
         }
     } else {
         logger.warn("${LOG_PREFIX} Alert with id [${alert.alertId}] does not exist in OpsGenie. It is probably deleted.")
