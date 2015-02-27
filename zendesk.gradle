@@ -1,0 +1,34 @@
+task prepareZendesk(dependsOn: 'generateIntegration') << {
+    def destination = "${project.buildDir}/zendesk"
+    copy {
+        from "${project.buildDir}/opsgenie-integration"
+        into "${destination}/opsgenie-integration"
+    }
+
+    copy {
+        from "${project.projectDir}/zendesk/marid"
+        into "${destination}/opsgenie-integration/marid"
+    }
+
+    mergeConfFile("${project.buildDir}/opsgenie-integration/conf/opsgenie-integration.conf",
+            "${project.projectDir}/zendesk/common/conf/opsgenie-integration.conf.part",
+            "${destination}/opsgenie-integration/conf/opsgenie-integration.conf")
+}
+
+task packageZendeskZip(dependsOn: 'prepareZendesk', type: Zip) {
+    from "${project.buildDir}/zendesk"
+    baseName = 'opsgenie-zendesk'
+    version = project.ext.versions.getProperty('zendesk') + project.ext.versionSuffix
+}
+
+task packageZendeskOS(dependsOn: ['generateIntegrationForNative', 'prepareZendesk']) << {
+    copyNativeFiles('zendesk')
+
+    buildRpm('zendesk', 'opsgenie-zendesk', 'OpsGenie - Zendesk integration files including lamp and marid',
+            [:], [:])
+
+    buildDeb('zendesk', 'opsgenie-zendesk', 'OpsGenie - Zendesk integration files including lamp and marid',
+            [:], [:])
+}
+
+task packageZendesk(dependsOn: ['packageZendeskZip', 'packageZendeskOS'])

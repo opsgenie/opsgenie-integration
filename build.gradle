@@ -12,6 +12,7 @@ plugins {
     id "nebula.os-package-base" version "2.0.3"
 }
 apply plugin: 'java'
+apply plugin: 'groovy'
 
 sourceCompatibility = 1.6
 targetCompatibility = 1.6
@@ -27,6 +28,21 @@ if(gradle.startParameter.taskNames.contains('removeSnapshot')) {
 }
 
 version = project.ext.versions.getProperty('client') + project.ext.versionSuffix
+
+sourceSets {
+    main {
+        groovy {
+            include "*/marid/scripts"
+            include "*/lamp/scripts"
+        }
+    }
+}
+
+
+dependencies {
+    compile project(":lamp")
+    compile project(":marid")
+}
 
 subprojects  {
     apply plugin: 'java'
@@ -295,6 +311,7 @@ apply from: 'zabbix.gradle'
 apply from: 'redmine.gradle'
 apply from: 'zenoss.gradle'
 apply from: 'icinga.gradle'
+apply from: 'zendesk.gradle'
 
 task packageAll(dependsOn: ['packageSmarts',
                                'packageSplunk',
@@ -305,5 +322,6 @@ task packageAll(dependsOn: ['packageSmarts',
                                'packageZabbix',
                                'packageRedmine',
                                'packageZenoss',
-                               'packageIcinga'
+                               'packageIcinga',
+                                'packageZendesk'
 ])

@@ -181,6 +181,7 @@ def increaseVersion(String type) {
     }
 
     Properties versions = project.ext.versions
+    versions.store(new FileOutputStream("${projectDir}/version.old.properties"), "")
     for(def arg : args) {
         String oldVersion = versions.getProperty(arg)
         if(oldVersion == null) {
@@ -189,29 +190,21 @@ def increaseVersion(String type) {
         String newVersion = type.equals("minor") ? getIncreasedMinor(oldVersion) : getIncreasedMajor(oldVersion)
         versions.setProperty(arg, newVersion)
     }
-    copy {
-        from "${projectDir}/release.properties"
-        into "${projectDir}"
-        rename 'release.properties', 'release.old.properties'
-    }
-    println "${type} versions icreased for ${args}"
+
+    println "${type} versions increased for ${args}"
     versions.store(new FileOutputStream("${projectDir}/version.properties"), "")
 }
 
 def increseAll(String type) {
     Properties versions = project.ext.versions
+    versions.store(new FileOutputStream("${projectDir}/version.old.properties"), "")
     for (String integration : versions.stringPropertyNames()) {
         String oldVersion = versions.getProperty(integration)
         String newVersion = type.equals('minor') ? getIncreasedMinor(oldVersion) : getIncreasedMajor(oldVersion)
         println integration
         versions.setProperty(integration, newVersion)
     }
-    copy {
-        from "${projectDir}/version.properties"
-        into "${projectDir}"
-        rename 'version.properties', 'version.old.properties'
-    }
-    println "All ${type} versions icreased!"
+    println "All ${type} versions increased!"
     versions.store(new FileOutputStream("${projectDir}/version.properties"), "")
 }
 
