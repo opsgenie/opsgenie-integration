@@ -6,8 +6,8 @@ COMMIT_MSG=$3
 TAG_NAME=$4
 
 cd $INTEGRATION_PATH
-/usr/bin/git checkout master
 /usr/bin/git stash save before_release
+/usr/bin/git checkout master
 /usr/bin/git pull origin master
 /usr/bin/git stash pop
 /usr/bin/git add version.properties
