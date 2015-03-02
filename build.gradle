@@ -134,8 +134,14 @@ def copyNativeFiles(String sourceDir) {
     }
 }
 
-def buildRpm(String sourceDir, String name, String descrpt, Map fileMapping, Map configFiles) {
+def buildRpm(String sourceDir, String name, String descrpt, Map fileMappingInput, Map configFilesInput) {
     def taskName = "generateRpm${sourceDir}"
+
+    def configFiles = [:]
+    configFiles.putAll(configFilesInput)
+    def fileMapping = [:]
+    fileMapping.putAll(fileMappingInput)
+
     task "${taskName}"(type: Rpm) {
 
         def nativeSource = "${project.buildDir}/os_client/${sourceDir}";
@@ -197,7 +203,7 @@ def buildRpm(String sourceDir, String name, String descrpt, Map fileMapping, Map
     tasks[taskName].execute()
 }
 
-def buildDeb(String sourceDir, String name, String descrpt, Map fileMapping, Map configFiles) {
+def buildDeb(String sourceDir, String name, String descrpt, Map fileMappingInput, Map configFilesInput) {
 
     def packageVersion = project.ext.versions.getProperty(sourceDir) + project.ext.versionSuffix
     packageVersion = packageVersion.replace("-", ".")
@@ -205,6 +211,12 @@ def buildDeb(String sourceDir, String name, String descrpt, Map fileMapping, Map
     def taskName = "prepareDeb${sourceDir}"
     def dataDir = "${project.buildDir}/debian_tmp/${sourceDir}/data"
     def controlDir = "${project.buildDir}/debian_tmp/${sourceDir}/control"
+
+    def configFiles = [:]
+    configFiles.putAll(configFilesInput)
+    def fileMapping = [:]
+    fileMapping.putAll(fileMappingInput)
+
     task "${taskName}" << {
 
         def nativeSource = "${project.buildDir}/os_client/${sourceDir}";
@@ -250,7 +262,7 @@ def buildDeb(String sourceDir, String name, String descrpt, Map fileMapping, Map
         }
 
         def conffiles = new File("${controlDir}/conffiles")
-        conffiles.setText(appender.toString())
+        conffiles.append("\n" + appender.toString())
 
         copy {
             from("${nativeSource}/lamp_rpm")
