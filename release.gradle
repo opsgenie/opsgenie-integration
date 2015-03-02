@@ -135,7 +135,7 @@ def uploadDownloadsPropertiesToS3() {
     def downloadsBucket = props.getProperty('amazonDownloadsBucket')
 
     def file = file("${buildDir}/distributions/downloads.properties")
-    println '[Release] Started to upload integration packages'
+    println '[Release] Started to upload download.properties'
     logger.info("Uploading " + file.getAbsolutePath())
     PutObjectRequest request = new PutObjectRequest(downloadsBucket, "${file.getName()}", file)
     request.setCannedAcl(CannedAccessControlList.PublicRead)
