@@ -216,6 +216,19 @@ task newMajor << {
     increaseVersion('major')
 }
 
+task versionUpdate << {
+    if(project.hasProperty("type")) {
+        String type = project.type;
+        if(type.equals("MINOR")) {
+            increaseVersion("minor")
+        } else if(type.equals("MAJOR")) {
+            increaseVersion("najor")
+        } else {
+            println "[VERSION UPDATE SKIPPED]"
+        }
+    }
+}
+
 task removeSnapshot << {
 
 }
