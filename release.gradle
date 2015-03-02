@@ -228,15 +228,13 @@ def updateGit(def args) {
     }
 }
 
-task versionUpdate << {
-    if(project.hasProperty("type")) {
-        String type = project.type;
-        if(type.equals("minor") || type.equals("major")) {
-            increaseVersion(type)
-            updateGit(project.args)
-        } else {
-            println "=======[VERSION UPDATE SKIPPED]========"
-        }
+def versionUpdate(def type) {
+    if(type.equals("minor") || type.equals("major")) {
+        increaseVersion(type)
+        return true
+    } else {
+        println "=======[VERSION UPDATE SKIPPED]========"
+        return false
     }
 }
 
@@ -303,7 +301,11 @@ def generateReleaseTasks() {
 }
 
 task release(type: GradleBuild ) {
+    def isVersionUpdated = false;
     doFirst{
+        if(project.hasProperty("type")) {
+            isVersionUpdated = versionUpdate(project.type);
+        }
         tasks = generateReleaseTasks();
     }
     doLast{
@@ -314,6 +316,9 @@ task release(type: GradleBuild ) {
         if(isReleaseForAll()) {
             uploadJavaDocToS3()
             uploadClientPackagesToS3()
+        }
+        if(isVersionUpdated) {
+            updateGit(project.args)
         }
     }
 }
