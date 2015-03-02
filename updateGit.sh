@@ -7,6 +7,9 @@ TAG_NAME=$4
 
 cd $INTEGRATION_PATH
 /usr/bin/git checkout master
+/usr/bin/git git stash save before_release
+/usr/bin/git pull origin master
+/usr/bin/git stash pop
 /usr/bin/git add version.properties
 /usr/bin/git commit -m "$COMMIT_MSG"
 
@@ -14,6 +17,7 @@ cd $INTEGRATION_PATH
 
 /usr/bin/git push origin master
 /usr/bin/git push --tags
+
 
 cd $CLIENT_PATH
 /usr/bin/git checkout master
