@@ -311,12 +311,12 @@ task release(type: GradleBuild ) {
     doLast{
         createDownloadBucketIfNonExist()
         generateDownloadsProperties()
-        uploadDownloadsPropertiesToS3()
         uploadIntegrationsToS3()
         if(isReleaseForAll()) {
             uploadJavaDocToS3()
             uploadClientPackagesToS3()
         }
+        uploadDownloadsPropertiesToS3()
         if(isVersionUpdated) {
             updateGit(project.args)
         }
