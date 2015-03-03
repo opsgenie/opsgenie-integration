@@ -67,7 +67,7 @@ def uploadJavaDocToS3() {
     def javadocBucket = props.getProperty('amazonJavadocBucket')
     def javadocBucketExists = buckets.find {it.getName() == javadocBucket}
 
-    println '[Release] Started to upload JavaDoc'
+    println '[Release] Deleting existing JavaDoc'
     if (javadocBucketExists) {
         logger.info("Bucket [" + javadocBucket + "] deleted")
         ObjectListing objects = client.listObjects(new ListObjectsRequest().withBucketName(javadocBucket));
@@ -78,6 +78,7 @@ def uploadJavaDocToS3() {
         println("Bucket [" + javadocBucket + "] deleted")
         client.deleteBucket(javadocBucket);
     }
+    println '[Release] Started to upload JavaDoc'
     client.createBucket(javadocBucket)
     println("Bucket [" + javadocBucket + "] created")
     client.setBucketWebsiteConfiguration(javadocBucket, new BucketWebsiteConfiguration("index.html"))
