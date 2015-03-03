@@ -44,6 +44,7 @@ def getAWSClient() {
     clientConfiguration.setMaxConnections(amazonMaxConnections);
     clientConfiguration.setMaxErrorRetry(amazonMaxErrorRetry);
     AmazonS3 client = new AmazonS3Client(awsCredentials, clientConfiguration)
+    client.setEndpoint("s3-us-west-2.amazonaws.com")
     return client
 }
 
