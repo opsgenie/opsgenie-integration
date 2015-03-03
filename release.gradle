@@ -15,6 +15,8 @@ import com.amazonaws.services.s3.AmazonS3
 import com.amazonaws.services.s3.AmazonS3Client
 import com.amazonaws.services.s3.model.*
 
+import java.text.SimpleDateFormat
+
 def getUploadOptions() {
     def options
     if(project.hasProperty('options')) {
@@ -133,7 +135,7 @@ def uploadDownloadsPropertiesToS3() {
     def downloadsBucket = props.getProperty('amazonDownloadsBucket')
 
     def file = file("${buildDir}/distributions/downloads.properties")
-    println '[Release] Started to upload integration packages'
+    println '[Release] Started to upload download.properties'
     logger.info("Uploading " + file.getAbsolutePath())
     PutObjectRequest request = new PutObjectRequest(downloadsBucket, "${file.getName()}", file)
     request.setCannedAcl(CannedAccessControlList.PublicRead)
@@ -216,6 +218,26 @@ task newMajor << {
     increaseVersion('major')
 }
 
+
+def updateGit(def args) {
+    def date = new Date()
+    def sdf = new SimpleDateFormat("yyyy.dd.MM")
+    exec {
+        commandLine './updateGit.sh', projectDir, "${project(":sdk").projectDir}/..",
+                "Version test bump for ${args}", "OpsGenieClient-v2-${sdf.format(date)}"
+    }
+}
+
+def versionUpdate(def type) {
+    if(type.equals("minor") || type.equals("major")) {
+        increaseVersion(type)
+        return true
+    } else {
+        println "=======[VERSION UPDATE SKIPPED]========"
+        return false
+    }
+}
+
 task removeSnapshot << {
 
 }
@@ -245,6 +267,7 @@ def generateDownloadsProperties() {
                     .replace('[[netcool]]', project.ext.versions.getProperty('netcool'))
                     .replace('[[zabbix]]', project.ext.versions.getProperty('zabbix'))
                     .replace('[[zenoss]]', project.ext.versions.getProperty('zenoss'))
+                    .replace('[[zendesk]]', project.ext.versions.getProperty('zendesk'))
         }
         into "${buildDir}/distributions"
         rename "downloads.template.properties", "downloads.properties"
@@ -278,17 +301,24 @@ def generateReleaseTasks() {
 }
 
 task release(type: GradleBuild ) {
+    def isVersionUpdated = false;
     doFirst{
+        if(project.hasProperty("type")) {
+            isVersionUpdated = versionUpdate(project.type);
+        }
         tasks = generateReleaseTasks();
     }
     doLast{
         createDownloadBucketIfNonExist()
         generateDownloadsProperties()
-        uploadDownloadsPropertiesToS3()
         uploadIntegrationsToS3()
         if(isReleaseForAll()) {
             uploadJavaDocToS3()
             uploadClientPackagesToS3()
+        }
+        uploadDownloadsPropertiesToS3()
+        if(isVersionUpdated) {
+            updateGit(project.args)
         }
     }
 }
