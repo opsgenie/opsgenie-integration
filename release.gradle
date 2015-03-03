@@ -315,7 +315,7 @@ task release(type: GradleBuild ) {
         generateDownloadsProperties()
         uploadIntegrationsToS3()
         if(isReleaseForAll()) {
-            uploadJavaDocToS3()
+//            uploadJavaDocToS3()
             uploadClientPackagesToS3()
         }
         uploadDownloadsPropertiesToS3()
