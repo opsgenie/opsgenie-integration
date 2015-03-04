@@ -285,9 +285,9 @@ def isReleaseForAll() {
     return args.contains('all') || args.contains('client')
 }
 
-def createPropertiesForUploadToNexus() {
+def createPropertiesToUploadToNexus() {
     def options = getUploadOptions()
-    options.store(new FileOutputStream("${buildDir}/uploadOptions.properties"), "")
+    options.store(new FileOutputStream(file("${buildDir}/uploadOptions.properties")), "")
 }
 
 def generateReleaseTasks() {
@@ -314,11 +314,11 @@ def generateReleaseTasks() {
 task release(type: GradleBuild ) {
     def isVersionUpdated = false;
     doFirst{
-        createPropertiesForUploadToNexus();
         if(project.hasProperty("type")) {
             isVersionUpdated = versionUpdate(project.type);
         }
         tasks = generateReleaseTasks();
+        createPropertiesToUploadToNexus();
     }
     doLast{
         generateDownloadsProperties()
