@@ -286,8 +286,10 @@ def isReleaseForAll() {
 }
 
 def createPropertiesToUploadToNexus() {
-    def options = getUploadOptions()
-    options.store(new FileOutputStream("${buildDir}/uploadOptions.properties"), "")
+    copy {
+        from project.options
+        into buildDir
+    }
 }
 
 def generateReleaseTasks() {
