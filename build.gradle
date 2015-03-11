@@ -325,17 +325,17 @@ apply from: 'release.gradle'
 apply from: 'sdk.gradle'
 
 //apply scripts
-apply from: 'smarts.gradle'
-apply from: 'splunk.gradle'
-apply from: 'opennms.gradle'
-apply from: 'nagios.gradle'
-apply from: 'nagiosxi.gradle'
-apply from: 'netcool.gradle'
-apply from: 'zabbix.gradle'
-apply from: 'redmine.gradle'
-apply from: 'zenoss.gradle'
-apply from: 'icinga.gradle'
-apply from: 'zendesk.gradle'
+apply from: 'smarts/smarts.gradle'
+apply from: 'splunk/splunk.gradle'
+apply from: 'opennms/opennms.gradle'
+apply from: 'nagios/nagios.gradle'
+apply from: 'nagiosxi/nagiosxi.gradle'
+apply from: 'netcool/netcool.gradle'
+apply from: 'zabbix/zabbix.gradle'
+apply from: 'redmine/redmine.gradle'
+apply from: 'zenoss/zenoss.gradle'
+apply from: 'icinga/icinga.gradle'
+apply from: 'zendesk/zendesk.gradle'
 
 task packageAll(dependsOn: ['packageSmarts',
                                'packageSplunk',
