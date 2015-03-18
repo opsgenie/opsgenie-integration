@@ -75,7 +75,8 @@ subprojects  {
                     "Specification-Vendor": "http://www.opsgenie.com",
                     "Implementation-Title" : project.name[0].toUpperCase() + project.name[1..-1],
                     "Implementation-Product": project.name,
-                    "Implementation-Vendor":"http://www.opsgenie.com"
+                    "Implementation-Vendor":"http://www.opsgenie.com",
+                    "Implementation-Version":project.version,
             )
         }
     }
