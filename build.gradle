@@ -151,9 +151,19 @@ def buildRpm(String sourceDir, String name, String descrpt, Map fileMappingInput
 
         packageName = name
         description = descrpt
+        summary = descrpt
+        packageDescription = descrpt + ". Please see doc for details: https://www.opsgenie.com/docs/"
         version = packageVersion.replace("-", ".");
         os = LINUX
         user = 'root'
+
+        release = '1.all'
+        packager = "ifountain"
+        vendor = "opsgenie"
+        url = "https://www.opsgenie.com"
+        license = "Apache License 2.0"
+        buildHost = "repo.opsgenie.com"
+        packageGroup = "System Administration Tools"
 
 
         configFiles.put("${project.buildDir}/${sourceDir}/opsgenie-integration/conf/opsgenie-integration.conf", 'etc/opsgenie/conf')

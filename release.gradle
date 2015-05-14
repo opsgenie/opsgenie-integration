@@ -39,6 +39,10 @@ def generateDownloadsProperties() {
     }
 }
 
+task generateDownloadsProperties << {
+    generateDownloadsProperties()
+}
+
 def getUploadOptions() {
     def options
     if(project.hasProperty('options')) {
