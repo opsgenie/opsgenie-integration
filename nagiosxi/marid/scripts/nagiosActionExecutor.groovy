@@ -15,7 +15,6 @@ logger.warn("${LOG_PREFIX} Will execute action for alertId ${alert.alertId}");
 ImageIO.setUseCache(false)
 CONF_PREFIX = "nagios.";
 alertFromOpsgenie = opsgenie.getAlert(alertId: alert.alertId)
-HTTP_CLIENT = createHttpClient();
 try{
     if (alertFromOpsgenie.size() > 0) {
 
@@ -32,6 +31,9 @@ try{
         } else {
             CONF_PREFIX = "nagios." + nagiosServer + ".";
         }
+        logger.info("CONF_PREFIX is ${CONF_PREFIX}");
+
+        HTTP_CLIENT = createHttpClient();
 
         //if nagios_server from alert details does exist in this Marid conf file , it should be ignored
         def command_url = _conf("command_url",false);
@@ -99,6 +101,7 @@ def createHttpClient() {
 def _conf(confKey, boolean isMandatory)
 {
     def confVal = conf[CONF_PREFIX+confKey]
+    logger.debug ("confVal ${CONF_PREFIX+confKey} from file is ${confVal}");
     if(isMandatory && confVal == null){
         def errorMessage = "${LOG_PREFIX} Skipping action, Mandatory Conf item ${CONF_PREFIX+confKey} is missing. Check your marid conf file.";
         throw new Exception(errorMessage);
