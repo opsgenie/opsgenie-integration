@@ -347,6 +347,7 @@ apply from: 'redmine/redmine.gradle'
 apply from: 'zenoss/zenoss.gradle'
 apply from: 'icinga/icinga.gradle'
 apply from: 'zendesk/zendesk.gradle'
+apply from: 'icinga2/icinga2.gradle'
 
 task packageAll(dependsOn: ['packageSmarts',
                                'packageSplunk',
@@ -358,5 +359,6 @@ task packageAll(dependsOn: ['packageSmarts',
                                'packageRedmine',
                                'packageZenoss',
                                'packageIcinga',
-                                'packageZendesk'
+                                'packageZendesk',
+                                'packageIcinga2'
 ])

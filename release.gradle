@@ -33,6 +33,7 @@ def generateDownloadsProperties() {
                     .replace('[[zabbix]]', project.ext.versions.getProperty('zabbix'))
                     .replace('[[zenoss]]', project.ext.versions.getProperty('zenoss'))
                     .replace('[[zendesk]]', project.ext.versions.getProperty('zendesk'))
+                    .replace('[[icinga2]]', project.ext.versions.getProperty('icinga2'))
         }
         into "${buildDir}/distributions"
         rename "downloads.template.properties", "downloads.properties"
