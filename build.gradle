@@ -167,8 +167,8 @@ def buildRpm(String sourceDir, String name, String descrpt, Map fileMappingInput
 
 
         configFiles.put("${project.buildDir}/${sourceDir}/opsgenie-integration/conf/opsgenie-integration.conf", 'etc/opsgenie/conf')
-        configFiles.put("${project.buildDir}/${sourceDir}/opsgenie-integration/lamp/conf/log.properties", 'etc/opsgenie/conf/lamp')
-        configFiles.put("${project.buildDir}/${sourceDir}/opsgenie-integration/marid/conf/log.properties", 'etc/opsgenie/conf/marid')
+        configFiles.put("${project.buildDir}/${sourceDir}/opsgenie-integration/lamp/conf/log.properties", 'etc/opsgenie/lamp')
+        configFiles.put("${project.buildDir}/${sourceDir}/opsgenie-integration/marid/conf/log.properties", 'etc/opsgenie/marid')
 
         fileMapping.put("${project.buildDir}/${sourceDir}/opsgenie-integration/lamp/lib", 'var/lib/opsgenie/lamp')
         fileMapping.put("${project.buildDir}/${sourceDir}/opsgenie-integration/lamp/scripts", 'var/opsgenie/lamp/scripts')
@@ -233,8 +233,8 @@ def buildDeb(String sourceDir, String name, String descrpt, Map fileMappingInput
         def nativeSource = "${project.buildDir}/os_client/${sourceDir}";
 
         fileMapping.put("${project.buildDir}/${sourceDir}/opsgenie-integration/conf/opsgenie-integration.conf", 'etc/opsgenie/conf')
-        fileMapping.put("${project.buildDir}/${sourceDir}/opsgenie-integration/lamp/log.properties", 'etc/opsgenie/conf/lamp')
-        fileMapping.put("${project.buildDir}/${sourceDir}/opsgenie-integration/marid/log.properties", 'etc/opsgenie/conf/marid')
+        fileMapping.put("${project.buildDir}/${sourceDir}/opsgenie-integration/lamp/log.properties", 'etc/opsgenie/lamp')
+        fileMapping.put("${project.buildDir}/${sourceDir}/opsgenie-integration/marid/log.properties", 'etc/opsgenie/marid')
 
         fileMapping.put("${project.buildDir}/${sourceDir}/opsgenie-integration/lamp/conf", 'etc/opsgenie/lamp')
         fileMapping.put("${project.buildDir}/${sourceDir}/opsgenie-integration/lamp/lib", 'var/lib/opsgenie/lamp')
