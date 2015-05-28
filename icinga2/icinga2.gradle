@@ -20,12 +20,6 @@ task prepareIcinga2(dependsOn: 'generateIntegration') << {
                 "${destination}/opsgenie-integration/conf/opsgenie-integration.conf")
 }
 
-task packageIcinga2Zip(dependsOn: 'prepareIcinga2', type: Zip) {
-    from "${project.buildDir}/icinga2"
-    baseName = 'opsgenie-icinga2'
-    version = project.ext.versions.getProperty('icinga2') + project.ext.versionSuffix
-}
-
 task packageIcinga2OS(dependsOn: ['generateIntegrationForNative', 'prepareIcinga2']) << {
     copyNativeFiles('icinga2')
     mergeConfFile("${project.buildDir}/native/ogAfter.sh",
