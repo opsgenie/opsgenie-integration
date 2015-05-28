@@ -3,6 +3,7 @@
 The project includes OpsGenie's specific integration packages:
 
 * icinga
+* icinga2
 * nagios
 * nagioxxi
 * netcool

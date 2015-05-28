@@ -28,6 +28,9 @@ task packageIcingaZip(dependsOn: 'prepareIcinga', type: Zip) {
 
 task packageIcingaOS(dependsOn: ['generateIntegrationForNative', 'prepareIcinga']) << {
     copyNativeFiles('icinga')
+    mergeConfFile("${project.buildDir}/native/ogAfter.sh",
+            "${project.projectDir}/icinga/native/ogAfter.sh",
+            "${project.buildDir}/os_client/icinga/ogAfter.sh")
 
     def fileMapping = [
             "${project.projectDir}/icinga/icinga/icinga2opsgenie":"usr/bin",
