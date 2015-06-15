@@ -84,11 +84,10 @@ def createJavadocBucketIfNonExist() {
 
 def createBucketIfNonExist(String bucketName) {
     def client = getAWSClient()
-    def buckets = client.listBuckets();
-    def bucketExists = buckets.find {it.getName() == bucketName}
 
-    if (!bucketExists) {
+    if (!client.doesBucketExist(bucketName)) {
         println "[RELEASE] Bucket $bucketName not exist. Creating new One!"
+        //This will not run for prod account , prod buckets need to created from another place , jenkins is not secure to have a create bucket access key
         client.createBucket(bucketName)
     }
 }
@@ -97,7 +96,6 @@ def uploadJavaDocToS3() {
 
     def client = getAWSClient()
     def props = getUploadOptions()
-    def buckets = client.listBuckets();
     def javadocBucket = props.getProperty('amazonJavadocBucket')
 
     println '[Release] Deleting existing JavaDoc'
