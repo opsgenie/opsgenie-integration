@@ -9,7 +9,6 @@ import java.awt.image.BufferedImage
 import java.text.SimpleDateFormat
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
-import groovy.time.TimeCategory
 
 LOG_PREFIX = "[${action}]:";
 logger.warn("${LOG_PREFIX} Will execute action for alertId ${alert.alertId}");
@@ -20,18 +19,9 @@ alertFromOpsgenie = opsgenie.getAlert(alertId: alert.alertId)
 try{
     if (alertFromOpsgenie.size() > 0) {
 
-	def tz = TimeZone.getDefault()
-	def timestamp = new Date()
-
-	use ( TimeCategory ) {
-        	timestamp = timestamp + 30.minutes
-	}
-
-	timestamp = timestamp.format('dd-MM-yyyy HH:mm:ss', tz)
-
         def host = alertFromOpsgenie.details.host_name
         def service = alertFromOpsgenie.details.service_desc
-        def postParams = ["btnSubmit": "Commit", "cmd_mod": "2", "send_notification": "off", "use_ack_end_time": "on", "end_time": timestamp, "host": host]
+        def postParams = ["btnSubmit": "Commit", "cmd_mod": "2", "send_notification": "off", "host": host]
         if (service) postParams.hostservice = host + "^" + service;
         boolean discardAction = false;
 
