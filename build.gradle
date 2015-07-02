@@ -33,14 +33,12 @@ sourceSets {
     main {
         groovy {
             include "*/marid/scripts"
-            include "*/lamp/scripts"
         }
     }
 }
 
 
 dependencies {
-    compile project(":lamp")
     compile project(":marid")
 }
 
@@ -112,7 +110,107 @@ dependencies {
     debian 'org.vafer:jdeb:1.3'
 }
 
-task generateIntegration(dependsOn: 'package:generateBaseForIntegration') {}
+task generateIntegration(dependsOn: 'jar') <<{
+    generateClientStructure("${project.buildDir}/opsgenie-integration")
+}
+
+def executeCommandAndWait(command , logPrefix = "")  {
+    println logPrefix+" execute :"+command
+    def proc = command.execute();
+    def out = new StringBuilder()
+    def err = new StringBuilder()
+    proc.waitForProcessOutput(out, err)
+    if (out) println logPrefix+" out:\n$out"
+    if(proc.exitValue()){
+        throw new TaskExecutionException(tasks.generateIntegration, new Exception(err.toString()))
+    }
+    println logPrefix+" execute finished"
+}
+
+def generateLampBinary(String lampProjectPath){
+    def isWindows = System.getProperty('os.name').toLowerCase().contains("win");
+    if (isWindows) {
+        executeCommandAndWait("cmd /c ${lampProjectPath}/build_lamp.bat", "generating lamp binaries")
+    }else{
+        executeCommandAndWait("chmod -R +x ${lampProjectPath}/build_lamp", "")
+        executeCommandAndWait("${lampProjectPath}/build_lamp", "generating lamp binaries")
+    }
+}
+
+def generateClientStructure(String dataTarget) {
+    def commonProjectDir = "${project(':common').projectDir}";
+    def maridProjectDir = "${project(':marid').projectDir}";
+
+    def lampProjectDir = "${System.getenv("GOPATH")}/src/github.com/opsgenie/opsgenie-lamp";
+
+    generateLampBinary(lampProjectDir)
+
+    copy {
+        from "${commonProjectDir}/conf/opsgenie-integration.conf"
+        into "${dataTarget}/conf"
+    }
+
+    copy {
+        from "${lampProjectDir}/LICENSE"
+        into "${dataTarget}/lamp"
+    }
+
+    copy {
+        from "${lampProjectDir}/NOTICE"
+        into "${dataTarget}/lamp"
+    }
+
+    copy {
+        from "${lampProjectDir}/opsgenie-lamp.exe"
+        into "${dataTarget}/lamp"
+        rename "opsgenie-lamp.exe", "lamp.exe"
+    }
+
+    copy {
+        from ("${lampProjectDir}/opsgenie-lamp") {
+            fileMode = 0755
+        }
+        into "${dataTarget}/lamp"
+        rename "opsgenie-lamp", "lamp"
+    }
+
+    copy {
+        from("${maridProjectDir}/conf"){
+            exclude "marid.conf"
+        }
+        into "${dataTarget}/marid/conf"
+    }
+
+    copy {
+        from project(':marid').configurations.runtime
+        into "${dataTarget}/marid/lib"
+    }
+
+    copy {
+        from project(':marid').jar.archivePath
+        into "${dataTarget}/marid/lib"
+    }
+
+    copy {
+        from "${commonProjectDir}/licenses"
+        into "${dataTarget}/marid/licenses"
+    }
+
+    copy {
+        from "${maridProjectDir}/scripts"
+        into "${dataTarget}/marid/scripts"
+    }
+
+    copy {
+        from("${maridProjectDir}/native") {
+            exclude "marid.exe4j"
+            exclude "marid_64.exe4j"
+            exclude "marid_64_standalone.vmoptions"
+            exclude "marid_standalone.vmoptions"
+        }
+        into "${dataTarget}/marid"
+    }
+}
 
 task generateIntegrationForNative(dependsOn: 'generateIntegration') << {
     copy {
@@ -167,11 +265,9 @@ def buildRpm(String sourceDir, String name, String descrpt, Map fileMappingInput
 
 
         configFiles.put("${project.buildDir}/${sourceDir}/opsgenie-integration/conf/opsgenie-integration.conf", 'etc/opsgenie/conf')
-        configFiles.put("${project.buildDir}/${sourceDir}/opsgenie-integration/lamp/conf/log.properties", 'etc/opsgenie/lamp')
         configFiles.put("${project.buildDir}/${sourceDir}/opsgenie-integration/marid/conf/log.properties", 'etc/opsgenie/marid')
 
-        fileMapping.put("${project.buildDir}/${sourceDir}/opsgenie-integration/lamp/lib", 'var/lib/opsgenie/lamp')
-        fileMapping.put("${project.buildDir}/${sourceDir}/opsgenie-integration/lamp/scripts", 'var/opsgenie/lamp/scripts')
+        fileMapping.put("${project.buildDir}/${sourceDir}/opsgenie-integration/lamp/lamp", 'usr/bin')
         fileMapping.put("${project.buildDir}/${sourceDir}/opsgenie-integration/marid/scripts", 'var/opsgenie/marid/scripts')
         fileMapping.put("${project.buildDir}/${sourceDir}/opsgenie-integration/marid/conf/.keystore", 'etc/opsgenie/marid')
         fileMapping.put("${project.buildDir}/${sourceDir}/opsgenie-integration/marid/lib", 'var/lib/opsgenie/marid')
@@ -191,11 +287,6 @@ def buildRpm(String sourceDir, String name, String descrpt, Map fileMappingInput
             from(source) {
                 into(dest)
             }
-        }
-
-        from("${nativeSource}/lamp_rpm"){
-            into("usr/bin")
-            rename "lamp_rpm", "lamp"
         }
 
         from("${nativeSource}/profile"){
@@ -233,9 +324,8 @@ def buildDeb(String sourceDir, String name, String descrpt, Map fileMappingInput
         def nativeSource = "${project.buildDir}/os_client/${sourceDir}";
 
         fileMapping.put("${project.buildDir}/${sourceDir}/opsgenie-integration/conf/opsgenie-integration.conf", 'etc/opsgenie/conf')
-        fileMapping.put("${project.buildDir}/${sourceDir}/opsgenie-integration/lamp/log.properties", 'etc/opsgenie/lamp')
-        fileMapping.put("${project.buildDir}/${sourceDir}/opsgenie-integration/marid/log.properties", 'etc/opsgenie/marid')
 
+        fileMapping.put("${project.buildDir}/${sourceDir}/opsgenie-integration/lamp/lamp", 'usr/bin')
         fileMapping.put("${project.buildDir}/${sourceDir}/opsgenie-integration/lamp/conf", 'etc/opsgenie/lamp')
         fileMapping.put("${project.buildDir}/${sourceDir}/opsgenie-integration/lamp/lib", 'var/lib/opsgenie/lamp')
         fileMapping.put("${project.buildDir}/${sourceDir}/opsgenie-integration/lamp/scripts", 'var/opsgenie/lamp/scripts')
@@ -274,12 +364,6 @@ def buildDeb(String sourceDir, String name, String descrpt, Map fileMappingInput
 
         def conffiles = new File("${controlDir}/conffiles")
         conffiles.append("\n" + appender.toString())
-
-        copy {
-            from("${nativeSource}/lamp_rpm")
-            into("${dataDir}/usr/bin")
-            rename "lamp_rpm", "lamp"
-        }
 
         copy {
             from("${nativeSource}/profile")
@@ -349,9 +433,10 @@ apply from: 'icinga/icinga.gradle'
 apply from: 'zendesk/zendesk.gradle'
 apply from: 'icinga2/icinga2.gradle'
 
-task packageAll(dependsOn: ['packageSmarts',
-                               'packageSplunk',
-                               'packageOpennms',
+task packageAll(dependsOn: [
+//                                'packageSmarts',
+//                               'packageSplunk',
+//                               'packageOpennms',
                                'packageNagios',
                                'packageNagiosxi',
                                'packageNetcool',

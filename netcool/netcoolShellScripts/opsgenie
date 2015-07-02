@@ -23,5 +23,5 @@ Sent by the Netcool/OMNIbus Automation system
 EOF
 )
 
-$LAMP_HOME/lamp createAlert --message "$SUMMARY" --recipients $RECIPIENTS --entity "$NODE" --description  "$DESCRIPTION" --source NETCOOL --actions $ACTIONS \
-     -DSerial="$SERIAL" -DNode="$NODE" -DCount="$COUNT" -DSeverity="$SEVERITY"
+$LAMP_HOME/lamp createAlert --message "$SUMMARY" --recipients "$RECIPIENTS" --entity "$NODE" --description  "$DESCRIPTION" --source NETCOOL --actions "$ACTIONS" \
+     -D Serial="$SERIAL" -D Node="$NODE" -D Count="$COUNT" -D Severity="$SEVERITY"
