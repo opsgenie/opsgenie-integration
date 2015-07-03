@@ -132,7 +132,6 @@ def generateLampBinary(String lampProjectPath){
     if (isWindows) {
         executeCommandAndWait("cmd /c ${lampProjectPath}/build_lamp.bat", "generating lamp binaries")
     }else{
-        executeCommandAndWait("chmod -R +x ${lampProjectPath}/build_lamp", "")
         executeCommandAndWait("${lampProjectPath}/build_lamp", "generating lamp binaries")
     }
 }
