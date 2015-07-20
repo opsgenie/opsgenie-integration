@@ -114,54 +114,35 @@ task generateIntegration(dependsOn: 'jar') <<{
     generateClientStructure("${project.buildDir}/opsgenie-integration")
 }
 
-def executeCommandAndWait(command , logPrefix = "")  {
-    println logPrefix+" execute :"+command
-    def proc = command.execute();
-    def out = new StringBuilder()
-    def err = new StringBuilder()
-    proc.waitForProcessOutput(out, err)
-    if (out) println logPrefix+" out:\n$out"
-    if(proc.exitValue()){
-        throw new TaskExecutionException(tasks.generateIntegration, new Exception(err.toString()))
-    }
-    println logPrefix+" execute finished"
-}
-
-def generateLampBinary(String lampProjectPath){
-    def isWindows = System.getProperty('os.name').toLowerCase().contains("win");
-    if (isWindows) {
-        executeCommandAndWait("cmd /c ${lampProjectPath}/build_lamp.bat", "generating lamp binaries")
-    }else{
-        executeCommandAndWait("${lampProjectPath}/build_lamp", "generating lamp binaries")
+task generateIntegrationForNative(dependsOn: 'generateIntegration') << {
+    copy {
+        from("${project(':common').projectDir}/native")
+        into("${project.buildDir}/native")
     }
 }
 
-def generateClientStructure(String dataTarget) {
-    def commonProjectDir = "${project(':common').projectDir}";
-    def maridProjectDir = "${project(':marid').projectDir}";
+task lampZip(dependsOn: 'generateLampZip', type: Zip) {
+    from "${buildDir}/zip"
+    baseName = "opsgenie-lamp"
+}
 
+task generateLampZip << {
     def lampProjectDir = "${System.getenv("GOPATH")}/src/github.com/opsgenie/opsgenie-lamp";
-
     generateLampBinary(lampProjectDir)
 
     copy {
-        from "${commonProjectDir}/conf/opsgenie-integration.conf"
-        into "${dataTarget}/conf"
-    }
-
-    copy {
         from "${lampProjectDir}/LICENSE"
-        into "${dataTarget}/lamp"
+        into "${buildDir}/zip/lamp"
     }
 
     copy {
         from "${lampProjectDir}/NOTICE"
-        into "${dataTarget}/lamp"
+        into "${buildDir}/zip/lamp"
     }
 
     copy {
         from "${lampProjectDir}/opsgenie-lamp.exe"
-        into "${dataTarget}/lamp"
+        into "${buildDir}/zip/lamp"
         rename "opsgenie-lamp.exe", "lamp.exe"
     }
 
@@ -169,8 +150,24 @@ def generateClientStructure(String dataTarget) {
         from ("${lampProjectDir}/opsgenie-lamp") {
             fileMode = 0755
         }
-        into "${dataTarget}/lamp"
+        into "${buildDir}/zip/lamp"
         rename "opsgenie-lamp", "lamp"
+    }
+
+    copy {
+        from("${lampProjectDir}/conf")
+        into "${buildDir}/zip/lamp/conf"
+    }
+}
+
+def generateClientStructure(String dataTarget) {
+    def commonProjectDir = "${project(':common').projectDir}";
+    def maridProjectDir = "${project(':marid').projectDir}";
+
+    copy {
+        from "${maridProjectDir}/conf/marid.conf"
+        into "${dataTarget}/conf"
+        rename "marid.conf", "opsgenie-integration.conf"
     }
 
     copy {
@@ -211,11 +208,44 @@ def generateClientStructure(String dataTarget) {
     }
 }
 
-task generateIntegrationForNative(dependsOn: 'generateIntegration') << {
-    copy {
-        from("${project(':common').projectDir}/native")
-        into("${project.buildDir}/native")
+def generateLampBinary(String lampProjectPath){
+    def isWindows = System.getProperty('os.name').toLowerCase().contains("win");
+    if (isWindows) {
+        executeCommandAndWait("cmd /c ${lampProjectPath}/build_lamp.bat", "generating lamp binaries")
+    }else{
+        executeCommandAndWait("${lampProjectPath}/build_lamp", "generating lamp binaries")
     }
+
+    if (!(new File("${lampProjectPath}/opsgenie-lamp").exists() && new File("${lampProjectPath}/opsgenie-lamp.exe").exists())){
+        throw new TaskExecutionException(tasks.generateLampZip, new Exception("one of or both [opsgenie-lamp, opsgenie-lamp.exe] executables are missing"))
+    }
+}
+
+def executeCommandAndWait(command , logPrefix = "")  {
+    println logPrefix+" execute :"+command
+    def proc = command.execute();
+    def out = new StringBuilder()
+    def err = new StringBuilder()
+    proc.waitForProcessOutput(out, err)
+    if (out) println logPrefix+" out:\n$out"
+    if(proc.exitValue()){
+        throw new TaskExecutionException(tasks.generateLampZip, new Exception(err.toString()))
+    }
+    println logPrefix+" execute finished"
+}
+
+def addLampToIntegrationPackage(String buildDir, String destination){
+    tasks.generateLampZip.execute()
+    copy{
+        from "${buildDir}/lamp"
+        into "${destination}/opsgenie-integration/lamp"
+    }
+
+    delete "${destination}/opsgenie-integration/lamp/conf"
+
+    mergeConfFile("${destination}/opsgenie-integration/conf/opsgenie-integration.conf",
+            "${buildDir}/lamp/conf/lamp.conf",
+            "${destination}/opsgenie-integration/conf/opsgenie-integration.conf")
 }
 
 def mergeConfFile(String mainConfFile, String partialConfFilePath, String destinationFilePath){
@@ -266,7 +296,6 @@ def buildRpm(String sourceDir, String name, String descrpt, Map fileMappingInput
         configFiles.put("${project.buildDir}/${sourceDir}/opsgenie-integration/conf/opsgenie-integration.conf", 'etc/opsgenie/conf')
         configFiles.put("${project.buildDir}/${sourceDir}/opsgenie-integration/marid/conf/log.properties", 'etc/opsgenie/marid')
 
-        fileMapping.put("${project.buildDir}/${sourceDir}/opsgenie-integration/lamp/lamp", 'usr/bin')
         fileMapping.put("${project.buildDir}/${sourceDir}/opsgenie-integration/marid/scripts", 'var/opsgenie/marid/scripts')
         fileMapping.put("${project.buildDir}/${sourceDir}/opsgenie-integration/marid/conf/.keystore", 'etc/opsgenie/marid')
         fileMapping.put("${project.buildDir}/${sourceDir}/opsgenie-integration/marid/lib", 'var/lib/opsgenie/marid')
@@ -324,10 +353,6 @@ def buildDeb(String sourceDir, String name, String descrpt, Map fileMappingInput
 
         fileMapping.put("${project.buildDir}/${sourceDir}/opsgenie-integration/conf/opsgenie-integration.conf", 'etc/opsgenie/conf')
 
-        fileMapping.put("${project.buildDir}/${sourceDir}/opsgenie-integration/lamp/lamp", 'usr/bin')
-        fileMapping.put("${project.buildDir}/${sourceDir}/opsgenie-integration/lamp/conf", 'etc/opsgenie/lamp')
-        fileMapping.put("${project.buildDir}/${sourceDir}/opsgenie-integration/lamp/lib", 'var/lib/opsgenie/lamp')
-        fileMapping.put("${project.buildDir}/${sourceDir}/opsgenie-integration/lamp/scripts", 'var/opsgenie/lamp/scripts')
         fileMapping.put("${project.buildDir}/${sourceDir}/opsgenie-integration/marid/scripts", 'var/opsgenie/marid/scripts')
         fileMapping.put("${project.buildDir}/${sourceDir}/opsgenie-integration/marid/conf", 'etc/opsgenie/marid')
         fileMapping.put("${project.buildDir}/${sourceDir}/opsgenie-integration/marid/lib", 'var/lib/opsgenie/marid')
