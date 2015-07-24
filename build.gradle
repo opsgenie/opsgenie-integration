@@ -469,5 +469,6 @@ task packageAll(dependsOn: [
                                'packageZenoss',
                                'packageIcinga',
                                 'packageZendesk',
-                                'packageIcinga2'
+                                'packageIcinga2',
+                                'lampZip'
 ])
