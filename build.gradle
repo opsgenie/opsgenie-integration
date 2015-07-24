@@ -237,14 +237,14 @@ def executeCommandAndWait(command , logPrefix = "")  {
 def addLampToIntegrationPackage(String buildDir, String destination){
     tasks.generateLampZip.execute()
     copy{
-        from "${buildDir}/lamp"
+        from "${buildDir}/zip/lamp"
         into "${destination}/opsgenie-integration/lamp"
     }
 
     delete "${destination}/opsgenie-integration/lamp/conf"
 
     mergeConfFile("${destination}/opsgenie-integration/conf/opsgenie-integration.conf",
-            "${buildDir}/lamp/conf/lamp.conf",
+            "${buildDir}/zip/lamp/conf/lamp.conf",
             "${destination}/opsgenie-integration/conf/opsgenie-integration.conf")
 }
 
