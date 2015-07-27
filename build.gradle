@@ -241,11 +241,16 @@ def addLampToIntegrationPackage(String buildDir, String destination){
         into "${destination}/opsgenie-integration/lamp"
     }
 
-    delete "${destination}/opsgenie-integration/lamp/conf"
+    def lampConfFilePath = "${destination}/opsgenie-integration/lamp/conf/lamp.conf"
+    new File (lampConfFilePath) << new File(lampConfFilePath).filterLine(new StringWriter()) {
+        !it.contains("apiKey")
+    }
 
     mergeConfFile("${destination}/opsgenie-integration/conf/opsgenie-integration.conf",
-            "${buildDir}/zip/lamp/conf/lamp.conf",
+            lampConfFilePath,
             "${destination}/opsgenie-integration/conf/opsgenie-integration.conf")
+
+    delete "${destination}/opsgenie-integration/lamp/conf"
 }
 
 def mergeConfFile(String mainConfFile, String partialConfFilePath, String destinationFilePath){
