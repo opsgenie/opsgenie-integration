@@ -98,6 +98,7 @@ String loginToZabbix(OpsGenieHttpClient HTTP_CLIENT, String url) {
     Map contentTypeHeader = [:]
     contentTypeHeader[HttpHeaders.CONTENT_TYPE] = "application/json"
     def response = HTTP_CLIENT.post(url, JsonUtils.toJson(loginParams), contentTypeHeader)
+    logger.debug("${LOG_PREFIX} login response:${response.statusCode} ${response.getContentAsString()}")
     def responseMap = JsonUtils.parse(response.content)
     if (responseMap.error)
         logger.error("${LOG_PREFIX} Cannot login to zabbix; response:${responseMap.error.data}");
