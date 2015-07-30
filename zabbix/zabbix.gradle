@@ -42,10 +42,10 @@ task packageZabbixOS(dependsOn: ['generateIntegrationForNative', 'prepareZabbix'
             "${project.projectDir}/zabbix/zabbix/actionCommand.txt" : "etc/opsgenie"
     ]
 
-    buildRpm('zabbix', 'opsgenie-zabbix', 'OpsGenie - Zabbix integration files including lamp, marid and Zabbix scripts',
+    buildRpm('zabbix', 'opsgenie-zabbix', 'OpsGenie - Zabbix integration files including marid and Zabbix scripts',
             fileMapping, [:])
 
-    buildDeb('zabbix', 'opsgenie-zabbix', 'OpsGenie - Zabbix integration files including lamp, marid and Zabbix scripts',
+    buildDeb('zabbix', 'opsgenie-zabbix', 'OpsGenie - Zabbix integration files including marid and Zabbix scripts',
             fileMapping, [:])
 
 }

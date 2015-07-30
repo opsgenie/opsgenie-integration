@@ -5,6 +5,8 @@ task prepareNetcool(dependsOn: 'generateIntegration') << {
         into "${destination}/opsgenie-integration"
     }
 
+    addLampToIntegrationPackage("${project.buildDir}", destination)
+
     copy {
         from "${project.projectDir}/netcool/marid"
         into "${destination}/opsgenie-integration/marid"

@@ -24,10 +24,10 @@ task packageRedmineZip(dependsOn: 'prepareRedmine', type: Zip) {
 task packageRedmineOS(dependsOn: ['generateIntegrationForNative', 'prepareRedmine']) << {
     copyNativeFiles('redmine')
 
-    buildRpm('redmine', 'opsgenie-redmine', 'OpsGenie - Redmine integration files including lamp and marid',
+    buildRpm('redmine', 'opsgenie-redmine', 'OpsGenie - Redmine integration files including marid',
             [:], [:])
 
-    buildDeb('redmine', 'opsgenie-redmine', 'OpsGenie - Redmine integration files including lamp and marid',
+    buildDeb('redmine', 'opsgenie-redmine', 'OpsGenie - Redmine integration files including marid',
             [:], [:])
 }
 

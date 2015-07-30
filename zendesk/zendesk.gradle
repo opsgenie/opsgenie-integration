@@ -24,10 +24,10 @@ task packageZendeskZip(dependsOn: 'prepareZendesk', type: Zip) {
 task packageZendeskOS(dependsOn: ['generateIntegrationForNative', 'prepareZendesk']) << {
     copyNativeFiles('zendesk')
 
-    buildRpm('zendesk', 'opsgenie-zendesk', 'OpsGenie - Zendesk integration files including lamp and marid',
+    buildRpm('zendesk', 'opsgenie-zendesk', 'OpsGenie - Zendesk integration files including marid',
             [:], [:])
 
-    buildDeb('zendesk', 'opsgenie-zendesk', 'OpsGenie - Zendesk integration files including lamp and marid',
+    buildDeb('zendesk', 'opsgenie-zendesk', 'OpsGenie - Zendesk integration files including marid',
             [:], [:])
 }
 
