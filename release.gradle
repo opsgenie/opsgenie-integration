@@ -352,6 +352,7 @@ def generateReleaseTasks() {
         if(isReleaseForLamp()) {
             tasks << 'packageLamp'
         }
+        tasks << 'maridAll'
         tasks << 'packageIntegrations'
     } else if(isReleaseForLamp()) {
         tasks << 'packageLamp'
