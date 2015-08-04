@@ -209,7 +209,7 @@ def increaseVersion(String type) {
 
     args = project.args.split(',')
     if(args.contains('sdk') || args.contains('all')) {
-        increseAll(type, true)
+        increaseAll(type, true)
         return
     }else if(args.contains('marid')) {
         increaseAll(type, false)
@@ -230,7 +230,7 @@ def increaseVersion(String type) {
     versions.store(new FileOutputStream("${projectDir}/version.properties"), "")
 }
 
-def increseAll(String type, boolean increaseSdk) {
+def increaseAll(String type, boolean increaseSdk) {
     Properties versions = project.ext.versions
     versions.store(new FileOutputStream("${projectDir}/version.old.properties"), "")
     for (String integration : versions.stringPropertyNames()) {
