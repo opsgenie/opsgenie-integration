@@ -27,7 +27,7 @@ if(gradle.startParameter.taskNames.contains('removeSnapshot')) {
     project.ext.versionSuffix = '-SNAPSHOT'
 }
 
-version = project.ext.versions.getProperty('client') + project.ext.versionSuffix
+version = project.ext.versions.getProperty('sdk') + project.ext.versionSuffix
 
 sourceSets {
     main {
@@ -52,6 +52,14 @@ subprojects  {
 
     group = "com.opsgenie.integration"
     version = rootProject.version
+
+    project.ext.versions = new Properties();
+    project.ext.versions.load(new FileInputStream("${rootProject.projectDir}/version.properties"))
+    if(gradle.startParameter.taskNames.contains('removeSnapshot')) {
+        project.ext.versionSuffix = ''
+    } else {
+        project.ext.versionSuffix = '-SNAPSHOT'
+    }
 
     repositories {
         mavenCentral()
@@ -122,6 +130,7 @@ task generateIntegrationForNative(dependsOn: 'generateIntegration') << {
 task packageLamp(dependsOn: 'generateLampZip', type: Zip) {
     from "${buildDir}/zip"
     baseName = "opsgenie-lamp"
+    version = project.ext.versions.getProperty('lamp') + project.ext.versionSuffix
 }
 
 task generateLampZip << {

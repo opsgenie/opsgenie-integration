@@ -8,9 +8,10 @@ buildscript {
     }
 }
 
+
 import com.amazonaws.*
-import com.amazonaws.auth.AWSCredentials;
-import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.auth.AWSCredentials
+import com.amazonaws.auth.BasicAWSCredentials
 import com.amazonaws.services.s3.AmazonS3
 import com.amazonaws.services.s3.AmazonS3Client
 import com.amazonaws.services.s3.model.*
@@ -21,7 +22,7 @@ def generateDownloadsProperties() {
     copy {
         from getDownloadsTemplate()
         filter {
-            it.replace('[[client]]', project.ext.versions.getProperty('client'))
+            it.replace('[[sdk]]', project.ext.versions.getProperty('sdk'))
                     .replace('[[splunk]]', project.ext.versions.getProperty('splunk'))
                     .replace('[[smarts]]', project.ext.versions.getProperty('smarts'))
                     .replace('[[opennms]]', project.ext.versions.getProperty('opennms'))
@@ -207,9 +208,11 @@ def increaseVersion(String type) {
     }
 
     args = project.args.split(',')
-    if(args.contains('client') || args.contains('all')) {
-        increseAll(type)
+    if(args.contains('sdk') || args.contains('all')) {
+        increseAll(type, true)
         return
+    }else if(args.contains('marid')) {
+        increaseAll(type, false)
     }
 
     Properties versions = project.ext.versions
@@ -227,10 +230,13 @@ def increaseVersion(String type) {
     versions.store(new FileOutputStream("${projectDir}/version.properties"), "")
 }
 
-def increseAll(String type) {
+def increseAll(String type, boolean increaseSdk) {
     Properties versions = project.ext.versions
     versions.store(new FileOutputStream("${projectDir}/version.old.properties"), "")
     for (String integration : versions.stringPropertyNames()) {
+        if (!increaseSdk && integration.equals('sdk')){
+            continue
+        }
         String oldVersion = versions.getProperty(integration)
         String newVersion = type.equals('minor') ? getIncreasedMinor(oldVersion) : getIncreasedMajor(oldVersion)
         println integration
@@ -285,7 +291,12 @@ def getDownloadsTemplate() {
 
 def isReleaseForAll() {
     def args = project.args.toString().split('\\,')
-    return args.contains('all') || args.contains('client')
+    return args.contains('all') || args.contains('sdk')
+}
+
+def isMaridBasedRelease(){
+    def args = project.args.toString().split('\\,')
+    return args.contains('marid')
 }
 
 def createPropertiesToUploadToNexus() {
@@ -306,8 +317,10 @@ def generateReleaseTasks() {
     if(isReleaseForAll()) {
         tasks << 'packageAll'
         tasks << 'packageSdk'
-        tasks << 'uploadArchives'
-    } else {
+//        tasks << 'uploadArchives'
+    }else if(isMaridBasedRelease()){
+        tasks << 'packageAll'
+    }else {
         for(String integration : args) {
             String taskName = "package${Character.toUpperCase(integration.charAt(0))}${integration.substring(1)}"
             tasks << taskName
@@ -323,7 +336,7 @@ task release(type: GradleBuild ) {
             isVersionUpdated = versionUpdate(project.type);
         }
         tasks = generateReleaseTasks();
-        createPropertiesToUploadToNexus();
+//        createPropertiesToUploadToNexus();
     }
     doLast{
         generateDownloadsProperties()
@@ -336,7 +349,8 @@ task release(type: GradleBuild ) {
         }
         uploadDownloadsPropertiesToS3()
         if(isVersionUpdated) {
-            updateGit(project.args)
+            println "will update git"
+//            updateGit(project.args)
         }
     }
 }
