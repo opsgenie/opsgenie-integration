@@ -243,6 +243,9 @@ def increaseVersions(String type, Set versionNames) {
     versions.store(new FileOutputStream("${projectDir}/version.old.properties"), "")
     for (String integration : versionNames) {
         String oldVersion = versions.getProperty(integration)
+        if(oldVersion == null) {
+            throw new TaskExecutionException("${integration} does not exist! ")
+        }
         String newVersion = type.equals('minor') ? getIncreasedMinor(oldVersion) : getIncreasedMajor(oldVersion)
         println integration
         versions.setProperty(integration, newVersion)
