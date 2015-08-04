@@ -110,9 +110,7 @@ dependencies {
     debian 'org.vafer:jdeb:1.3'
 }
 
-task generateIntegration(dependsOn: 'jar') <<{
-    generateClientStructure("${project.buildDir}/opsgenie-integration")
-}
+task generateIntegration(dependsOn: 'marid:generateBaseForIntegration')
 
 task generateIntegrationForNative(dependsOn: 'generateIntegration') << {
     copy {
@@ -121,7 +119,7 @@ task generateIntegrationForNative(dependsOn: 'generateIntegration') << {
     }
 }
 
-task lampZip(dependsOn: 'generateLampZip', type: Zip) {
+task packageLamp(dependsOn: 'generateLampZip', type: Zip) {
     from "${buildDir}/zip"
     baseName = "opsgenie-lamp"
 }
@@ -160,54 +158,6 @@ task generateLampZip << {
     }
 }
 
-def generateClientStructure(String dataTarget) {
-    def commonProjectDir = "${project(':common').projectDir}";
-    def maridProjectDir = "${project(':marid').projectDir}";
-
-    copy {
-        from "${maridProjectDir}/conf/marid.conf"
-        into "${dataTarget}/conf"
-        rename "marid.conf", "opsgenie-integration.conf"
-    }
-
-    copy {
-        from("${maridProjectDir}/conf"){
-            exclude "marid.conf"
-        }
-        into "${dataTarget}/marid/conf"
-    }
-
-    copy {
-        from project(':marid').configurations.runtime
-        into "${dataTarget}/marid/lib"
-    }
-
-    copy {
-        from project(':marid').jar.archivePath
-        into "${dataTarget}/marid/lib"
-    }
-
-    copy {
-        from "${commonProjectDir}/licenses"
-        into "${dataTarget}/marid/licenses"
-    }
-
-    copy {
-        from "${maridProjectDir}/scripts"
-        into "${dataTarget}/marid/scripts"
-    }
-
-    copy {
-        from("${maridProjectDir}/native") {
-            exclude "marid.exe4j"
-            exclude "marid_64.exe4j"
-            exclude "marid_64_standalone.vmoptions"
-            exclude "marid_standalone.vmoptions"
-        }
-        into "${dataTarget}/marid"
-    }
-}
-
 def generateLampBinary(String lampProjectPath){
     def isWindows = System.getProperty('os.name').toLowerCase().contains("win");
     if (isWindows) {
@@ -217,7 +167,13 @@ def generateLampBinary(String lampProjectPath){
     }
 
     if (!(new File("${lampProjectPath}/opsgenie-lamp").exists() && new File("${lampProjectPath}/opsgenie-lamp.exe").exists())){
-        throw new TaskExecutionException(tasks.generateLampZip, new Exception("one of or both [opsgenie-lamp, opsgenie-lamp.exe] executables are missing"))
+        if(System.getenv("DEV")){
+            throw new TaskExecutionException(tasks.generateLampZip, new Exception("one of or both [opsgenie-lamp, opsgenie-lamp.exe] executables are missing"))
+        }else{
+            def message = "one of or both [opsgenie-lamp, opsgenie-lamp.exe] executables are missing. Lamp package will not be generated, integration packages containing lamp will be generated without lamp."
+            println message
+            throw new StopActionException(message)
+        }
     }
 }
 
@@ -229,29 +185,48 @@ def executeCommandAndWait(command , logPrefix = "")  {
     proc.waitForProcessOutput(out, err)
     if (out) println logPrefix+" out:\n$out"
     if(proc.exitValue()){
-        throw new TaskExecutionException(tasks.generateLampZip, new Exception(err.toString()))
+        if(System.getenv("DEV")){
+            throw new TaskExecutionException(tasks.generateLampZip, new Exception(err.toString()))
+        }else{
+            def message = "Exception occured while building lamp. Lamp package will not be generated, integration packages containing lamp will be generated without lamp."
+            println message
+            throw new StopActionException(message)
+        }
     }
     println logPrefix+" execute finished"
 }
 
 def addLampToIntegrationPackage(String buildDir, String destination){
     tasks.generateLampZip.execute()
+
+    if(!new File("${buildDir}/zip/lamp").exists()) {
+        def message = "Could not find Lamp directory. Packages containing lamp will be generated without lamp."
+        println message
+        throw new StopActionException(message)
+    }
     copy{
         from "${buildDir}/zip/lamp"
         into "${destination}/opsgenie-integration/lamp"
     }
 
-    def lampConfFilePath = "${destination}/opsgenie-integration/lamp/conf/lamp.conf"
-    new File (lampConfFilePath) << new File(lampConfFilePath).filterLine(new StringWriter()) {
-        !it.contains("apiKey")
+    def tempLampConfFilePath = "${destination}/opsgenie-integration/lamp/conf/lamp_temp.conf"
+    new File(tempLampConfFilePath).withPrintWriter { out ->
+        new File("${destination}/opsgenie-integration/lamp/conf/lamp.conf").eachLine { line ->
+            if (!line.startsWith("apiKey")){
+                out.println("${line}")
+            }else{
+                out.println()
+            }
+        }
     }
 
     mergeConfFile("${destination}/opsgenie-integration/conf/opsgenie-integration.conf",
-            lampConfFilePath,
+            tempLampConfFilePath,
             "${destination}/opsgenie-integration/conf/opsgenie-integration.conf")
 
     delete "${destination}/opsgenie-integration/lamp/conf"
 }
+
 
 def mergeConfFile(String mainConfFile, String partialConfFilePath, String destinationFilePath){
     def partialConfFile = new File(partialConfFilePath)
@@ -475,5 +450,5 @@ task packageAll(dependsOn: [
                                'packageIcinga',
                                 'packageZendesk',
                                 'packageIcinga2',
-                                'lampZip'
+                                'packageLamp'
 ])

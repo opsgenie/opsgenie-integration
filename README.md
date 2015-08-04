@@ -5,12 +5,9 @@ The project includes OpsGenie's specific integration packages:
 * icinga
 * icinga2
 * nagios
-* nagioxxi
+* nagiosxi
 * netcool
-* opennms
 * redmine
-* smarts
-* splunk
 * zabbix
 * zendesk
 * zenoss
@@ -30,7 +27,9 @@ The project includes OpsGenie's specific integration packages:
 * **package\<Integration_name\>:** Packages the integration specific rpm, deb or zip files.
 * **package\<Integration_name\>Zip:** Packages the integration's zip archive only if available
 * **package\<Integration_name\>OS:** Packages the integration's rpm and deb archives only if available
-* **packageAll:** Packages all zip, rpm and rpm archives for all integrations.
+* **packageAll:** Packages all zip, rpm and rpm archives for all integrations. Also includes Go based Lamp client tool zip package(if you checkout go based lamp locally).
+
+* **packageLamp:** If you checkout Go Based Lamp to your local computer, you can generate a zip package of it. You can find the Go Based Lamp source code from [here](https://github.com/opsgenie/opsgenie-lamp)
 
 You can run the tasks:
 
