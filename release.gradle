@@ -381,8 +381,12 @@ task release(type: GradleBuild ) {
         uploadIntegrationsToS3()
         if(isReleaseForAll()) {
             uploadJavaDocToS3()
+        }
+
+        if(isReleaseForMarid()) {
             uploadMaridPackagesToS3()
         }
+
         uploadDownloadsPropertiesToS3()
         if(isVersionUpdated) {
             println "will update git"
