@@ -244,7 +244,7 @@ def increaseVersions(String type, Set versionNames) {
     for (String integration : versionNames) {
         String oldVersion = versions.getProperty(integration)
         if(oldVersion == null) {
-            throw new TaskExecutionException(tasks.release, integration +" does not exist! ")
+            throw new TaskExecutionException(tasks.release, new Exception(integration +" does not exist! "))
         }
         String newVersion = type.equals('minor') ? getIncreasedMinor(oldVersion) : getIncreasedMajor(oldVersion)
         println integration
