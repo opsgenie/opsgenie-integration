@@ -18,6 +18,11 @@ import com.amazonaws.services.s3.model.*
 
 import java.text.SimpleDateFormat
 
+def getLampBasedPackageNames() {
+    return ["netcool"]
+}
+
+
 def generateDownloadsProperties() {
     copy {
         from getDownloadsTemplate()
@@ -208,43 +213,60 @@ def increaseVersion(String type) {
     }
 
     args = project.args.split(',')
-    if(args.contains('sdk') || args.contains('all')) {
-        increaseAll(type, true)
-        return
-    }else if(args.contains('marid')) {
-        increaseAll(type, false)
-    }
+
+    Set versionNames = []
 
     Properties versions = project.ext.versions
-    versions.store(new FileOutputStream("${projectDir}/version.old.properties"), "")
-    for(def arg : args) {
-        String oldVersion = versions.getProperty(arg)
-        if(oldVersion == null) {
-            throw new IllegalArgumentException("Integration ${arg} does not exist!")
+
+    if(args.contains("all") || args.contains("sdk")) {
+        versionNames << versions.stringPropertyNames()
+    } else {
+        if(args.contains("marid")) {
+            versionNames << versions.stringPropertyNames()
+            versionNames.remove("sdk")
+            versionNames.remove("lamp")
         }
-        String newVersion = type.equals("minor") ? getIncreasedMinor(oldVersion) : getIncreasedMajor(oldVersion)
-        versions.setProperty(arg, newVersion)
+
+        if(args.contains("lamp")) {
+            versionNames.add("lamp")
+            versionNames.addAll(getLampBasedPackageNames())
+        }
+
+        versionNames.addAll(args)
     }
 
-    println "${type} versions increased for ${args}"
-    versions.store(new FileOutputStream("${projectDir}/version.properties"), "")
+    increaseVersions(type, versionNames);
 }
 
-def increaseAll(String type, boolean increaseSdk) {
+def increaseVersions(String type, Set versionNames) {
     Properties versions = project.ext.versions
     versions.store(new FileOutputStream("${projectDir}/version.old.properties"), "")
-    for (String integration : versions.stringPropertyNames()) {
-        if (!increaseSdk && integration.equals('sdk')){
-            continue
-        }
+    for (String integration : versionNames) {
         String oldVersion = versions.getProperty(integration)
         String newVersion = type.equals('minor') ? getIncreasedMinor(oldVersion) : getIncreasedMajor(oldVersion)
         println integration
         versions.setProperty(integration, newVersion)
     }
-    println "All ${type} versions increased!"
+
+    println "${type} versions increased for ${versionNames}!"
     versions.store(new FileOutputStream("${projectDir}/version.properties"), "")
 }
+
+//def increaseAll(String type, boolean increaseSdk) {
+//    Properties versions = project.ext.versions
+//    versions.store(new FileOutputStream("${projectDir}/version.old.properties"), "")
+//    for (String integration : versions.stringPropertyNames()) {
+//        if (!increaseSdk && integration.equals('sdk')){
+//            continue
+//        }
+//        String oldVersion = versions.getProperty(integration)
+//        String newVersion = type.equals('minor') ? getIncreasedMinor(oldVersion) : getIncreasedMajor(oldVersion)
+//        println integration
+//        versions.setProperty(integration, newVersion)
+//    }
+//    println "All ${type} versions increased!"
+//    versions.store(new FileOutputStream("${projectDir}/version.properties"), "")
+//}
 
 task newMinor << {
     increaseVersion('minor')
