@@ -124,12 +124,12 @@ def uploadJavaDocToS3() {
     println '[Release] Started to upload JavaDoc - Finished'
 }
 
-def uploadClientPackagesToS3() {
+def uploadMaridPackagesToS3() {
     def client = getAWSClient()
     def props = getUploadOptions()
     def downloadsBucket = props.getProperty('amazonDownloadsBucket')
 
-    FileTree packages = fileTree(dir: "${project(':package').buildDir}/distributions")
+    FileTree packages = fileTree(dir: "${project(':marid').buildDir}/distributions")
     packages.include '*.zip'
     packages.include '*.deb'
     packages.include '*.rpm'
@@ -294,9 +294,14 @@ def isReleaseForAll() {
     return args.contains('all') || args.contains('sdk')
 }
 
-def isMaridBasedRelease(){
+def isReleaseForMarid(){
     def args = project.args.toString().split('\\,')
     return args.contains('marid')
+}
+
+def isReleaseForLamp() {
+    def args = project.args.toString().split('\\,')
+    return args.contains('lamp')
 }
 
 def createPropertiesToUploadToNexus() {
@@ -318,9 +323,15 @@ def generateReleaseTasks() {
         tasks << 'packageAll'
         tasks << 'packageSdk'
 //        tasks << 'uploadArchives'
-    }else if(isMaridBasedRelease()){
-        tasks << 'packageAll'
-    }else {
+    }else if(isReleaseForMarid()){
+        if(isReleaseForLamp()) {
+            tasks << 'packageLamp'
+        }
+        tasks << 'packageIntegrations'
+    } else if(isReleaseForLamp()) {
+        tasks << 'packageLamp'
+        tasks << 'packageNetcool'
+    }  else {
         for(String integration : args) {
             String taskName = "package${Character.toUpperCase(integration.charAt(0))}${integration.substring(1)}"
             tasks << taskName
@@ -345,7 +356,7 @@ task release(type: GradleBuild ) {
         uploadIntegrationsToS3()
         if(isReleaseForAll()) {
             uploadJavaDocToS3()
-            uploadClientPackagesToS3()
+            uploadMaridPackagesToS3()
         }
         uploadDownloadsPropertiesToS3()
         if(isVersionUpdated) {

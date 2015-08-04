@@ -446,7 +446,8 @@ apply from: 'icinga/icinga.gradle'
 apply from: 'zendesk/zendesk.gradle'
 apply from: 'icinga2/icinga2.gradle'
 
-task packageAll(dependsOn: [
+
+task packageIntegrations(dependsOn: [
 //                                'packageSmarts',
 //                               'packageSplunk',
 //                               'packageOpennms',
@@ -458,6 +459,7 @@ task packageAll(dependsOn: [
                                'packageZenoss',
                                'packageIcinga',
                                 'packageZendesk',
-                                'packageIcinga2',
-                                'packageLamp'
+                                'packageIcinga2'
 ])
+
+task packageAll(dependsOn: ['packageIntegrations', 'packageLamp'])
