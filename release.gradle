@@ -219,10 +219,10 @@ def increaseVersion(String type) {
     Properties versions = project.ext.versions
 
     if(args.contains("all") || args.contains("sdk")) {
-        versionNames << versions.stringPropertyNames()
+        versionNames.addAll(versions.stringPropertyNames())
     } else {
         if(args.contains("marid")) {
-            versionNames << versions.stringPropertyNames()
+            versionNames.addAll(versions.stringPropertyNames())
             versionNames.remove("sdk")
             versionNames.remove("lamp")
         }
