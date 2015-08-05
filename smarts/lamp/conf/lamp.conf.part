@@ -1,7 +1,0 @@
-
-######################################## EMC SMARTS BROKER CONFIGURATION #######################################
-###Change following EMC/Smarts broker configuration if you are going to use Smarts Integration
-smarts.username=admin
-smarts.password=changeme
-smarts.brokerUsername=BrokerNonsecure
-smarts.brokerPassword=Nonsecure

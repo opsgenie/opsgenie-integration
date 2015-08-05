@@ -109,19 +109,11 @@ repositories {
 
 configurations {
     netcool
-    smarts
-    splunk
     debian
 }
 
 dependencies {
     netcool 'com.sybase.jdbc:sybase:5.5.OG'
-    smarts 'com.smarts:net:1.0.OG'
-    smarts 'com.smarts:platform:1.0.OG'
-    smarts 'com.smarts:skclient:1.0.OG'
-    splunk 'org.jfree:jcommon:1.0.17'
-    splunk 'org.jfree:jfreechart:1.0.14'
-    splunk 'org.apache.commons:commons-csv:1.0'
     debian 'org.vafer:jdeb:1.3'
 }
 
@@ -440,9 +432,6 @@ apply from: 'release.gradle'
 apply from: 'sdk.gradle'
 
 //apply scripts
-apply from: 'smarts/smarts.gradle'
-apply from: 'splunk/splunk.gradle'
-apply from: 'opennms/opennms.gradle'
 apply from: 'nagios/nagios.gradle'
 apply from: 'nagiosxi/nagiosxi.gradle'
 apply from: 'netcool/netcool.gradle'
