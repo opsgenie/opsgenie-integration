@@ -203,17 +203,24 @@ def uploadDownloadsPropertiesToS3() {
     println '[Release] Started to upload download.properties - finished'
 }
 
-def getIncreasedMinor(String version) {
+def getIncreasedBugfix(String version) {
     String[] versions = version.split('\\.')
-    int minor = Integer.valueOf(versions[2]) + 1
-    return versions[0] + "." + versions[1] + "." + minor
+    int bugfix = Integer.valueOf(versions[2]) + 1
+    return versions[0] + "." + versions[1] + "." + bugfix
+}
+
+def getIncreasedMinor(String version) {
+    String[] versions = version.split("\\.")
+    int minor = Integer.valueOf(versions[1]) + 1
+    return versions[0] + "." + minor + ".0"
 }
 
 def getIncreasedMajor(String version) {
     String[] versions = version.split("\\.")
-    int major = Integer.valueOf(versions[1]) + 1
-    return versions[0] + "." + major + ".0"
+    int major = Integer.valueOf(versions[0]) + 1
+    return major + ".0.0"
 }
+
 
 def increaseVersion(String type) {
     def args
@@ -255,30 +262,21 @@ def increaseVersions(String type, Set versionNames) {
         if(oldVersion == null) {
             throw new TaskExecutionException(tasks.release, new Exception(integration +" does not exist! "))
         }
-        String newVersion = type.equals('minor') ? getIncreasedMinor(oldVersion) : getIncreasedMajor(oldVersion)
-        println integration
+
+        String newVersion = oldVersion;
+        if(type.equals("bugfix")) {
+            newVersion = getIncreasedBugfix(oldVersion)
+        } else if (type.equals("minor")) {
+            newVersion = getIncreasedMinor(oldVersion)
+        } else if(type.equals("major")) {
+            newVersion = getIncreasedMajor(oldVersion)
+        }
         versions.setProperty(integration, newVersion)
     }
 
     println "${type} versions increased for ${versionNames}!"
     versions.store(new FileOutputStream("${projectDir}/version.properties"), "")
 }
-
-//def increaseAll(String type, boolean increaseSdk) {
-//    Properties versions = project.ext.versions
-//    versions.store(new FileOutputStream("${projectDir}/version.old.properties"), "")
-//    for (String integration : versions.stringPropertyNames()) {
-//        if (!increaseSdk && integration.equals('sdk')){
-//            continue
-//        }
-//        String oldVersion = versions.getProperty(integration)
-//        String newVersion = type.equals('minor') ? getIncreasedMinor(oldVersion) : getIncreasedMajor(oldVersion)
-//        println integration
-//        versions.setProperty(integration, newVersion)
-//    }
-//    println "All ${type} versions increased!"
-//    versions.store(new FileOutputStream("${projectDir}/version.properties"), "")
-//}
 
 task newMinor << {
     increaseVersion('minor')
