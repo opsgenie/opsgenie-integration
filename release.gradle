@@ -144,7 +144,7 @@ def uploadMaridPackagesToS3() {
     println '[Release] Started to upload client packages'
     packages.each { File file ->
         println("Uploading " + file.getAbsolutePath() + " to " + "bucket [${downloadsBucket}]")
-        PutObjectRequest request = new PutObjectRequest(downloadsBucket, "client/${file.getName()}", file)
+        PutObjectRequest request = new PutObjectRequest(downloadsBucket, "repo/${file.getName()}", file)
         request.setCannedAcl(CannedAccessControlList.PublicRead)
         client.putObject(request)
     }
@@ -162,7 +162,7 @@ def uploadSdkPackageToS3() {
 
     sdk.each { File file ->
         println("Uploading " + file.getAbsolutePath() + " to " + "bucket [${downloadsBucket}]")
-        PutObjectRequest request = new PutObjectRequest(downloadsBucket, "client/${file.getName()}", file)
+        PutObjectRequest request = new PutObjectRequest(downloadsBucket, "repo/${file.getName()}", file)
         request.setCannedAcl(CannedAccessControlList.PublicRead)
         client.putObject(request)
     }
@@ -182,7 +182,7 @@ def uploadIntegrationsToS3() {
     println '[Release] Started to upload integration packages'
     integrations.each { File file ->
         println("Uploading " + file.getAbsolutePath() + " to " + "bucket [${downloadsBucket}]")
-        PutObjectRequest request = new PutObjectRequest(downloadsBucket, "integration/${file.getName()}", file)
+        PutObjectRequest request = new PutObjectRequest(downloadsBucket, "repo/${file.getName()}", file)
         request.setCannedAcl(CannedAccessControlList.PublicRead)
         client.putObject(request)
     }
