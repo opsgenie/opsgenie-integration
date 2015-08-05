@@ -151,6 +151,7 @@ def uploadMaridPackagesToS3() {
 
 def uploadSdkPackageToS3() {
     def client = getAWSClient()
+    def props = getUploadOptions()
     def downloadsBucket = props.getProperty('amazonDownloadsBucket')
 
     println '[Release] Started to upload opsgenie-java-sdk'
