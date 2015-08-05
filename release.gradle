@@ -147,6 +147,12 @@ def uploadMaridPackagesToS3() {
         client.putObject(request)
     }
     println '[Release] Started to upload client packages - Finished'
+}
+
+def uploadSdkPackageToS3() {
+    def client = getAWSClient()
+    def downloadsBucket = props.getProperty('amazonDownloadsBucket')
+
     println '[Release] Started to upload opsgenie-java-sdk'
     FileTree sdk = fileTree(dir: "${buildDir}/distributions")
     sdk.include 'opsgenie-java-sdk**'
@@ -319,6 +325,11 @@ def isReleaseForAll() {
     return args.contains('all')
 }
 
+def isReleaseForSdk() {
+    def args = project.args.toString().split('\\,')
+    return args.contains('sdk')
+}
+
 def isReleaseForMarid(){
     def args = project.args.toString().split('\\,')
     return args.contains('marid')
@@ -337,7 +348,7 @@ def generateReleaseTasks() {
         tasks << 'packageSdk'
 //        tasks << 'uploadArchives'
     }else{
-        if(args.contains('sdk')){
+        if(isReleaseForSdk()){
             tasks << 'packageSdk'
             tasks << 'packageMarid'
             tasks << 'packageIntegrations'
@@ -387,11 +398,11 @@ task release(type: GradleBuild ) {
         createDownloadBucketIfNonExist()
         createJavadocBucketIfNonExist()
         uploadIntegrationsToS3()
-        if(isReleaseForAll()) {
+        if(isReleaseForAll() || isReleaseForSdk()) {
+            uploadSdkPackageToS3()
             uploadJavaDocToS3()
-        }
-
-        if(isReleaseForMarid()) {
+            uploadMaridPackagesToS3()
+        } else if(isReleaseForMarid()) {
             uploadMaridPackagesToS3()
         }
 
