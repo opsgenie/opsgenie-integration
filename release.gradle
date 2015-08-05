@@ -330,7 +330,7 @@ def generateReleaseTasks() {
         throw new IllegalArgumentException("Please give integrations as args to release! E.g. gradle release -Pargs=nagios,redmine")
     }
 
-    def args = project.args.toString().split('\\,')
+    Set args = project.args.toString().split('\\,')
 
     if(isReleaseForAll()) {
         tasks << 'packageAll'
@@ -338,14 +338,12 @@ def generateReleaseTasks() {
 //        tasks << 'uploadArchives'
     }else{
         if(isReleaseForMarid()){
-            if(isReleaseForLamp()) {
-                tasks << 'packageLamp'
-            }
             tasks << 'maridAll'
             tasks << 'packageIntegrations'
-        } else if(isReleaseForLamp()) {
+        }
+        if(isReleaseForLamp()) {
             tasks << 'packageLamp'
-            tasks << 'packageNetcool'
+            args.addAll(getLampBasedPackageNames())
         }
 
         for(String integration : args) {
