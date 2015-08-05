@@ -183,7 +183,7 @@ def generateLampBinary(String lampProjectPath){
     }
 
     if (!(new File("${lampProjectPath}/opsgenie-lamp").exists() && new File("${lampProjectPath}/opsgenie-lamp.exe").exists())){
-        if(System.getenv("DEV")){
+        if(System.getenv("IS_LAMP_MANDATORY")){
             throw new TaskExecutionException(tasks.generateLampZip, new Exception("one of or both [opsgenie-lamp, opsgenie-lamp.exe] executables are missing"))
         }else{
             def message = "one of or both [opsgenie-lamp, opsgenie-lamp.exe] executables are missing. Lamp package will not be generated, integration packages containing lamp will be generated without lamp."
@@ -201,7 +201,7 @@ def executeCommandAndWait(command , logPrefix = "")  {
     proc.waitForProcessOutput(out, err)
     if (out) println logPrefix+" out:\n$out"
     if(proc.exitValue()){
-        if(System.getenv("DEV")){
+        if(System.getenv("IS_LAMP_MANDATORY")){
             throw new TaskExecutionException(tasks.generateLampZip, new Exception(err.toString()))
         }else{
             def message = "Exception occured while building lamp. Lamp package will not be generated, integration packages containing lamp will be generated without lamp."
