@@ -55,6 +55,13 @@ subprojects  {
 
     project.ext.versions = new Properties();
     project.ext.versions.load(new FileInputStream("${rootProject.projectDir}/version.properties"))
+
+
+
+    if(project.ext.versions.getProperty(name) != null) {
+        version = project.ext.versions.getProperty(name)
+    }
+
     if(gradle.startParameter.taskNames.contains('removeSnapshot')) {
         project.ext.versionSuffix = ''
     } else {
