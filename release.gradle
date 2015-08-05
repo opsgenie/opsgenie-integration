@@ -338,7 +338,7 @@ def generateReleaseTasks() {
 //        tasks << 'uploadArchives'
     }else{
         if(isReleaseForMarid()){
-            tasks << 'maridAll'
+            tasks << 'packageMarid'
             tasks << 'packageIntegrations'
         }
         if(isReleaseForLamp()) {
