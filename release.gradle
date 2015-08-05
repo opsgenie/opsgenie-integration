@@ -297,7 +297,7 @@ def updateGit(def args) {
 }
 
 def versionUpdate(def type) {
-    if(type.equals("minor") || type.equals("major")) {
+    if(type.equals("minor") || type.equals("major") || type.equals("bugfix")) {
         increaseVersion(type)
         return true
     } else {
