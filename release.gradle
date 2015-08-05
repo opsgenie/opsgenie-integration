@@ -316,7 +316,7 @@ def getDownloadsTemplate() {
 
 def isReleaseForAll() {
     def args = project.args.toString().split('\\,')
-    return args.contains('all') || args.contains('sdk')
+    return args.contains('all')
 }
 
 def isReleaseForMarid(){
@@ -337,6 +337,12 @@ def generateReleaseTasks() {
         tasks << 'packageSdk'
 //        tasks << 'uploadArchives'
     }else{
+        if(args.contains('sdk')){
+            tasks << 'packageSdk'
+            tasks << 'packageMarid'
+            tasks << 'packageIntegrations'
+            //        tasks << 'uploadArchives'
+        }
         if(isReleaseForMarid()){
             tasks << 'packageMarid'
             tasks << 'packageIntegrations'
