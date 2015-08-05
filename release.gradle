@@ -28,6 +28,8 @@ def generateDownloadsProperties() {
         from getDownloadsTemplate()
         filter {
             it.replace('[[sdk]]', project.ext.versions.getProperty('sdk'))
+                    .replace('[[lamp]]', project.ext.versions.getProperty('lamp'))
+                    .replace('[[marid]]', project.ext.versions.getProperty('marid'))
                     .replace('[[splunk]]', project.ext.versions.getProperty('splunk'))
                     .replace('[[smarts]]', project.ext.versions.getProperty('smarts'))
                     .replace('[[opennms]]', project.ext.versions.getProperty('opennms'))
