@@ -12,13 +12,9 @@ for(def dir : possibleClientDirs) {
 include ":marid"
 include ":common"
 include ":sdk"
-include ":lamp"
 include ":test"
-include ":package"
 
 project(":marid").projectDir = file("${clientDir}/marid")
 project(":common").projectDir = file("${clientDir}/common")
 project(":sdk").projectDir = file("${clientDir}/sdk")
-project(":lamp").projectDir = file("${clientDir}/lamp")
 project(":test").projectDir = file("${clientDir}/test")
-project(":package").projectDir = file("${clientDir}/package")

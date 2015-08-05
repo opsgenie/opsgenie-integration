@@ -1,4 +1,4 @@
-# /bin/bash
+#!/bin/bash
 
 INTEGRATION_PATH=$1
 CLIENT_PATH=$2

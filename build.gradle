@@ -27,20 +27,18 @@ if(gradle.startParameter.taskNames.contains('removeSnapshot')) {
     project.ext.versionSuffix = '-SNAPSHOT'
 }
 
-version = project.ext.versions.getProperty('client') + project.ext.versionSuffix
+version = project.ext.versions.getProperty('sdk') + project.ext.versionSuffix
 
 sourceSets {
     main {
         groovy {
             include "*/marid/scripts"
-            include "*/lamp/scripts"
         }
     }
 }
 
 
 dependencies {
-    compile project(":lamp")
     compile project(":marid")
 }
 
@@ -54,6 +52,21 @@ subprojects  {
 
     group = "com.opsgenie.integration"
     version = rootProject.version
+
+    project.ext.versions = new Properties();
+    project.ext.versions.load(new FileInputStream("${rootProject.projectDir}/version.properties"))
+
+
+
+    if(project.ext.versions.getProperty(name) != null) {
+        version = project.ext.versions.getProperty(name)
+    }
+
+    if(gradle.startParameter.taskNames.contains('removeSnapshot')) {
+        project.ext.versionSuffix = ''
+    } else {
+        project.ext.versionSuffix = '-SNAPSHOT'
+    }
 
     repositories {
         mavenCentral()
@@ -112,7 +125,7 @@ dependencies {
     debian 'org.vafer:jdeb:1.3'
 }
 
-task generateIntegration(dependsOn: 'package:generateBaseForIntegration') {}
+task generateIntegration(dependsOn: 'marid:generateBaseForIntegration')
 
 task generateIntegrationForNative(dependsOn: 'generateIntegration') << {
     copy {
@@ -120,6 +133,116 @@ task generateIntegrationForNative(dependsOn: 'generateIntegration') << {
         into("${project.buildDir}/native")
     }
 }
+
+task packageLamp(dependsOn: 'generateLampZip', type: Zip) {
+    from "${buildDir}/zip"
+    baseName = "opsgenie-lamp"
+    version = project.ext.versions.getProperty('lamp') + project.ext.versionSuffix
+}
+
+task generateLampZip << {
+    def lampProjectDir = "${System.getenv("GOPATH")}/src/github.com/opsgenie/opsgenie-lamp";
+    generateLampBinary(lampProjectDir)
+
+    copy {
+        from "${lampProjectDir}/LICENSE"
+        into "${buildDir}/zip/lamp"
+    }
+
+    copy {
+        from "${lampProjectDir}/NOTICE"
+        into "${buildDir}/zip/lamp"
+    }
+
+    copy {
+        from "${lampProjectDir}/opsgenie-lamp.exe"
+        into "${buildDir}/zip/lamp"
+        rename "opsgenie-lamp.exe", "lamp.exe"
+    }
+
+    copy {
+        from ("${lampProjectDir}/opsgenie-lamp") {
+            fileMode = 0755
+        }
+        into "${buildDir}/zip/lamp"
+        rename "opsgenie-lamp", "lamp"
+    }
+
+    copy {
+        from("${lampProjectDir}/conf")
+        into "${buildDir}/zip/lamp/conf"
+    }
+}
+
+def generateLampBinary(String lampProjectPath){
+    def isWindows = System.getProperty('os.name').toLowerCase().contains("win");
+    if (isWindows) {
+        executeCommandAndWait("cmd /c ${lampProjectPath}/build_lamp.bat", "generating lamp binaries")
+    }else{
+        executeCommandAndWait("${lampProjectPath}/build_lamp", "generating lamp binaries")
+    }
+
+    if (!(new File("${lampProjectPath}/opsgenie-lamp").exists() && new File("${lampProjectPath}/opsgenie-lamp.exe").exists())){
+        if(System.getenv("IS_LAMP_MANDATORY")){
+            throw new TaskExecutionException(tasks.generateLampZip, new Exception("one of or both [opsgenie-lamp, opsgenie-lamp.exe] executables are missing"))
+        }else{
+            def message = "one of or both [opsgenie-lamp, opsgenie-lamp.exe] executables are missing. Lamp package will not be generated, integration packages containing lamp will be generated without lamp."
+            println message
+            throw new StopActionException(message)
+        }
+    }
+}
+
+def executeCommandAndWait(command , logPrefix = "")  {
+    println logPrefix+" execute :"+command
+    def proc = command.execute();
+    def out = new StringBuilder()
+    def err = new StringBuilder()
+    proc.waitForProcessOutput(out, err)
+    if (out) println logPrefix+" out:\n$out"
+    if(proc.exitValue()){
+        if(System.getenv("IS_LAMP_MANDATORY")){
+            throw new TaskExecutionException(tasks.generateLampZip, new Exception(err.toString()))
+        }else{
+            def message = "Exception occured while building lamp. Lamp package will not be generated, integration packages containing lamp will be generated without lamp."
+            println message
+            throw new StopActionException(message)
+        }
+    }
+    println logPrefix+" execute finished"
+}
+
+def addLampToIntegrationPackage(String buildDir, String destination){
+    tasks.generateLampZip.execute()
+
+    if(!new File("${buildDir}/zip/lamp").exists()) {
+        def message = "Could not find Lamp directory. Packages containing lamp will be generated without lamp."
+        println message
+        throw new StopActionException(message)
+    }
+    copy{
+        from "${buildDir}/zip/lamp"
+        into "${destination}/opsgenie-integration/lamp"
+    }
+
+    def tempLampConfFilePath = "${destination}/opsgenie-integration/lamp/conf/lamp_temp.conf"
+    new File(tempLampConfFilePath).withPrintWriter { out ->
+        new File("${destination}/opsgenie-integration/lamp/conf/lamp.conf").eachLine { line ->
+            if (!line.startsWith("apiKey")){
+                out.println("${line}")
+            }else{
+                out.println()
+            }
+        }
+    }
+
+    mergeConfFile("${destination}/opsgenie-integration/conf/opsgenie-integration.conf",
+            tempLampConfFilePath,
+            "${destination}/opsgenie-integration/conf/opsgenie-integration.conf")
+
+    delete "${destination}/opsgenie-integration/lamp/conf"
+}
+
 
 def mergeConfFile(String mainConfFile, String partialConfFilePath, String destinationFilePath){
     def partialConfFile = new File(partialConfFilePath)
@@ -167,11 +290,8 @@ def buildRpm(String sourceDir, String name, String descrpt, Map fileMappingInput
 
 
         configFiles.put("${project.buildDir}/${sourceDir}/opsgenie-integration/conf/opsgenie-integration.conf", 'etc/opsgenie/conf')
-        configFiles.put("${project.buildDir}/${sourceDir}/opsgenie-integration/lamp/conf/log.properties", 'etc/opsgenie/lamp')
         configFiles.put("${project.buildDir}/${sourceDir}/opsgenie-integration/marid/conf/log.properties", 'etc/opsgenie/marid')
 
-        fileMapping.put("${project.buildDir}/${sourceDir}/opsgenie-integration/lamp/lib", 'var/lib/opsgenie/lamp')
-        fileMapping.put("${project.buildDir}/${sourceDir}/opsgenie-integration/lamp/scripts", 'var/opsgenie/lamp/scripts')
         fileMapping.put("${project.buildDir}/${sourceDir}/opsgenie-integration/marid/scripts", 'var/opsgenie/marid/scripts')
         fileMapping.put("${project.buildDir}/${sourceDir}/opsgenie-integration/marid/conf/.keystore", 'etc/opsgenie/marid')
         fileMapping.put("${project.buildDir}/${sourceDir}/opsgenie-integration/marid/lib", 'var/lib/opsgenie/marid')
@@ -191,11 +311,6 @@ def buildRpm(String sourceDir, String name, String descrpt, Map fileMappingInput
             from(source) {
                 into(dest)
             }
-        }
-
-        from("${nativeSource}/lamp_rpm"){
-            into("usr/bin")
-            rename "lamp_rpm", "lamp"
         }
 
         from("${nativeSource}/profile"){
@@ -233,12 +348,7 @@ def buildDeb(String sourceDir, String name, String descrpt, Map fileMappingInput
         def nativeSource = "${project.buildDir}/os_client/${sourceDir}";
 
         fileMapping.put("${project.buildDir}/${sourceDir}/opsgenie-integration/conf/opsgenie-integration.conf", 'etc/opsgenie/conf')
-        fileMapping.put("${project.buildDir}/${sourceDir}/opsgenie-integration/lamp/log.properties", 'etc/opsgenie/lamp')
-        fileMapping.put("${project.buildDir}/${sourceDir}/opsgenie-integration/marid/log.properties", 'etc/opsgenie/marid')
 
-        fileMapping.put("${project.buildDir}/${sourceDir}/opsgenie-integration/lamp/conf", 'etc/opsgenie/lamp')
-        fileMapping.put("${project.buildDir}/${sourceDir}/opsgenie-integration/lamp/lib", 'var/lib/opsgenie/lamp')
-        fileMapping.put("${project.buildDir}/${sourceDir}/opsgenie-integration/lamp/scripts", 'var/opsgenie/lamp/scripts')
         fileMapping.put("${project.buildDir}/${sourceDir}/opsgenie-integration/marid/scripts", 'var/opsgenie/marid/scripts')
         fileMapping.put("${project.buildDir}/${sourceDir}/opsgenie-integration/marid/conf", 'etc/opsgenie/marid')
         fileMapping.put("${project.buildDir}/${sourceDir}/opsgenie-integration/marid/lib", 'var/lib/opsgenie/marid')
@@ -274,12 +384,6 @@ def buildDeb(String sourceDir, String name, String descrpt, Map fileMappingInput
 
         def conffiles = new File("${controlDir}/conffiles")
         conffiles.append("\n" + appender.toString())
-
-        copy {
-            from("${nativeSource}/lamp_rpm")
-            into("${dataDir}/usr/bin")
-            rename "lamp_rpm", "lamp"
-        }
 
         copy {
             from("${nativeSource}/profile")
@@ -349,9 +453,11 @@ apply from: 'icinga/icinga.gradle'
 apply from: 'zendesk/zendesk.gradle'
 apply from: 'icinga2/icinga2.gradle'
 
-task packageAll(dependsOn: ['packageSmarts',
-                               'packageSplunk',
-                               'packageOpennms',
+
+task packageIntegrations(dependsOn: [
+//                                'packageSmarts',
+//                               'packageSplunk',
+//                               'packageOpennms',
                                'packageNagios',
                                'packageNagiosxi',
                                'packageNetcool',
@@ -362,3 +468,5 @@ task packageAll(dependsOn: ['packageSmarts',
                                 'packageZendesk',
                                 'packageIcinga2'
 ])
+
+task packageAll(dependsOn: ['packageIntegrations', 'packageLamp'])

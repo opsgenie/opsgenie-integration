@@ -8,20 +8,28 @@ buildscript {
     }
 }
 
+
 import com.amazonaws.*
-import com.amazonaws.auth.AWSCredentials;
-import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.auth.AWSCredentials
+import com.amazonaws.auth.BasicAWSCredentials
 import com.amazonaws.services.s3.AmazonS3
 import com.amazonaws.services.s3.AmazonS3Client
 import com.amazonaws.services.s3.model.*
 
 import java.text.SimpleDateFormat
 
+def getLampBasedPackageNames() {
+    return ["netcool"]
+}
+
+
 def generateDownloadsProperties() {
     copy {
         from getDownloadsTemplate()
         filter {
-            it.replace('[[client]]', project.ext.versions.getProperty('client'))
+            it.replace('[[sdk]]', project.ext.versions.getProperty('sdk'))
+                    .replace('[[lamp]]', project.ext.versions.getProperty('lamp'))
+                    .replace('[[marid]]', project.ext.versions.getProperty('marid'))
                     .replace('[[splunk]]', project.ext.versions.getProperty('splunk'))
                     .replace('[[smarts]]', project.ext.versions.getProperty('smarts'))
                     .replace('[[opennms]]', project.ext.versions.getProperty('opennms'))
@@ -123,12 +131,12 @@ def uploadJavaDocToS3() {
     println '[Release] Started to upload JavaDoc - Finished'
 }
 
-def uploadClientPackagesToS3() {
+def uploadMaridPackagesToS3() {
     def client = getAWSClient()
     def props = getUploadOptions()
     def downloadsBucket = props.getProperty('amazonDownloadsBucket')
 
-    FileTree packages = fileTree(dir: "${project(':package').buildDir}/distributions")
+    FileTree packages = fileTree(dir: "${project(':marid').buildDir}/distributions")
     packages.include '*.zip'
     packages.include '*.deb'
     packages.include '*.rpm'
@@ -136,18 +144,25 @@ def uploadClientPackagesToS3() {
     println '[Release] Started to upload client packages'
     packages.each { File file ->
         println("Uploading " + file.getAbsolutePath() + " to " + "bucket [${downloadsBucket}]")
-        PutObjectRequest request = new PutObjectRequest(downloadsBucket, "client/${file.getName()}", file)
+        PutObjectRequest request = new PutObjectRequest(downloadsBucket, "repo/${file.getName()}", file)
         request.setCannedAcl(CannedAccessControlList.PublicRead)
         client.putObject(request)
     }
     println '[Release] Started to upload client packages - Finished'
+}
+
+def uploadSdkPackageToS3() {
+    def client = getAWSClient()
+    def props = getUploadOptions()
+    def downloadsBucket = props.getProperty('amazonDownloadsBucket')
+
     println '[Release] Started to upload opsgenie-java-sdk'
     FileTree sdk = fileTree(dir: "${buildDir}/distributions")
     sdk.include 'opsgenie-java-sdk**'
 
     sdk.each { File file ->
         println("Uploading " + file.getAbsolutePath() + " to " + "bucket [${downloadsBucket}]")
-        PutObjectRequest request = new PutObjectRequest(downloadsBucket, "client/${file.getName()}", file)
+        PutObjectRequest request = new PutObjectRequest(downloadsBucket, "repo/${file.getName()}", file)
         request.setCannedAcl(CannedAccessControlList.PublicRead)
         client.putObject(request)
     }
@@ -167,7 +182,7 @@ def uploadIntegrationsToS3() {
     println '[Release] Started to upload integration packages'
     integrations.each { File file ->
         println("Uploading " + file.getAbsolutePath() + " to " + "bucket [${downloadsBucket}]")
-        PutObjectRequest request = new PutObjectRequest(downloadsBucket, "integration/${file.getName()}", file)
+        PutObjectRequest request = new PutObjectRequest(downloadsBucket, "repo/${file.getName()}", file)
         request.setCannedAcl(CannedAccessControlList.PublicRead)
         client.putObject(request)
     }
@@ -188,17 +203,24 @@ def uploadDownloadsPropertiesToS3() {
     println '[Release] Started to upload download.properties - finished'
 }
 
-def getIncreasedMinor(String version) {
+def getIncreasedBugfix(String version) {
     String[] versions = version.split('\\.')
-    int minor = Integer.valueOf(versions[2]) + 1
-    return versions[0] + "." + versions[1] + "." + minor
+    int bugfix = Integer.valueOf(versions[2]) + 1
+    return versions[0] + "." + versions[1] + "." + bugfix
+}
+
+def getIncreasedMinor(String version) {
+    String[] versions = version.split("\\.")
+    int minor = Integer.valueOf(versions[1]) + 1
+    return versions[0] + "." + minor + ".0"
 }
 
 def getIncreasedMajor(String version) {
     String[] versions = version.split("\\.")
-    int major = Integer.valueOf(versions[1]) + 1
-    return versions[0] + "." + major + ".0"
+    int major = Integer.valueOf(versions[0]) + 1
+    return major + ".0.0"
 }
+
 
 def increaseVersion(String type) {
     def args
@@ -207,36 +229,52 @@ def increaseVersion(String type) {
     }
 
     args = project.args.split(',')
-    if(args.contains('client') || args.contains('all')) {
-        increseAll(type)
-        return
-    }
+
+    Set versionNames = []
 
     Properties versions = project.ext.versions
-    versions.store(new FileOutputStream("${projectDir}/version.old.properties"), "")
-    for(def arg : args) {
-        String oldVersion = versions.getProperty(arg)
-        if(oldVersion == null) {
-            throw new IllegalArgumentException("Integration ${arg} does not exist!")
+
+    if(args.contains("all") || args.contains("sdk")) {
+        versionNames.addAll(versions.stringPropertyNames())
+    } else {
+        if(args.contains("marid")) {
+            versionNames.addAll(versions.stringPropertyNames())
+            versionNames.remove("sdk")
+            versionNames.remove("lamp")
         }
-        String newVersion = type.equals("minor") ? getIncreasedMinor(oldVersion) : getIncreasedMajor(oldVersion)
-        versions.setProperty(arg, newVersion)
+
+        if(args.contains("lamp")) {
+            versionNames.add("lamp")
+            versionNames.addAll(getLampBasedPackageNames())
+        }
+
+        versionNames.addAll(args)
     }
 
-    println "${type} versions increased for ${args}"
-    versions.store(new FileOutputStream("${projectDir}/version.properties"), "")
+    increaseVersions(type, versionNames);
 }
 
-def increseAll(String type) {
+def increaseVersions(String type, Set versionNames) {
     Properties versions = project.ext.versions
     versions.store(new FileOutputStream("${projectDir}/version.old.properties"), "")
-    for (String integration : versions.stringPropertyNames()) {
+    for (String integration : versionNames) {
         String oldVersion = versions.getProperty(integration)
-        String newVersion = type.equals('minor') ? getIncreasedMinor(oldVersion) : getIncreasedMajor(oldVersion)
-        println integration
+        if(oldVersion == null) {
+            throw new TaskExecutionException(tasks.release, new Exception(integration +" does not exist! "))
+        }
+
+        String newVersion = oldVersion;
+        if(type.equals("bugfix")) {
+            newVersion = getIncreasedBugfix(oldVersion)
+        } else if (type.equals("minor")) {
+            newVersion = getIncreasedMinor(oldVersion)
+        } else if(type.equals("major")) {
+            newVersion = getIncreasedMajor(oldVersion)
+        }
         versions.setProperty(integration, newVersion)
     }
-    println "All ${type} versions increased!"
+
+    println "${type} versions increased for ${versionNames}!"
     versions.store(new FileOutputStream("${projectDir}/version.properties"), "")
 }
 
@@ -259,7 +297,7 @@ def updateGit(def args) {
 }
 
 def versionUpdate(def type) {
-    if(type.equals("minor") || type.equals("major")) {
+    if(type.equals("minor") || type.equals("major") || type.equals("bugfix")) {
         increaseVersion(type)
         return true
     } else {
@@ -285,7 +323,59 @@ def getDownloadsTemplate() {
 
 def isReleaseForAll() {
     def args = project.args.toString().split('\\,')
-    return args.contains('all') || args.contains('client')
+    return args.contains('all')
+}
+
+def isReleaseForSdk() {
+    def args = project.args.toString().split('\\,')
+    return args.contains('sdk')
+}
+
+def isReleaseForMarid(){
+    def args = project.args.toString().split('\\,')
+    return args.contains('marid')
+}
+
+def generateReleaseTasks() {
+    Set tasks = ['removeSnapshot', 'clean']
+    if(!project.hasProperty('args')) {
+        throw new IllegalArgumentException("Please give integrations as args to release! E.g. gradle release -Pargs=nagios,redmine")
+    }
+
+    Set args = project.args.toString().split('\\,')
+
+    if(isReleaseForAll()) {
+        tasks << 'packageAll'
+        tasks << 'packageSdk'
+        tasks << 'uploadArchives'
+    }else{
+        if(isReleaseForSdk()){
+            tasks << 'packageSdk'
+            tasks << 'packageMarid'
+            tasks << 'packageIntegrations'
+            tasks << 'uploadArchives'
+        }
+        if(isReleaseForMarid()){
+            tasks << 'packageMarid'
+            tasks << 'packageIntegrations'
+        }
+        if(isReleaseForLamp()) {
+            tasks << 'packageLamp'
+            args.addAll(getLampBasedPackageNames())
+        }
+
+        for(String integration : args) {
+            String taskName = "package${Character.toUpperCase(integration.charAt(0))}${integration.substring(1)}"
+            tasks << taskName
+        }
+    }
+
+    return tasks
+}
+
+def isReleaseForLamp() {
+    def args = project.args.toString().split('\\,')
+    return args.contains('lamp')
 }
 
 def createPropertiesToUploadToNexus() {
@@ -293,27 +383,6 @@ def createPropertiesToUploadToNexus() {
         from project.options
         into buildDir
     }
-}
-
-def generateReleaseTasks() {
-    def tasks = ['removeSnapshot', 'clean']
-    if(!project.hasProperty('args')) {
-        throw new IllegalArgumentException("Please give integrations as args to release! E.g. gradle release -Pargs=nagios,redmine")
-    }
-
-    def args = project.args.toString().split('\\,')
-
-    if(isReleaseForAll()) {
-        tasks << 'packageAll'
-        tasks << 'packageSdk'
-        tasks << 'uploadArchives'
-    } else {
-        for(String integration : args) {
-            String taskName = "package${Character.toUpperCase(integration.charAt(0))}${integration.substring(1)}"
-            tasks << taskName
-        }
-    }
-    return tasks
 }
 
 task release(type: GradleBuild ) {
@@ -330,10 +399,14 @@ task release(type: GradleBuild ) {
         createDownloadBucketIfNonExist()
         createJavadocBucketIfNonExist()
         uploadIntegrationsToS3()
-        if(isReleaseForAll()) {
+        if(isReleaseForAll() || isReleaseForSdk()) {
+            uploadSdkPackageToS3()
             uploadJavaDocToS3()
-            uploadClientPackagesToS3()
+            uploadMaridPackagesToS3()
+        } else if(isReleaseForMarid()) {
+            uploadMaridPackagesToS3()
         }
+
         uploadDownloadsPropertiesToS3()
         if(isVersionUpdated) {
             updateGit(project.args)
