@@ -347,13 +347,13 @@ def generateReleaseTasks() {
     if(isReleaseForAll()) {
         tasks << 'packageAll'
         tasks << 'packageSdk'
-//        tasks << 'uploadArchives'
+        tasks << 'uploadArchives'
     }else{
         if(isReleaseForSdk()){
             tasks << 'packageSdk'
             tasks << 'packageMarid'
             tasks << 'packageIntegrations'
-            //        tasks << 'uploadArchives'
+            tasks << 'uploadArchives'
         }
         if(isReleaseForMarid()){
             tasks << 'packageMarid'
@@ -392,7 +392,7 @@ task release(type: GradleBuild ) {
             isVersionUpdated = versionUpdate(project.type);
         }
         tasks = generateReleaseTasks();
-//        createPropertiesToUploadToNexus();
+        createPropertiesToUploadToNexus();
     }
     doLast{
         generateDownloadsProperties()
@@ -409,8 +409,7 @@ task release(type: GradleBuild ) {
 
         uploadDownloadsPropertiesToS3()
         if(isVersionUpdated) {
-            println "will update git"
-//            updateGit(project.args)
+            updateGit(project.args)
         }
     }
 }
