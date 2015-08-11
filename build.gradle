@@ -292,7 +292,7 @@ def buildRpm(String sourceDir, String name, String descrpt, Map fileMappingInput
             def dest = configFiles.get(source)
             logger.info("config " + source + " - " + dest)
             from(source) {
-                fileType CONFIG
+                fileType CONFIG | NOREPLACE
                 into(dest)
             }
         }
