@@ -175,6 +175,7 @@ func parseFlags()map[string]string{
 	eventId := flag.String ("eventId","","EVENT.ID")
 	tags := flag.String ("tags","","tags")
 	recipients := flag.String ("recipients","","recipients")
+	teams := flag.String("teams","","Teams")
 
 	flag.Parse()
 
@@ -207,6 +208,12 @@ func parseFlags()map[string]string{
 		parameters["tags"] = *tags
 	}else{
 		parameters["tags"] = configParameters ["tags"]
+	}
+
+	if *teams != ""{
+		parameters["teams"] = *teams
+	}else{
+		parameters["teams"] = configParameters ["teams"]
 	}
 
 	return parameters
