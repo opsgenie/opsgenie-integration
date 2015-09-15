@@ -378,13 +378,13 @@ def generateReleaseTasks() {
         }
     }else{
         if(isReleaseForSdk()){
-            args << getSdkBasedPackageNames()
+            args.addAll(getSdkBasedPackageNames())
             if (!isTestModeActive()) {
                 tasks << 'uploadArchives'
             }
         }
         if(isReleaseForMarid()){
-            args << getMaridBasedPackageNames()
+            args.addAll(getMaridBasedPackageNames())
         }
         if(isReleaseForLamp()) {
             args.addAll(getLampBasedPackageNames())
