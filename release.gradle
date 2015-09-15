@@ -69,10 +69,6 @@ task generateDownloadsProperties << {
     generateDownloadsProperties()
 }
 
-boolean isTestModeActive() {
-    return "true".equals(System.getenv("TEST_MODE"))
-}
-
 def getUploadOptions() {
     def options
     if(project.hasProperty('options')) {
@@ -368,18 +364,21 @@ def generateReleaseTasks() {
         throw new IllegalArgumentException("Please give integrations as args to release! E.g. gradle release -Pargs=nagios,redmine")
     }
 
+
+    boolean testMode = project.hasProperty('test');
+
     Set args = project.args.toString().split('\\,')
 
     if(isReleaseForAll()) {
         tasks << 'packageAll'
         tasks << 'packageSdk'
-        if (!isTestModeActive()) {
+        if (!testMode) {
             tasks << 'uploadArchives'
         }
     }else{
         if(isReleaseForSdk()){
             args.addAll(getSdkBasedPackageNames())
-            if (!isTestModeActive()) {
+            if (!testMode) {
                 tasks << 'uploadArchives'
             }
         }
@@ -413,35 +412,35 @@ def createPropertiesToUploadToNexus() {
 
 task release(type: GradleBuild ) {
     def isVersionUpdated = false;
-    doFirst{
-        if(project.hasProperty("type")) {
+    boolean testMode = project.hasProperty('test');
+    if (testMode) {
+        print "TEST_MODE IS ACTIVATED!"
+    }
+    doFirst {
+        if (project.hasProperty("type")) {
             isVersionUpdated = versionUpdate(project.type);
         }
         tasks = generateReleaseTasks();
         createPropertiesToUploadToNexus();
     }
-    doLast{
+    doLast {
         generateDownloadsProperties()
         createDownloadBucketIfNonExist()
         createJavadocBucketIfNonExist()
         uploadIntegrationsToS3()
-        if(isReleaseForAll() || isReleaseForSdk()) {
+        if (isReleaseForAll() || isReleaseForSdk()) {
             uploadSdkPackageToS3()
             uploadJavaDocToS3()
             uploadMaridPackagesToS3()
-        } else if(isReleaseForMarid()) {
+        } else if (isReleaseForMarid()) {
             uploadMaridPackagesToS3()
         }
 
         uploadDownloadsPropertiesToS3()
-        if (isVersionUpdated && !isTestModeActive()) {
+        if (isVersionUpdated && !testMode) {
             updateGit(project.args)
-        } else if (isTestModeActive()) {
+        } else if (testMode) {
             resetGit()
         }
     }
-}
-
-task testTestMode << {
-    println isTestModeActive()
 }
