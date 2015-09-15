@@ -18,8 +18,28 @@ import com.amazonaws.services.s3.model.*
 
 import java.text.SimpleDateFormat
 
+def getSdkBasedPackageNames() {
+    def packageNames = []
+    packageNames << "sdk"
+    packageNames << getMaridBasedPackageNames()
+    return packageNames
+}
+
 def getLampBasedPackageNames() {
-    return ["netcool"]
+    return ["lamp", "netcool"]
+}
+
+def getMaridBasedPackageNames() {
+    return ["marid",
+            "nagios",
+            "nagiosxi",
+            "icinga",
+            "redmine",
+            "netcool",
+            "zabbix",
+            "zenoss",
+            "zendesk",
+            "icinga2"]
 }
 
 
@@ -47,6 +67,10 @@ def generateDownloadsProperties() {
 
 task generateDownloadsProperties << {
     generateDownloadsProperties()
+}
+
+boolean isTestModeActive() {
+    return "true".equals(System.getenv("TEST_MODE"))
 }
 
 def getUploadOptions() {
@@ -231,17 +255,16 @@ def increaseVersion(String type) {
 
     Properties versions = project.ext.versions
 
-    if(args.contains("all") || args.contains("sdk")) {
+    if (args.contains("all")) {
         versionNames.addAll(versions.stringPropertyNames())
     } else {
-        if(args.contains("marid")) {
-            versionNames.addAll(versions.stringPropertyNames())
-            versionNames.remove("sdk")
-            versionNames.remove("lamp")
+        if (args.contains("sdk")) {
+            versionNames.addAll(getSdkBasedPackageNames())
         }
-
+        if(args.contains("marid")) {
+            versionNames.addAll(getMaridBasedPackageNames())
+        }
         if(args.contains("lamp")) {
-            versionNames.add("lamp")
             versionNames.addAll(getLampBasedPackageNames())
         }
 
@@ -290,6 +313,12 @@ def updateGit(def args) {
     exec {
         commandLine './updateGit.sh', projectDir, "${project(":sdk").projectDir}/..",
                 "Version test bump for ${args}", "OpsGenieClient-v2-${sdf.format(date)}"
+    }
+}
+
+def resetGit(def args) {
+    exec {
+        commandLine './resetGit.sh'
     }
 }
 
@@ -344,20 +373,20 @@ def generateReleaseTasks() {
     if(isReleaseForAll()) {
         tasks << 'packageAll'
         tasks << 'packageSdk'
-        tasks << 'uploadArchives'
-    }else{
-        if(isReleaseForSdk()){
-            tasks << 'packageSdk'
-            tasks << 'packageMarid'
-            tasks << 'packageIntegrations'
+        if (!isTestModeActive()) {
             tasks << 'uploadArchives'
         }
+    }else{
+        if(isReleaseForSdk()){
+            args << getSdkBasedPackageNames()
+            if (!isTestModeActive()) {
+                tasks << 'uploadArchives'
+            }
+        }
         if(isReleaseForMarid()){
-            tasks << 'packageMarid'
-            tasks << 'packageIntegrations'
+            args << getMaridBasedPackageNames()
         }
         if(isReleaseForLamp()) {
-            tasks << 'packageLamp'
             args.addAll(getLampBasedPackageNames())
         }
 
@@ -405,8 +434,10 @@ task release(type: GradleBuild ) {
         }
 
         uploadDownloadsPropertiesToS3()
-        if(isVersionUpdated) {
+        if (isVersionUpdated && !isTestModeActive()) {
             updateGit(project.args)
+        } else if (isTestModeActive()) {
+            resetGit()
         }
     }
 }
