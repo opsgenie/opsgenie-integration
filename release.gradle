@@ -365,7 +365,7 @@ def generateReleaseTasks() {
     }
 
 
-    boolean testMode = project.hasProperty('test');
+    boolean testMode = project.hasProperty('testMode');
 
     Set args = project.args.toString().split('\\,')
 
@@ -412,7 +412,7 @@ def createPropertiesToUploadToNexus() {
 
 task release(type: GradleBuild ) {
     def isVersionUpdated = false;
-    boolean testMode = project.hasProperty('test');
+    boolean testMode = project.hasProperty('testMode');
     if (testMode) {
         print "TEST_MODE IS ACTIVATED!"
     }
