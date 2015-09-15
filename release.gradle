@@ -441,3 +441,7 @@ task release(type: GradleBuild ) {
         }
     }
 }
+
+task testTestMode << {
+    println isTestModeActive()
+}
