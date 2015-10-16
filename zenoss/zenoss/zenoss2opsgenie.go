@@ -27,6 +27,7 @@ var configPath = "/etc/opsgenie/conf/opsgenie-integration.conf"
 var levels = map [string]log.Level{"info":log.Info,"debug":log.Debug,"warning":log.Warning,"error":log.Error}
 var logger log.Logger
 var logPrefix string
+var eventState string
 func main() {
 	configFile, err := os.Open(configPath)
 	if err == nil{
@@ -43,7 +44,11 @@ func main() {
 		return
 	}
 	logPrefix = "[EventId: " + parameters["evid"].(string)  + "]"
-	getEventDetailsFromZenoss()
+	if(strings.ToLower(eventState) == "close"){
+		logger.Info("eventState flag is set to close. Will not try to retrieve event details from zenoss")
+	}else{
+		getEventDetailsFromZenoss()
+	}
 	postToOpsGenie()
 }
 
@@ -213,8 +218,10 @@ func parseFlags(){
 	recipients := flag.String("recipients","","Recipients")
 	tags := flag.String("tags","","Tags")
 	teams := flag.String("teams","","Teams")
-
+	state := flag.String("eventState", "", "Event State")
 	flag.Parse()
+
+	eventState = *state
 
 	if *apiKey != ""{
 		parameters["apiKey"] = *apiKey
