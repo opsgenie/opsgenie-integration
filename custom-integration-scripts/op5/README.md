@@ -1,0 +1,1 @@
+This custom script is written for a customer who uses op5 and integrate it with OpsGenie by using Nagios Integration.
