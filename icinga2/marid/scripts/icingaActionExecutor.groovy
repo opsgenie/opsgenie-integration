@@ -16,47 +16,43 @@ logger.warn("${LOG_PREFIX} Will execute action for alertId ${alert.alertId}");
 ImageIO.setUseCache(false)
 CONF_PREFIX = "icinga.";
 alertFromOpsgenie = opsgenie.getAlert(alertId: alert.alertId)
-try{
-    if (alertFromOpsgenie.size() > 0) {
+if (alertFromOpsgenie.size() > 0) {
+    def host = alertFromOpsgenie.details.host_name
+    def service = alertFromOpsgenie.details.service_desc
+    def postParams = ["btnSubmit": "Commit", "cmd_mod": "2", "send_notification": "off", "host": host]
+    if (service) postParams.hostservice = host + "^" + service;
+    boolean discardAction = false;
 
-        def host = alertFromOpsgenie.details.host_name
-        def service = alertFromOpsgenie.details.service_desc
-        def postParams = ["btnSubmit": "Commit", "cmd_mod": "2", "send_notification": "off", "host": host]
-        if (service) postParams.hostservice = host + "^" + service;
-        boolean discardAction = false;
+    //determine which icinga server will be used by using the alert details prop icinga_server
+    def icingaServer = alertFromOpsgenie.details.icinga_server
+    if (!icingaServer || icingaServer == "default") {
+        CONF_PREFIX = "icinga.";
+    } else {
+        CONF_PREFIX = "icinga." + icingaServer + ".";
+    }
+    logger.info("CONF_PREFIX is ${CONF_PREFIX}");
 
-        //determine which icinga server will be used by using the alert details prop icinga_server
-        def icingaServer = alertFromOpsgenie.details.icinga_server
-        if (!icingaServer || icingaServer == "default") {
-            CONF_PREFIX = "icinga.";
-        } else {
-            CONF_PREFIX = "icinga." + icingaServer + ".";
-        }
-        logger.info("CONF_PREFIX is ${CONF_PREFIX}");
+    //if icinga_server from alert details does exist in this Marid conf file , it should be ignored
+    def command_url = _conf("command_url", false);
+    if (!command_url) {
+        logger.warn("Ignoring action ${action} from icingaServer ${icingaServer}, because ${CONF_PREFIX} does not exist in conf file, alert: ${alert.message}");
+        return;
+    }
 
-        HTTP_CLIENT = createHttpClient();
-
-        //if icinga_server from alert details does exist in this Marid conf file , it should be ignored
-        def command_url = _conf("command_url",false);
-        if(! command_url ){
-            logger.warn("Ignoring action ${action} from icingaServer ${icingaServer}, because ${CONF_PREFIX} does not exist in conf file, alert: ${alert.message}");
-            return;
-        }
-
-        if(action == "Create"){
-            if(service){
-                attach(alert.alertId,"service")
-            }else{
-                attach(alert.alertId,"host")
+    HTTP_CLIENT = createHttpClient();
+    try {
+        if (action == "Create") {
+            if (service) {
+                attach(alert.alertId, "service")
+            } else {
+                attach(alert.alertId, "host")
             }
             discardAction = true;
-        }
-        else if (action == "Acknowledge") {
-            if(source != null && source.name?.toLowerCase()?.startsWith("icinga")){
+        } else if (action == "Acknowledge") {
+            if (source != null && source.name?.toLowerCase()?.startsWith("icinga")) {
                 logger.warn("OpsGenie alert is already acknowledged by icinga. Discarding!!!");
                 discardAction = true;
-            }
-            else{
+            } else {
                 postParams.com_data = "Acknowledged by ${alert.username} via OpsGenie"
                 postParams.sticky_ack = "on"
                 postParams.cmd_typ = service ? "34" : "33";
@@ -73,16 +69,17 @@ try{
         }
 
 
-        if(!discardAction){
+        if (!discardAction) {
             postToIcinga(postParams);
         }
-    } else {
-        logger.warn("${LOG_PREFIX} Alert with id [${alert.alertId}] does not exist in OpsGenie. It is probably deleted.")
     }
+    finally {
+        HTTP_CLIENT.close()
+    }
+} else {
+    logger.warn("${LOG_PREFIX} Alert with id [${alert.alertId}] does not exist in OpsGenie. It is probably deleted.")
 }
-finally {
-    HTTP_CLIENT.close()
-}
+
 
 def _conf(confKey, boolean isMandatory){
     def confVal = conf[CONF_PREFIX+confKey]
