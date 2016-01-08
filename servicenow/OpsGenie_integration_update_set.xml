@@ -1,0 +1,414 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<unload unload_date="2016-01-08 08:46:38">
+<sys_remote_update_set action="INSERT_OR_UPDATE">
+<application display_value="Global">global</application>
+<application_name>Global</application_name>
+<application_scope>global</application_scope>
+<application_version/>
+<collisions/>
+<commit_date/>
+<deleted/>
+<description>OpsGenie is an incident management solution for dev &amp; ops teams, providing on-call schedule management, escalations and alerting via email, SMS, phone and mobile push notifications. 
+
+OpsGenie ServiceNow integration allows you to forward ServiceNow incidents to OpsGenie. The integration does the following:
+1- A new alert is created at OpsGenie for every new incident.
+2- Assigning a user to an incident will result in adding the user in OpsGenie to the alert as recipient, allowing them to get rich notifications about the incident.
+3- Assigning a group to an incident will add the team with the same name to the alert at OpsGenie. Thus, the team's escalation will be processed to distribute the notifications regarding the incident.
+4- Resolving the incident will close the alert at OpsGenie.</description>
+<inserted/>
+<name>OpsGenie-integration</name>
+<origin_sys_id/>
+<release_date/>
+<remote_sys_id>c2449d064f7c1200ab9d33718110c75c</remote_sys_id>
+<state>loaded</state>
+<summary/>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2016-01-08 08:46:37</sys_created_on>
+<sys_id>f5b2a90a4f7c1200ab9d33718110c725</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2016-01-08 08:46:37</sys_updated_on>
+<update_set display_value=""/>
+<update_source display_value=""/>
+<updated/>
+</sys_remote_update_set>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="Global">global</application>
+<category>customer</category>
+<comments/>
+<name>sys_rest_message_fn_de5f59c64f7c1200ab9d33718110c737</name>
+<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_rest_message_fn"><sys_rest_message_fn action="INSERT_OR_UPDATE"><authentication_type/><basic_auth_password/><basic_auth_profile/><basic_auth_user/><content/><function_name>post</function_name><lock>false</lock><oauth2_profile/><protocol_name/><rest_endpoint>https://api.opsgenie.com/v1/json/servicenow?apiKey=${apiKey}</rest_endpoint><rest_message display_value="OpsGenie Webhook">ec3f5dc64f7c1200ab9d33718110c73c</rest_message><sys_class_name>sys_rest_message_fn</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2016-01-08 08:31:54</sys_created_on><sys_customer_update>true</sys_customer_update><sys_id>de5f59c64f7c1200ab9d33718110c737</sys_id><sys_mod_count>0</sys_mod_count><sys_name>post</sys_name><sys_package display_value="Global" source="global">global</sys_package><sys_policy/><sys_replace_on_upgrade>false</sys_replace_on_upgrade><sys_scope display_value="Global">global</sys_scope><sys_update_name>sys_rest_message_fn_de5f59c64f7c1200ab9d33718110c737</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2016-01-08 08:31:54</sys_updated_on><use_basic_auth>false</use_basic_auth><use_mid_server/><use_mutual_auth>false</use_mutual_auth></sys_rest_message_fn></record_update>]]></payload>
+<remote_update_set display_value="OpsGenie-integration">f5b2a90a4f7c1200ab9d33718110c725</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2016-01-08 08:46:37</sys_created_on>
+<sys_id>31b2a90a4f7c1200ab9d33718110c726</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2016-01-08 08:46:37</sys_updated_on>
+<table/>
+<target_name>post</target_name>
+<type>HTTP Method</type>
+<update_domain>global</update_domain>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="Global">global</application>
+<category>customer</category>
+<comments/>
+<name>sys_script_d540610a4f7c1200ab9d33718110c71e</name>
+<payload>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;record_update sys_domain="global" table="sys_script"&gt;&lt;sys_script action="INSERT_OR_UPDATE"&gt;&lt;abort_action&gt;false&lt;/abort_action&gt;&lt;access&gt;package_private&lt;/access&gt;&lt;action_delete&gt;false&lt;/action_delete&gt;&lt;action_insert&gt;false&lt;/action_insert&gt;&lt;action_query&gt;false&lt;/action_query&gt;&lt;action_update&gt;true&lt;/action_update&gt;&lt;active&gt;true&lt;/active&gt;&lt;add_message&gt;false&lt;/add_message&gt;&lt;advanced&gt;true&lt;/advanced&gt;&lt;change_fields&gt;false&lt;/change_fields&gt;&lt;client_callable&gt;false&lt;/client_callable&gt;&lt;collection&gt;incident&lt;/collection&gt;&lt;condition/&gt;&lt;description/&gt;&lt;execute_function&gt;false&lt;/execute_function&gt;&lt;filter_condition table="incident"&gt;assigned_toVALCHANGES^EQ&lt;item endquery="false" field="assigned_to" goto="false" newquery="false" operator="VALCHANGES" or="false" value=""/&gt;&lt;item endquery="true" field="" goto="false" newquery="false" operator="=" or="false" value=""/&gt;&lt;/filter_condition&gt;&lt;is_rest&gt;false&lt;/is_rest&gt;&lt;message/&gt;&lt;name&gt;OpsGenie Add Recipient&lt;/name&gt;&lt;order&gt;100&lt;/order&gt;&lt;priority&gt;100&lt;/priority&gt;&lt;rest_method/&gt;&lt;rest_method_text/&gt;&lt;rest_service/&gt;&lt;rest_service_text/&gt;&lt;rest_variables/&gt;&lt;role_conditions/&gt;&lt;script&gt;&lt;![CDATA[(function executeRule(current, previous /*null when async*/) {
+
+	var client = new OpsGenie_Client();
+	var contentMap = {
+		action : "addRecipient",
+		alias: current.number.toString(),
+		recipient : current.assigned_to.email.toString()
+	};
+	client.postToOpsGenie(contentMap);
+})(current, previous);]]&gt;&lt;/script&gt;&lt;sys_class_name&gt;sys_script&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2016-01-08 08:37:18&lt;/sys_created_on&gt;&lt;sys_customer_update&gt;true&lt;/sys_customer_update&gt;&lt;sys_domain&gt;global&lt;/sys_domain&gt;&lt;sys_domain_path/&gt;&lt;sys_id&gt;d540610a4f7c1200ab9d33718110c71e&lt;/sys_id&gt;&lt;sys_mod_count&gt;0&lt;/sys_mod_count&gt;&lt;sys_name&gt;OpsGenie Add Recipient&lt;/sys_name&gt;&lt;sys_overrides/&gt;&lt;sys_package display_value="Global" source="global"&gt;global&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_replace_on_upgrade&gt;false&lt;/sys_replace_on_upgrade&gt;&lt;sys_scope display_value="Global"&gt;global&lt;/sys_scope&gt;&lt;sys_update_name&gt;sys_script_d540610a4f7c1200ab9d33718110c71e&lt;/sys_update_name&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2016-01-08 08:37:18&lt;/sys_updated_on&gt;&lt;template/&gt;&lt;when&gt;after&lt;/when&gt;&lt;/sys_script&gt;&lt;sys_translated_text action="delete_multiple" query="documentkey=d540610a4f7c1200ab9d33718110c71e"/&gt;&lt;/record_update&gt;</payload>
+<remote_update_set display_value="OpsGenie-integration">f5b2a90a4f7c1200ab9d33718110c725</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2016-01-08 08:46:37</sys_created_on>
+<sys_id>35b2a90a4f7c1200ab9d33718110c726</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2016-01-08 08:46:37</sys_updated_on>
+<table>incident</table>
+<target_name>OpsGenie Add Recipient</target_name>
+<type>Business Rule</type>
+<update_domain>global</update_domain>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="Global">global</application>
+<category>customer</category>
+<comments/>
+<name>sys_app_application_ecd75d464f7c1200ab9d33718110c7b3</name>
+<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update sys_domain="global" table="sys_app_application"><sys_app_application action="INSERT_OR_UPDATE"><active>true</active><category/><description>Necessary tools to setup OpsGenie ServiceNow integration</description><device_type>browser</device_type><hint>OpsGenie ServiceNow Integration</hint><name/><order/><roles>admin</roles><sys_class_name>sys_app_application</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2016-01-08 08:15:11</sys_created_on><sys_customer_update>true</sys_customer_update><sys_domain>global</sys_domain><sys_domain_path/><sys_id>ecd75d464f7c1200ab9d33718110c7b3</sys_id><sys_mod_count>0</sys_mod_count><sys_name>OpsGenie</sys_name><sys_overrides/><sys_package display_value="Global" source="global">global</sys_package><sys_policy/><sys_replace_on_upgrade>false</sys_replace_on_upgrade><sys_scope display_value="Global">global</sys_scope><sys_update_name>sys_app_application_ecd75d464f7c1200ab9d33718110c7b3</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2016-01-08 08:15:11</sys_updated_on><title>OpsGenie</title><view_name/></sys_app_application></record_update>]]></payload>
+<remote_update_set display_value="OpsGenie-integration">f5b2a90a4f7c1200ab9d33718110c725</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2016-01-08 08:46:37</sys_created_on>
+<sys_id>39b2a90a4f7c1200ab9d33718110c725</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2016-01-08 08:46:37</sys_updated_on>
+<table/>
+<target_name>OpsGenie</target_name>
+<type>Application Menu</type>
+<update_domain>global</update_domain>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="Global">global</application>
+<category>customer</category>
+<comments/>
+<name>sys_rest_message_ec3f5dc64f7c1200ab9d33718110c73c</name>
+<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_rest_message"><sys_rest_message action="INSERT_OR_UPDATE"><access>package_private</access><authentication_type/><basic_auth_password>0LIhnbfVsQHtgqdeL3c9Qg==</basic_auth_password><basic_auth_profile/><basic_auth_user>admin</basic_auth_user><description/><name>OpsGenie Webhook</name><oauth2_profile/><protocol_name/><rest_endpoint>https://api.opsgenie.com/v1/json/servicenow?apiKey=${apiKey}</rest_endpoint><sys_class_name>sys_rest_message</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2016-01-08 08:31:54</sys_created_on><sys_customer_update>true</sys_customer_update><sys_id>ec3f5dc64f7c1200ab9d33718110c73c</sys_id><sys_mod_count>0</sys_mod_count><sys_name>OpsGenie Webhook</sys_name><sys_package display_value="Global" source="global">global</sys_package><sys_policy/><sys_replace_on_upgrade>false</sys_replace_on_upgrade><sys_scope display_value="Global">global</sys_scope><sys_update_name>sys_rest_message_ec3f5dc64f7c1200ab9d33718110c73c</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2016-01-08 08:31:54</sys_updated_on><use_basic_auth>false</use_basic_auth><use_mutual_auth>false</use_mutual_auth></sys_rest_message></record_update>]]></payload>
+<remote_update_set display_value="OpsGenie-integration">f5b2a90a4f7c1200ab9d33718110c725</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2016-01-08 08:46:37</sys_created_on>
+<sys_id>3db2a90a4f7c1200ab9d33718110c725</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2016-01-08 08:46:37</sys_updated_on>
+<table/>
+<target_name>OpsGenie Webhook</target_name>
+<type>REST Message</type>
+<update_domain>global</update_domain>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="Global">global</application>
+<category>customer</category>
+<comments/>
+<name>sys_script_059e19c64f7c1200ab9d33718110c720</name>
+<payload>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;record_update sys_domain="global" table="sys_script"&gt;&lt;sys_script action="INSERT_OR_UPDATE"&gt;&lt;abort_action&gt;false&lt;/abort_action&gt;&lt;access&gt;package_private&lt;/access&gt;&lt;action_delete&gt;false&lt;/action_delete&gt;&lt;action_insert&gt;true&lt;/action_insert&gt;&lt;action_query&gt;false&lt;/action_query&gt;&lt;action_update&gt;false&lt;/action_update&gt;&lt;active&gt;true&lt;/active&gt;&lt;add_message&gt;false&lt;/add_message&gt;&lt;advanced&gt;true&lt;/advanced&gt;&lt;change_fields&gt;false&lt;/change_fields&gt;&lt;client_callable&gt;false&lt;/client_callable&gt;&lt;collection&gt;incident&lt;/collection&gt;&lt;condition/&gt;&lt;description/&gt;&lt;execute_function&gt;false&lt;/execute_function&gt;&lt;filter_condition/&gt;&lt;is_rest&gt;false&lt;/is_rest&gt;&lt;message/&gt;&lt;name&gt;OpsGenie Create Alert&lt;/name&gt;&lt;order&gt;100&lt;/order&gt;&lt;priority&gt;100&lt;/priority&gt;&lt;rest_method/&gt;&lt;rest_method_text/&gt;&lt;rest_service/&gt;&lt;rest_service_text/&gt;&lt;rest_variables/&gt;&lt;role_conditions/&gt;&lt;script&gt;&lt;![CDATA[(function executeRule(current, previous /*null when async*/) {
+	
+	var client = new OpsGenie_Client();
+	var contentMap = {
+		action : "create",
+		message : "[ServiceNow] " + current.short_description.toString() + ", Priority:" + current.priority.toString(),
+		alias: current.number.toString(),
+		description : "Priority: " + current.priority.getDisplayValue() + "\n" +
+			"Category: " + current.category.toString() + "\n" +
+			"Incident Number: "  + current.number.toString() + "\n" +
+			"Work Notes: " + current.work_notes.toString(),
+		details : {
+			"Severity" : current.severity.getDisplayValue(),
+			"State" : current.state.getDisplayValue(),
+		},
+		recipients : current.assigned_to.email.toString(),
+		teams : current.assignment_group.name.toString()
+	};
+	client.postToOpsGenie(contentMap);
+})(current, previous);]]&gt;&lt;/script&gt;&lt;sys_class_name&gt;sys_script&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2016-01-08 08:30:40&lt;/sys_created_on&gt;&lt;sys_customer_update&gt;true&lt;/sys_customer_update&gt;&lt;sys_domain&gt;global&lt;/sys_domain&gt;&lt;sys_domain_path/&gt;&lt;sys_id&gt;059e19c64f7c1200ab9d33718110c720&lt;/sys_id&gt;&lt;sys_mod_count&gt;0&lt;/sys_mod_count&gt;&lt;sys_name&gt;OpsGenie Create Alert&lt;/sys_name&gt;&lt;sys_overrides/&gt;&lt;sys_package display_value="Global" source="global"&gt;global&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_replace_on_upgrade&gt;false&lt;/sys_replace_on_upgrade&gt;&lt;sys_scope display_value="Global"&gt;global&lt;/sys_scope&gt;&lt;sys_update_name&gt;sys_script_059e19c64f7c1200ab9d33718110c720&lt;/sys_update_name&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2016-01-08 08:30:40&lt;/sys_updated_on&gt;&lt;template/&gt;&lt;when&gt;after&lt;/when&gt;&lt;/sys_script&gt;&lt;sys_translated_text action="delete_multiple" query="documentkey=059e19c64f7c1200ab9d33718110c720"/&gt;&lt;/record_update&gt;</payload>
+<remote_update_set display_value="OpsGenie-integration">f5b2a90a4f7c1200ab9d33718110c725</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2016-01-08 08:46:37</sys_created_on>
+<sys_id>71b2a90a4f7c1200ab9d33718110c726</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2016-01-08 08:46:37</sys_updated_on>
+<table>incident</table>
+<target_name>OpsGenie Create Alert</target_name>
+<type>Business Rule</type>
+<update_domain>global</update_domain>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="Global">global</application>
+<category>customer</category>
+<comments/>
+<name>sys_script_include_771ed9c64f7c1200ab9d33718110c721</name>
+<payload>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;record_update table="sys_script_include"&gt;&lt;sys_script_include action="INSERT_OR_UPDATE"&gt;&lt;access&gt;package_private&lt;/access&gt;&lt;active&gt;true&lt;/active&gt;&lt;api_name&gt;global.OpsGenie_Client&lt;/api_name&gt;&lt;client_callable&gt;false&lt;/client_callable&gt;&lt;description/&gt;&lt;name&gt;OpsGenie_Client&lt;/name&gt;&lt;script&gt;&lt;![CDATA[var OpsGenie_Client = Class.create();
+OpsGenie_Client.prototype = {
+    initialize: function() {
+		this.apiKey = "&lt;API_KEY&gt;"; // paste the API key provided by OpsGenie here.
+    },
+	
+	postToOpsGenie: function(contentMap) {
+		var rest = new sn_ws.RESTMessageV2('OpsGenie Webhook', 'post');
+		rest.setStringParameter("apiKey", this.apiKey);
+		var content = new JSON().encode(contentMap);
+		rest.setRequestBody(content);
+		
+		gs.log("Posting to " + rest.getEndpoint() + " content:" + content);
+		var response = rest.execute();
+		var responseBody = response.getBody();
+		var httpStatus = response.getStatusCode();
+		
+		var responseLogMessage = "Response status:" + httpStatus + ", body:" + responseBody;
+		if(httpStatus != 200){
+			gs.logError(responseLogMessage);
+		} else{
+			gs.log(responseLogMessage);
+		}
+	},
+	
+    type: 'OpsGenie_Client'
+};]]&gt;&lt;/script&gt;&lt;sys_class_name&gt;sys_script_include&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2016-01-08 08:28:10&lt;/sys_created_on&gt;&lt;sys_customer_update&gt;true&lt;/sys_customer_update&gt;&lt;sys_id&gt;771ed9c64f7c1200ab9d33718110c721&lt;/sys_id&gt;&lt;sys_mod_count&gt;0&lt;/sys_mod_count&gt;&lt;sys_name&gt;OpsGenie_Client&lt;/sys_name&gt;&lt;sys_package display_value="Global" source="global"&gt;global&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_replace_on_upgrade&gt;false&lt;/sys_replace_on_upgrade&gt;&lt;sys_scope display_value="Global"&gt;global&lt;/sys_scope&gt;&lt;sys_update_name&gt;sys_script_include_771ed9c64f7c1200ab9d33718110c721&lt;/sys_update_name&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2016-01-08 08:28:10&lt;/sys_updated_on&gt;&lt;/sys_script_include&gt;&lt;/record_update&gt;</payload>
+<remote_update_set display_value="OpsGenie-integration">f5b2a90a4f7c1200ab9d33718110c725</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2016-01-08 08:46:37</sys_created_on>
+<sys_id>75b2a90a4f7c1200ab9d33718110c726</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2016-01-08 08:46:37</sys_updated_on>
+<table/>
+<target_name>OpsGenie_Client</target_name>
+<type>Script Include</type>
+<update_domain>global</update_domain>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="Global">global</application>
+<category>customer</category>
+<comments/>
+<name>sys_app_module_185c9d864f7c1200ab9d33718110c746</name>
+<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update sys_domain="global" table="sys_app_module"><sys_app_module action="INSERT_OR_UPDATE"><active>true</active><application display_value="OpsGenie">ecd75d464f7c1200ab9d33718110c7b3</application><assessment/><content_page/><device_type/><filter table="sys_rest_message">rest_endpointLIKEopsgenie^EQ<item endquery="false" field="rest_endpoint" goto="false" newquery="false" operator="LIKE" or="false" value="opsgenie"/><item endquery="true" field="" goto="false" newquery="false" operator="=" or="false" value=""/></filter><hint/><homepage/><image/><link_type>LIST</link_type><map_page/><mobile_title>REST Message</mobile_title><mobile_view_name>Mobile</mobile_view_name><name>sys_rest_message</name><order/><override_menu_roles>false</override_menu_roles><query/><report/><roles/><survey/><survey_overwrite>true</survey_overwrite><sys_class_name>sys_app_module</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2016-01-08 08:20:27</sys_created_on><sys_customer_update>true</sys_customer_update><sys_domain>global</sys_domain><sys_domain_path/><sys_id>185c9d864f7c1200ab9d33718110c746</sys_id><sys_mod_count>0</sys_mod_count><sys_name>REST Message</sys_name><sys_overrides/><sys_package display_value="Global" source="global">global</sys_package><sys_policy/><sys_replace_on_upgrade>false</sys_replace_on_upgrade><sys_scope display_value="Global">global</sys_scope><sys_update_name>sys_app_module_185c9d864f7c1200ab9d33718110c746</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2016-01-08 08:20:27</sys_updated_on><timeline_page/><title>REST Message</title><uncancelable>false</uncancelable><view_name/><window_name/></sys_app_module></record_update>]]></payload>
+<remote_update_set display_value="OpsGenie-integration">f5b2a90a4f7c1200ab9d33718110c725</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2016-01-08 08:46:37</sys_created_on>
+<sys_id>79b2a90a4f7c1200ab9d33718110c725</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2016-01-08 08:46:37</sys_updated_on>
+<table>sys_rest_message</table>
+<target_name>REST Message</target_name>
+<type>Module</type>
+<update_domain>global</update_domain>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="Global">global</application>
+<category>customer</category>
+<comments/>
+<name>sys_rest_message_fn_165f59c64f7c1200ab9d33718110c738</name>
+<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_rest_message_fn"><sys_rest_message_fn action="INSERT_OR_UPDATE"><authentication_type/><basic_auth_password/><basic_auth_profile/><basic_auth_user/><content/><function_name>put</function_name><lock>false</lock><oauth2_profile/><protocol_name/><rest_endpoint>https://api.opsgenie.com/v1/json/servicenow?apiKey=${apiKey}</rest_endpoint><rest_message display_value="OpsGenie Webhook">ec3f5dc64f7c1200ab9d33718110c73c</rest_message><sys_class_name>sys_rest_message_fn</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2016-01-08 08:31:54</sys_created_on><sys_customer_update>true</sys_customer_update><sys_id>165f59c64f7c1200ab9d33718110c738</sys_id><sys_mod_count>0</sys_mod_count><sys_name>put</sys_name><sys_package display_value="Global" source="global">global</sys_package><sys_policy/><sys_replace_on_upgrade>false</sys_replace_on_upgrade><sys_scope display_value="Global">global</sys_scope><sys_update_name>sys_rest_message_fn_165f59c64f7c1200ab9d33718110c738</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2016-01-08 08:31:54</sys_updated_on><use_basic_auth>false</use_basic_auth><use_mid_server/><use_mutual_auth>false</use_mutual_auth></sys_rest_message_fn></record_update>]]></payload>
+<remote_update_set display_value="OpsGenie-integration">f5b2a90a4f7c1200ab9d33718110c725</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2016-01-08 08:46:37</sys_created_on>
+<sys_id>7db2a90a4f7c1200ab9d33718110c725</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2016-01-08 08:46:37</sys_updated_on>
+<table/>
+<target_name>put</target_name>
+<type>HTTP Method</type>
+<update_domain>global</update_domain>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="Global">global</application>
+<category>customer</category>
+<comments/>
+<name>sys_script_0de0edc64f7c1200ab9d33718110c7c6</name>
+<payload>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;record_update sys_domain="global" table="sys_script"&gt;&lt;sys_script action="INSERT_OR_UPDATE"&gt;&lt;abort_action&gt;false&lt;/abort_action&gt;&lt;access&gt;package_private&lt;/access&gt;&lt;action_delete&gt;false&lt;/action_delete&gt;&lt;action_insert&gt;false&lt;/action_insert&gt;&lt;action_query&gt;false&lt;/action_query&gt;&lt;action_update&gt;true&lt;/action_update&gt;&lt;active&gt;true&lt;/active&gt;&lt;add_message&gt;false&lt;/add_message&gt;&lt;advanced&gt;true&lt;/advanced&gt;&lt;change_fields&gt;false&lt;/change_fields&gt;&lt;client_callable&gt;false&lt;/client_callable&gt;&lt;collection&gt;incident&lt;/collection&gt;&lt;condition/&gt;&lt;description/&gt;&lt;execute_function&gt;false&lt;/execute_function&gt;&lt;filter_condition table="incident"&gt;assignment_groupVALCHANGES^EQ&lt;item endquery="false" field="assignment_group" goto="false" newquery="false" operator="VALCHANGES" or="false" value=""/&gt;&lt;item endquery="true" field="" goto="false" newquery="false" operator="=" or="false" value=""/&gt;&lt;/filter_condition&gt;&lt;is_rest&gt;false&lt;/is_rest&gt;&lt;message/&gt;&lt;name&gt;OpsGenie Add Team&lt;/name&gt;&lt;order&gt;100&lt;/order&gt;&lt;priority&gt;100&lt;/priority&gt;&lt;rest_method/&gt;&lt;rest_method_text/&gt;&lt;rest_service/&gt;&lt;rest_service_text/&gt;&lt;rest_variables/&gt;&lt;role_conditions/&gt;&lt;script&gt;&lt;![CDATA[(function executeRule(current, previous /*null when async*/) {
+
+	var client = new OpsGenie_Client();
+	var contentMap = {
+		action : "addTeam",
+		alias: current.number.toString(),
+		team : current.assignment_group.name.toString()
+	};
+	client.postToOpsGenie(contentMap);
+})(current, previous);]]&gt;&lt;/script&gt;&lt;sys_class_name&gt;sys_script&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2016-01-08 08:40:42&lt;/sys_created_on&gt;&lt;sys_customer_update&gt;true&lt;/sys_customer_update&gt;&lt;sys_domain&gt;global&lt;/sys_domain&gt;&lt;sys_domain_path/&gt;&lt;sys_id&gt;0de0edc64f7c1200ab9d33718110c7c6&lt;/sys_id&gt;&lt;sys_mod_count&gt;0&lt;/sys_mod_count&gt;&lt;sys_name&gt;OpsGenie Add Team&lt;/sys_name&gt;&lt;sys_overrides/&gt;&lt;sys_package display_value="Global" source="global"&gt;global&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_replace_on_upgrade&gt;false&lt;/sys_replace_on_upgrade&gt;&lt;sys_scope display_value="Global"&gt;global&lt;/sys_scope&gt;&lt;sys_update_name&gt;sys_script_0de0edc64f7c1200ab9d33718110c7c6&lt;/sys_update_name&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2016-01-08 08:40:42&lt;/sys_updated_on&gt;&lt;template/&gt;&lt;when&gt;after&lt;/when&gt;&lt;/sys_script&gt;&lt;sys_translated_text action="delete_multiple" query="documentkey=0de0edc64f7c1200ab9d33718110c7c6"/&gt;&lt;/record_update&gt;</payload>
+<remote_update_set display_value="OpsGenie-integration">f5b2a90a4f7c1200ab9d33718110c725</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2016-01-08 08:46:37</sys_created_on>
+<sys_id>b1b2a90a4f7c1200ab9d33718110c726</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2016-01-08 08:46:37</sys_updated_on>
+<table>incident</table>
+<target_name>OpsGenie Add Team</target_name>
+<type>Business Rule</type>
+<update_domain>global</update_domain>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="Global">global</application>
+<category>customer</category>
+<comments/>
+<name>sys_app_module_64dc51c64f7c1200ab9d33718110c794</name>
+<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update sys_domain="global" table="sys_app_module"><sys_app_module action="INSERT_OR_UPDATE"><active>true</active><application display_value="OpsGenie">ecd75d464f7c1200ab9d33718110c7b3</application><assessment/><content_page/><device_type/><filter table="sys_script_include">nameLIKEOpsGenie^EQ<item endquery="false" field="name" goto="false" newquery="false" operator="LIKE" or="false" value="OpsGenie"/><item endquery="true" field="" goto="false" newquery="false" operator="=" or="false" value=""/></filter><hint/><homepage/><image/><link_type>LIST</link_type><map_page/><mobile_title>Script Includes</mobile_title><mobile_view_name>Mobile</mobile_view_name><name>sys_script_include</name><order/><override_menu_roles>false</override_menu_roles><query/><report/><roles/><survey/><survey_overwrite>true</survey_overwrite><sys_class_name>sys_app_module</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2016-01-08 08:23:43</sys_created_on><sys_customer_update>true</sys_customer_update><sys_domain>global</sys_domain><sys_domain_path/><sys_id>64dc51c64f7c1200ab9d33718110c794</sys_id><sys_mod_count>0</sys_mod_count><sys_name>Script Includes</sys_name><sys_overrides/><sys_package display_value="Global" source="global">global</sys_package><sys_policy/><sys_replace_on_upgrade>false</sys_replace_on_upgrade><sys_scope display_value="Global">global</sys_scope><sys_update_name>sys_app_module_64dc51c64f7c1200ab9d33718110c794</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2016-01-08 08:23:43</sys_updated_on><timeline_page/><title>Script Includes</title><uncancelable>false</uncancelable><view_name/><window_name/></sys_app_module></record_update>]]></payload>
+<remote_update_set display_value="OpsGenie-integration">f5b2a90a4f7c1200ab9d33718110c725</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2016-01-08 08:46:37</sys_created_on>
+<sys_id>b9b2a90a4f7c1200ab9d33718110c725</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2016-01-08 08:46:37</sys_updated_on>
+<table>sys_script_include</table>
+<target_name>Script Includes</target_name>
+<type>Module</type>
+<update_domain>global</update_domain>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="Global">global</application>
+<category>customer</category>
+<comments/>
+<name>sys_rest_message_fn_9a5f110a4f7c1200ab9d33718110c78e</name>
+<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_rest_message_fn"><sys_rest_message_fn action="INSERT_OR_UPDATE"><authentication_type/><basic_auth_password/><basic_auth_profile/><basic_auth_user/><content/><function_name>delete</function_name><lock>false</lock><oauth2_profile/><protocol_name/><rest_endpoint>https://api.opsgenie.com/v1/json/servicenow?apiKey=${apiKey}</rest_endpoint><rest_message display_value="OpsGenie Webhook">ec3f5dc64f7c1200ab9d33718110c73c</rest_message><sys_class_name>sys_rest_message_fn</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2016-01-08 08:31:54</sys_created_on><sys_customer_update>true</sys_customer_update><sys_id>9a5f110a4f7c1200ab9d33718110c78e</sys_id><sys_mod_count>0</sys_mod_count><sys_name>delete</sys_name><sys_package display_value="Global" source="global">global</sys_package><sys_policy/><sys_replace_on_upgrade>false</sys_replace_on_upgrade><sys_scope display_value="Global">global</sys_scope><sys_update_name>sys_rest_message_fn_9a5f110a4f7c1200ab9d33718110c78e</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2016-01-08 08:31:54</sys_updated_on><use_basic_auth>false</use_basic_auth><use_mid_server/><use_mutual_auth>false</use_mutual_auth></sys_rest_message_fn></record_update>]]></payload>
+<remote_update_set display_value="OpsGenie-integration">f5b2a90a4f7c1200ab9d33718110c725</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2016-01-08 08:46:37</sys_created_on>
+<sys_id>bdb2a90a4f7c1200ab9d33718110c725</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2016-01-08 08:46:37</sys_updated_on>
+<table/>
+<target_name>delete</target_name>
+<type>HTTP Method</type>
+<update_domain>global</update_domain>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="Global">global</application>
+<category>customer</category>
+<comments/>
+<name>sys_script_377f5dc64f7c1200ab9d33718110c740</name>
+<payload>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;record_update sys_domain="global" table="sys_script"&gt;&lt;sys_script action="INSERT_OR_UPDATE"&gt;&lt;abort_action&gt;false&lt;/abort_action&gt;&lt;access&gt;package_private&lt;/access&gt;&lt;action_delete&gt;false&lt;/action_delete&gt;&lt;action_insert&gt;false&lt;/action_insert&gt;&lt;action_query&gt;false&lt;/action_query&gt;&lt;action_update&gt;true&lt;/action_update&gt;&lt;active&gt;true&lt;/active&gt;&lt;add_message&gt;false&lt;/add_message&gt;&lt;advanced&gt;true&lt;/advanced&gt;&lt;change_fields&gt;false&lt;/change_fields&gt;&lt;client_callable&gt;false&lt;/client_callable&gt;&lt;collection&gt;incident&lt;/collection&gt;&lt;condition/&gt;&lt;description/&gt;&lt;execute_function&gt;false&lt;/execute_function&gt;&lt;filter_condition table="incident"&gt;stateVALCHANGES^state=6^ORstate=7^EQ&lt;item endquery="false" field="state" goto="false" newquery="false" operator="VALCHANGES" or="false" value=""/&gt;&lt;item endquery="false" field="state" goto="false" newquery="false" operator="=" or="false" value="6"/&gt;&lt;item endquery="false" field="state" goto="false" newquery="false" operator="=" or="true" value="7"/&gt;&lt;item endquery="true" field="" goto="false" newquery="false" operator="=" or="false" value=""/&gt;&lt;/filter_condition&gt;&lt;is_rest&gt;false&lt;/is_rest&gt;&lt;message/&gt;&lt;name&gt;OpsGenie Close Alert&lt;/name&gt;&lt;order&gt;100&lt;/order&gt;&lt;priority&gt;100&lt;/priority&gt;&lt;rest_method/&gt;&lt;rest_method_text/&gt;&lt;rest_service/&gt;&lt;rest_service_text/&gt;&lt;rest_variables/&gt;&lt;role_conditions/&gt;&lt;script&gt;&lt;![CDATA[(function executeRule(current, previous /*null when async*/) {
+	
+	var client = new OpsGenie_Client();
+	var contentMap = {
+		action : "close",
+		alias: current.number.toString()
+	};
+	client.postToOpsGenie(contentMap);
+})(current, previous);]]&gt;&lt;/script&gt;&lt;sys_class_name&gt;sys_script&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2016-01-08 08:35:28&lt;/sys_created_on&gt;&lt;sys_customer_update&gt;true&lt;/sys_customer_update&gt;&lt;sys_domain&gt;global&lt;/sys_domain&gt;&lt;sys_domain_path/&gt;&lt;sys_id&gt;377f5dc64f7c1200ab9d33718110c740&lt;/sys_id&gt;&lt;sys_mod_count&gt;0&lt;/sys_mod_count&gt;&lt;sys_name&gt;OpsGenie Close Alert&lt;/sys_name&gt;&lt;sys_overrides/&gt;&lt;sys_package display_value="Global" source="global"&gt;global&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_replace_on_upgrade&gt;false&lt;/sys_replace_on_upgrade&gt;&lt;sys_scope display_value="Global"&gt;global&lt;/sys_scope&gt;&lt;sys_update_name&gt;sys_script_377f5dc64f7c1200ab9d33718110c740&lt;/sys_update_name&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2016-01-08 08:35:28&lt;/sys_updated_on&gt;&lt;template/&gt;&lt;when&gt;after&lt;/when&gt;&lt;/sys_script&gt;&lt;sys_translated_text action="delete_multiple" query="documentkey=377f5dc64f7c1200ab9d33718110c740"/&gt;&lt;/record_update&gt;</payload>
+<remote_update_set display_value="OpsGenie-integration">f5b2a90a4f7c1200ab9d33718110c725</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2016-01-08 08:46:37</sys_created_on>
+<sys_id>f1b2a90a4f7c1200ab9d33718110c726</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2016-01-08 08:46:37</sys_updated_on>
+<table>incident</table>
+<target_name>OpsGenie Close Alert</target_name>
+<type>Business Rule</type>
+<update_domain>global</update_domain>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="Global">global</application>
+<category>customer</category>
+<comments/>
+<name>sys_app_module_dc9d11c64f7c1200ab9d33718110c7c2</name>
+<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update sys_domain="global" table="sys_app_module"><sys_app_module action="INSERT_OR_UPDATE"><active>true</active><application display_value="OpsGenie">ecd75d464f7c1200ab9d33718110c7b3</application><assessment/><content_page/><device_type/><filter table="sys_script">nameLIKEOpsGenie^EQ<item endquery="false" field="name" goto="false" newquery="false" operator="LIKE" or="false" value="OpsGenie"/><item endquery="true" field="" goto="false" newquery="false" operator="=" or="false" value=""/></filter><hint/><homepage/><image/><link_type>LIST</link_type><map_page/><mobile_title>Business Rules</mobile_title><mobile_view_name>Mobile</mobile_view_name><name>sys_script</name><order/><override_menu_roles>false</override_menu_roles><query/><report/><roles/><survey/><survey_overwrite>true</survey_overwrite><sys_class_name>sys_app_module</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2016-01-08 08:25:11</sys_created_on><sys_customer_update>true</sys_customer_update><sys_domain>global</sys_domain><sys_domain_path/><sys_id>dc9d11c64f7c1200ab9d33718110c7c2</sys_id><sys_mod_count>0</sys_mod_count><sys_name>Business Rules</sys_name><sys_overrides/><sys_package display_value="Global" source="global">global</sys_package><sys_policy/><sys_replace_on_upgrade>false</sys_replace_on_upgrade><sys_scope display_value="Global">global</sys_scope><sys_update_name>sys_app_module_dc9d11c64f7c1200ab9d33718110c7c2</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2016-01-08 08:25:11</sys_updated_on><timeline_page/><title>Business Rules</title><uncancelable>false</uncancelable><view_name/><window_name/></sys_app_module></record_update>]]></payload>
+<remote_update_set display_value="OpsGenie-integration">f5b2a90a4f7c1200ab9d33718110c725</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2016-01-08 08:46:37</sys_created_on>
+<sys_id>f9b2a90a4f7c1200ab9d33718110c725</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2016-01-08 08:46:37</sys_updated_on>
+<table>sys_script</table>
+<target_name>Business Rules</target_name>
+<type>Module</type>
+<update_domain>global</update_domain>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value="Global">global</application>
+<category>customer</category>
+<comments/>
+<name>sys_rest_message_fn_9a5f59c64f7c1200ab9d33718110c737</name>
+<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_rest_message_fn"><sys_rest_message_fn action="INSERT_OR_UPDATE"><authentication_type/><basic_auth_password/><basic_auth_profile/><basic_auth_user/><content/><function_name>get</function_name><lock>false</lock><oauth2_profile/><protocol_name/><rest_endpoint>https://api.opsgenie.com/v1/json/servicenow?apiKey=${apiKey}</rest_endpoint><rest_message display_value="OpsGenie Webhook">ec3f5dc64f7c1200ab9d33718110c73c</rest_message><sys_class_name>sys_rest_message_fn</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2016-01-08 08:31:54</sys_created_on><sys_customer_update>true</sys_customer_update><sys_id>9a5f59c64f7c1200ab9d33718110c737</sys_id><sys_mod_count>0</sys_mod_count><sys_name>get</sys_name><sys_package display_value="Global" source="global">global</sys_package><sys_policy/><sys_replace_on_upgrade>false</sys_replace_on_upgrade><sys_scope display_value="Global">global</sys_scope><sys_update_name>sys_rest_message_fn_9a5f59c64f7c1200ab9d33718110c737</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2016-01-08 08:31:54</sys_updated_on><use_basic_auth>false</use_basic_auth><use_mid_server/><use_mutual_auth>false</use_mutual_auth></sys_rest_message_fn></record_update>]]></payload>
+<remote_update_set display_value="OpsGenie-integration">f5b2a90a4f7c1200ab9d33718110c725</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2016-01-08 08:46:37</sys_created_on>
+<sys_id>fdb2a90a4f7c1200ab9d33718110c725</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2016-01-08 08:46:37</sys_updated_on>
+<table/>
+<target_name>get</target_name>
+<type>HTTP Method</type>
+<update_domain>global</update_domain>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+</unload>
