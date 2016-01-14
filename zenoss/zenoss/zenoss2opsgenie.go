@@ -24,19 +24,12 @@ var TOTAL_TIME = 60
 var configParameters = map[string]string{"apiKey": API_KEY,"zenoss2opsgenie.logger":"warning","opsgenie.api.url":"https://api.opsgenie.com"}
 var parameters = make(map[string]interface{})
 var configPath = "/etc/opsgenie/conf/opsgenie-integration.conf"
+var logPath = "/var/log/opsgenie/zenoss2opsgenie.log"
 var levels = map [string]log.Level{"info":log.Info,"debug":log.Debug,"warning":log.Warning,"error":log.Error}
 var logger log.Logger
 var logPrefix string
 var eventState string
 func main() {
-	configFile, err := os.Open(configPath)
-	if err == nil{
-		readConfigFile(configFile)
-	}else{
-		panic(err)
-	}
-	logger = configureLogger()
-	printConfigToLog()
 	version := flag.String("v","","")
 	parseFlags()
 	if *version != ""{
@@ -84,7 +77,7 @@ func readConfigFile(file io.Reader){
 
 func configureLogger ()log.Logger{
 	level := configParameters["zenoss2opsgenie.logger"]
-	file, err := os.OpenFile("/var/log/opsgenie/zenoss2opsgenie.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	file, err := os.OpenFile(logPath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	if err != nil{
 		fmt.Println("Logging disabled. Reason: ", err)
 	}
@@ -219,9 +212,29 @@ func parseFlags(){
 	tags := flag.String("tags","","Tags")
 	teams := flag.String("teams","","Teams")
 	state := flag.String("eventState", "", "Event State")
+	configloc := flag.String("config", "", "Config File Location")
+        logloc := flag.String("logfile", "", "Log File Location")
 	flag.Parse()
 
 	eventState = *state
+
+	if *configloc != ""{
+		configPath = *configloc
+	}
+
+	if *configloc != ""{
+		logPath = *logloc
+	}
+
+	configFile, err := os.Open(configPath)
+	if err == nil{
+		readConfigFile(configFile)
+	}else{
+		panic(err)
+	}
+	logger = configureLogger()
+	printConfigToLog()
+
 
 	if *apiKey != ""{
 		parameters["apiKey"] = *apiKey
@@ -249,8 +262,4 @@ func parseFlags(){
 
 	parameters["evid"] = *evid
 }
-
-
-
-
 
