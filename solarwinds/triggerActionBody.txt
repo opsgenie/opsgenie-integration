@@ -1,6 +1,8 @@
 ## OpsGenie expects the following fields like below, use them without changing names (in both contents)
 
 ActionType=Create&
+ObjectID=${ObjectID}&
+NodeName=${NodeName}&
 AlertID=${N=Alerting;M=AlertID}&
 AlertDefID=${N=Alerting;M=AlertDefID}&
 AlertName=${N=Alerting;M=AlertName}&
@@ -18,10 +20,12 @@ LastEdit=${N=Alerting;M=LastEdit;F=DateTime}&
 ObjectType=${N=Alerting;M=ObjectType}&
 Severity=${N=Alerting;M=Severity}&
 TimeOfDay=${N=Alerting;M=TimeOfDay}&
-DateTime=${N=Generic;M=DateTime;F=DateTime}&
+DateTime=${N=Generic;M=DateTime;F=DateTime}
 
 ## Troubleshooting content, use µ#µ instead of = and §#§ instead of &
 ActionTypeµ#µCreate§#§
+ObjectIDµ#µ${ObjectID}§#§
+NodeNameµ#µ${NodeName}§#§
 AlertIDµ#µ${N=Alerting;M=AlertID}§#§
 AlertDefIDµ#µ${N=Alerting;M=AlertDefID}§#§
 AlertNameµ#µ${N=Alerting;M=AlertName}§#§
@@ -39,4 +43,4 @@ LastEditµ#µ${N=Alerting;M=LastEdit;F=DateTime}§#§
 ObjectTypeµ#µ${N=Alerting;M=ObjectType}§#§
 Severityµ#µ${N=Alerting;M=Severity}§#§
 TimeOfDayµ#µ${N=Alerting;M=TimeOfDay}§#§
-DateTimeµ#µ${N=Generic;M=DateTime;F=DateTime}§#§
+DateTimeµ#µ${N=Generic;M=DateTime;F=DateTime}
