@@ -31,7 +31,7 @@ tags=<comma_separated_list_of_tags>
 ## you can send alias, teams, recipients and tags to be used in OpsGenie alerts. Notice that these fields start with lowercase in example content do not change it.
 
 ActionTypeµ#µCreate§#§
-Aliasµ#µ${ObjectID}-${N=Alerting;M=AlertID}§#§
+aliasµ#µ${ObjectID}-${N=Alerting;M=AlertID}§#§
 ObjectIDµ#µ${ObjectID}§#§
 NodeNameµ#µ${NodeName}§#§
 AlertIDµ#µ${N=Alerting;M=AlertID}§#§
