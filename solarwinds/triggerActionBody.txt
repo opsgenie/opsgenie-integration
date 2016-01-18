@@ -1,8 +1,8 @@
 ## OpsGenie expects the following fields like below, use them without changing names (in both contents)
-## you can send teams, recipients and tags to be used in OpsGenie alerts. Notice that these three fields start with lowercase in example content do not change it.
+## you can send alias, teams, recipients and tags to be used in OpsGenie alerts. Notice that these fields start with lowercase in example content do not change it.
 
 ActionType=Create&
-Alias=${ObjectID}-${N=Alerting;M=AlertID}&
+alias=${ObjectID}-${N=Alerting;M=AlertID}&
 ObjectID=${ObjectID}&
 NodeName=${NodeName}&
 AlertID=${N=Alerting;M=AlertID}&
@@ -28,7 +28,7 @@ teams=<comma_separated_list_of_teams>&
 tags=<comma_separated_list_of_tags>
 
 ## Troubleshooting content, use µ#µ instead of = and §#§ instead of &
-## you can send teams, recipients and tags to be used in OpsGenie alerts. Notice that these three fields start with lowercase in example content do not change it.
+## you can send alias, teams, recipients and tags to be used in OpsGenie alerts. Notice that these fields start with lowercase in example content do not change it.
 
 ActionTypeµ#µCreate§#§
 Aliasµ#µ${ObjectID}-${N=Alerting;M=AlertID}§#§
