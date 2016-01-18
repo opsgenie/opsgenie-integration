@@ -1,8 +1,8 @@
-## Reset action should trigger the Close Action of OpsGenie. By default, Solarwinds Orion NPM integration alerts uses AlertID field as Alias.
-That's why sending only ActionType (Close action's default condition) and AlertID (default alias of alerts) will be sufficient.
+## Reset action should trigger the Close Action of OpsGenie. By default, Solarwinds Orion NPM integration alerts uses alias field as Alert Alias.
+That's why sending only ActionType (Close action's default condition) and alias (default alias of alerts) will be sufficient.
 
 ## OpsGenie expects the following fields like below, use them without changing names.
-ObjectID=${ObjectID}&ActionType=Close
+alias=${ObjectID}-${N=Alerting;M=AlertID}&ActionType=Close
 
 ## Troubleshooting content, use µ#µ instead of = and §#§ instead of &
-ObjectID#µ#${ObjectID}§#§ActionTypeµ#µClose
+aliasµ#µ${ObjectID}-${N=Alerting;M=AlertID}§#§ActionTypeµ#µClose
