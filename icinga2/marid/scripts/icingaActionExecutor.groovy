@@ -1,6 +1,9 @@
 import com.ifountain.opsgenie.client.http.OpsGenieHttpClient
 import com.ifountain.opsgenie.client.util.ClientConfiguration
+import com.ifountain.opsgenie.client.util.JsonUtils
 import org.apache.commons.lang.StringEscapeUtils
+import org.apache.commons.lang.StringUtils
+import org.apache.http.HttpHeaders
 import org.apache.http.HttpHost
 import org.apache.http.auth.UsernamePasswordCredentials
 
@@ -17,10 +20,18 @@ ImageIO.setUseCache(false)
 CONF_PREFIX = "icinga.";
 alertFromOpsgenie = opsgenie.getAlert(alertId: alert.alertId)
 if (alertFromOpsgenie.size() > 0) {
-    def host = alertFromOpsgenie.details.host_name
-    def service = alertFromOpsgenie.details.service_desc
-    def postParams = ["btnSubmit": "Commit", "cmd_mod": "2", "send_notification": "off", "host": host]
-    if (service) postParams.hostservice = host + "^" + service;
+    String host = alertFromOpsgenie.details.host_name
+    String service = alertFromOpsgenie.details.service_desc
+    boolean isServiceAlert = StringUtils.isNotBlank(service)
+    def requestParams = [:]
+    def contentMap = [:]
+    def urlPath = ""
+    if (isServiceAlert){
+        requestParams.service = host + "!" + service;
+    } else{
+        requestParams.host = host;
+    }
+
     boolean discardAction = false;
 
     //determine which icinga server will be used by using the alert details prop icinga_server
@@ -33,8 +44,8 @@ if (alertFromOpsgenie.size() > 0) {
     logger.info("CONF_PREFIX is ${CONF_PREFIX}");
 
     //if icinga_server from alert details does exist in this Marid conf file , it should be ignored
-    def command_url = _conf("command_url", false);
-    if (!command_url) {
+    def apiUrl = _conf("api_url", false);
+    if (!apiUrl) {
         logger.warn("Ignoring action ${action} from icingaServer ${icingaServer}, because ${CONF_PREFIX} does not exist in conf file, alert: ${alert.message}");
         return;
     }
@@ -42,35 +53,35 @@ if (alertFromOpsgenie.size() > 0) {
     HTTP_CLIENT = createHttpClient();
     try {
         if (action == "Create") {
-            if (service) {
-                attach(alert.alertId, "service")
-            } else {
-                attach(alert.alertId, "host")
-            }
+            attach(isServiceAlert)
             discardAction = true;
         } else if (action == "Acknowledge") {
             if (source != null && source.name?.toLowerCase()?.startsWith("icinga")) {
                 logger.warn("OpsGenie alert is already acknowledged by icinga. Discarding!!!");
                 discardAction = true;
             } else {
-                postParams.com_data = "Acknowledged by ${alert.username} via OpsGenie"
-                postParams.sticky_ack = "on"
-                postParams.cmd_typ = service ? "34" : "33";
+                urlPath = "/v1/actions/acknowledge-problem"
+                contentMap.put("comment", String.valueOf("Acknowledged by ${alert.username} via OpsGenie"))
+                contentMap.put("author", alert.username)
+                contentMap.put("notify", true)
+                contentMap.put("sticky", true)
             }
         } else if (action == "TakeOwnership") {
-            postParams.com_data = "alert ownership taken by ${alert.username}"
-            postParams.cmd_typ = service ? "3" : "1";
+            urlPath = "/v1/actions/add-comment"
+            contentMap.put("comment", String.valueOf("alert ownership taken by ${alert.username}"))
+            contentMap.put("author", "OpsGenie")
         } else if (action == "AssignOwnership") {
-            postParams.com_data = "alert ownership assigned to ${alert.owner}"
-            postParams.cmd_typ = service ? "3" : "1";
+            urlPath = "/v1/actions/add-comment"
+            contentMap.put("comment", String.valueOf("alert ownership assigned to ${alert.owner}"))
+            contentMap.put("author", "OpsGenie")
         } else if (action == "AddNote") {
-            postParams.com_data = "${alert.note} by ${alert.username}"
-            postParams.cmd_typ = service ? "3" : "1";
+            urlPath = "/v1/actions/add-comment"
+            contentMap.put("comment", String.valueOf("${alert.note} by ${alert.username}"))
+            contentMap.put("author", "OpsGenie")
         }
 
-
         if (!discardAction) {
-            postToIcinga(postParams);
+            postToIcingaApi(urlPath, requestParams, contentMap);
         }
     }
     finally {
@@ -79,7 +90,6 @@ if (alertFromOpsgenie.size() > 0) {
 } else {
     logger.warn("${LOG_PREFIX} Alert with id [${alert.alertId}] does not exist in OpsGenie. It is probably deleted.")
 }
-
 
 def _conf(confKey, boolean isMandatory){
     def confVal = conf[CONF_PREFIX+confKey]
@@ -105,77 +115,53 @@ def createHttpClient() {
     return new OpsGenieHttpClient(clientConfiguration)
 }
 
-def getUrl(String confProperty, String backwardCompatabilityUrl, boolean  isMandatory) {
-    def url = _conf(confProperty, isMandatory)
-    if (url != null) {
-        return url;
-    } else {
-        //backward compatability
-        def scheme =  _conf("http.scheme", false)
-        if (scheme == null) scheme = "http";
-        def port = _conf("port", true).toInteger();
-        def host = _conf("host", true);
-        return new HttpHost(host, port, scheme).toURI() + backwardCompatabilityUrl;
-    }
-}
-
-def postToIcinga(Map<String, String> postParams) {
-    String url = getUrl("command_url", "/icinga/cgi-bin/cmd.cgi", true);
-    logger.debug("${LOG_PREFIX} Posting to Icinga. Url ${url} params:${postParams}")
-    def response = ((OpsGenieHttpClient) HTTP_CLIENT).post(url, postParams)
+def postToIcingaApi(String urlPath, Map requestParameters, Map contentMap) {
+    String url = _conf("api_url", true) + urlPath;
+    String jsonContent = JsonUtils.toJson(contentMap);
+    logger.debug("${LOG_PREFIX} Posting to Icinga. Url ${url} params:${requestParameters}, content:${jsonContent} , conmap:${contentMap}")
+    def httpPost = ((OpsGenieHttpClient) HTTP_CLIENT).preparePostMethod(url, jsonContent, [(HttpHeaders.ACCEPT): "application/json", (HttpHeaders.CONTENT_TYPE): "application/json"], requestParameters)
+    def response = ((OpsGenieHttpClient) HTTP_CLIENT).executeHttpMethod(httpPost)
     if (response.getStatusCode() == 200) {
         logger.info("${LOG_PREFIX} Successfully executed at Icinga.");
         logger.debug("${LOG_PREFIX} Icinga response: ${response.getContentAsString()}")
     } else {
-        logger.warn("${LOG_PREFIX} Could not execute at Icinga. Icinga Resonse:${response.getContentAsString()}")
+        logger.warn("${LOG_PREFIX} Could not execute at Icinga. Icinga Response:${response.getContentAsString()}")
     }
 }
 
-def attach(alertId, entity) {
-    // will get alert histogram and trends charts from Icinga and attach them to the alert
+def attach(boolean isServiceAlert) {
+    // will get performance data from Icinga and attach it to the alert
     try {
-        def alertHistogram = getAlertHistogram(entity);
-        def trends = getTrends(entity);
-        def htmlText = createHtml(entity, alertHistogram, trends)
-        ByteArrayOutputStream bout = createZip(htmlText, alertHistogram, trends)
-        logger.warn("Attaching details");
-        println "Attaching details"
+        def perfData = getPerfData(isServiceAlert)
+        def htmlText = createHtml(isServiceAlert, perfData)
+        ByteArrayOutputStream bout = createZip(htmlText, perfData)
+        logger.info("Attaching details");
 
         String fileDate = new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss").format(new Date());
         String fileName = "details_${fileDate}.zip";
-        response = opsgenie.attach([alertId: alertId, stream: new ByteArrayInputStream(bout.toByteArray()), fileName: fileName])
+        response = opsgenie.attach([alertId: alert.alertId, stream: new ByteArrayInputStream(bout.toByteArray()), fileName: fileName])
         if (response.success) {
-            logger.warn("Successfully attached details ${fileName}");
-            println "Successfully attached details"
+            logger.info("Successfully attached details ${fileName}");
         } else {
-            println "Could not attach details"
-            logger.warn("Could not attach details ${fileName}");
+            logger.error("Could not attach details ${fileName}");
         }
     }
     catch (e) {
-        logger.warn("Could not attach details. Reason: ${e}", e)
-        println "Could not attach details. Reason: ${e}"
+        logger.error("Could not attach details. Reason: ${e}", e)
     }
 }
 
-def createZip(html, alertHistogram, trends) {
+def createZip(html, perfData) {
     ByteArrayOutputStream bout = new ByteArrayOutputStream();
     ZipOutputStream zout = new ZipOutputStream(bout);
     ZipEntry htmlEntry = new ZipEntry("index.html");
     zout.putNextEntry(htmlEntry);
     zout.write(html.getBytes())
     zout.closeEntry()
-    if (alertHistogram) {
-        ZipEntry imageEntry = new ZipEntry("alertHistogram.png");
+    if (perfData) {
+        ZipEntry imageEntry = new ZipEntry("perfData.png");
         zout.putNextEntry(imageEntry);
-        BufferedImage img = ImageIO.read(new ByteArrayInputStream(alertHistogram))
-        ImageIO.write(img, "png", zout);
-        zout.closeEntry()
-    }
-    if (trends) {
-        ZipEntry imageEntry = new ZipEntry("trends.png");
-        zout.putNextEntry(imageEntry);
-        BufferedImage img = ImageIO.read(new ByteArrayInputStream(trends))
+        BufferedImage img = ImageIO.read(new ByteArrayInputStream(perfData))
         ImageIO.write(img, "png", zout);
         zout.closeEntry()
     }
@@ -183,7 +169,7 @@ def createZip(html, alertHistogram, trends) {
     return bout;
 }
 
-def createHtml(entity, alertHistogram, trends) {
+def createHtml(boolean isServiceAlert, perfData) {
     StringBuffer buf = new StringBuffer()
     buf.append("""
         <html>
@@ -200,16 +186,13 @@ def createHtml(entity, alertHistogram, trends) {
             <body>
                 <div>
     """)
-    if (entity == "host") {
-        getHostStatusHtml(buf)
-    } else {
+    if (isServiceAlert) {
         getServicesStatusHtml(buf)
+    } else {
+        getHostStatusHtml(buf)
     }
-    if (trends) {
-        buf.append('<div class="img"><img src="trends.png"></div>')
-    }
-    if (alertHistogram) {
-        buf.append('<div class="img"><img src="alertHistogram.png"></div>')
+    if (perfData) {
+        buf.append('<div class="img"><img src="perfData.png"></div>')
     }
     buf.append("""
                 </div>
@@ -304,35 +287,30 @@ def getHostStatusHtml(buf) {
    """)
 }
 
-def getAlertHistogram(entity) {
-    String url = getUrl("alert_histogram_image_url", "/icinga/cgi-bin/histogram.cgi", false)
-    return getImage(url, entity);
-}
-
-def getTrends(entity) {
-    String url = getUrl("trends_image_url", "/icinga/cgi-bin/trends.cgi", false)
-    return getImage(url, entity);
-}
-
-def getImage(url, entity) {
-    def host = alertFromOpsgenie.details.host_name
-    url += "?createimage&host=" + URLEncoder.encode(host)
-    if (entity == "service") {
-        def service = alertFromOpsgenie.details.service_desc
-        url += "&service=" + URLEncoder.encode(service)
+def getPerfData(boolean isServiceAlert) {
+    String graphiteUrl = _conf("graphite_url", false);
+    if (StringUtils.isBlank(graphiteUrl)) {
+        logger.warn("Could not get performance data because graphite_url is not configured.")
+        return null
     }
-    logger.warn("Sending request to url:" + url)
-    def response = HTTP_CLIENT.get(url, [:])
-    def code = response.getStatusCode()
+    String targetParam;
+    String host = alertFromOpsgenie.details.host_name;
+    if (isServiceAlert) {
+        String service = alertFromOpsgenie.details.service_desc
+        targetParam = "icinga2." + host + ".services." + service + ".*.perfdata.*.*"
+    } else {
+        targetParam = "icinga2." + host + ".host.*.perfdata.*.*"
+    }
+    logger.debug("Sending to ${graphiteUrl} target: ${targetParam}")
+    def response = HTTP_CLIENT.get(graphiteUrl + "/render", ["target": targetParam])
+    int code = response.getStatusCode()
     if (code == 200) {
-        logger.warn("Image received");
-        println "Image received"
+        logger.info("Image received");
         return response.getContent();
     } else {
         def content = response.getContentAsString()
-        logger.warn("Could not get image from url ${url}. ResponseCode:${code} Reason:" + content)
-        println "Could not get image from url ${url}. ResponseCode:${code} Reason:" + content
-        return null;
+        logger.error("Could not get image from url ${url}. ResponseCode:${code} Reason:" + content)
+        return null
     }
 }
 

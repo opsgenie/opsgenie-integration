@@ -11,9 +11,8 @@ icinga_server=default
 #viaMaridUrl=http://maridHost:port/script/marid2opsgenie.groovy?async=true
 
 ######################################## ICINGA CONFIGURATION #######################################
-icinga.alert_histogram_image_url=http://localhost/icinga/cgi-bin/histogram.cgi
-icinga.trends_image_url=http://localhost/icinga/cgi-bin/trends.cgi
-icinga.command_url=http://localhost/icinga/cgi-bin/cmd.cgi
+icinga.api_url=https://localhost:5665
+icinga.graphite_url=http://localhost:5003
 icinga.user=icingaadmin
 icinga.password=icingaadmin
 icinga.http.timeout=30000
@@ -27,10 +26,8 @@ actions.Create.script=icingaActionExecutor.groovy
 
 #You can configure more than one Icinga Server like the following (used in marid)
 #In order to use feature you should also set icinga_server:server1
-#icinga.server1.alert_histogram_image_url=http://icingaHost:port/icinga/cgi-bin/histogram.cgi
-#icinga.server1.trends_image_url=http://icingaHost:port/icinga/cgi-bin/trends.cgi
-#icinga.server1.command_url=http://icingaHost:port/icinga/cgi-bin/cmd.cgi
+#icinga.server1.api_url=http://icingaHost:port
+#icinga.server1.graphite_url=http://icingaHost:port
 #icinga.server1.user=icingaadmin
 #icinga.server1.password=icingaadmin
-#icinga.server1.http.timeout=30000
 #icinga.server1.http.timeout=30000
