@@ -19,3 +19,4 @@ if [ -d "/etc/icinga2/conf.d" ]; then
 else
         echo "WARNING : Could not find your icinga conf.d directory. Please copy /etc/opsgenie/opsgenie.conf file to your Icinga conf.d directory manually!"
 fi
+echo "WARNING : If you're updating the integration from version 1.​*.*​, please update your /etc/opsgenie/conf/opsgenie-integration.conf file accordingly: the old configuration will not work with this version of the integration."
