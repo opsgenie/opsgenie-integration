@@ -30,7 +30,39 @@
 
 [String]$LastModified,
 
-[String]$TimeRaised
+[String]$TimeRaised,
+
+[String]$TicketId,
+
+[String]$DataItemCreateTimeLocal,
+
+[String]$ManagedEntityPath,
+
+[String]$ManagedEntity,
+
+[String]$TimeAddedLocal,
+
+[String]$MPElement = "NotPresent",
+
+[String]$Custom1,
+
+[String]$Custom2,
+
+[String]$Custom3,
+
+[String]$Custom4,
+
+[String]$Custom5,
+
+[String]$Custom6,
+
+[String]$Custom7,
+
+[String]$Custom8,
+
+[String]$Custom9,
+
+[String]$Custom10
 
 )
 
@@ -50,6 +82,22 @@ managedEntitySource=$ManagedEntitySource;
 workflowId=$WorkflowId;
 lastModified=$LastModified;
 timeRaised=$TimeRaised;
+ticketId=$TicketId;
+dataItemCreateTime=$DataItemCreateTimeLocal;
+managedEntityPath=$ManagedEntityPath;
+managedEntityGUID=$ManagedEntity;
+timeAdded=$TimeAddedLocal;
+mpElement=$MPElement;
+customField1=$Custom1;
+customField2=$Custom2;
+customField3=$Custom3;
+customField4=$Custom4;
+customField5=$Custom5;
+customField6=$Custom6;
+customField7=$Custom7;
+customField8=$Custom8;
+customField9=$Custom9;
+customField10=$Custom10;
 }
 
 
@@ -57,7 +105,7 @@ $json = ConvertTo-Json -InputObject $params
 
 $postFile = "C:\scripts\opsgenie\postResult.txt"
 
-$urlWithoutApiKey = "https://api.opsgenie.com/v1/json/scom?apiKey="
+$urlWithoutApiKey = "http://qaapi.opsgeni.us/v1/json/scom?apiKey="
 
 $endpoint = $urlWithoutApiKey + $ApiKey
 
