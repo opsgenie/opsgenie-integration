@@ -105,7 +105,7 @@ $json = ConvertTo-Json -InputObject $params
 
 $postFile = "C:\scripts\opsgenie\postResult.txt"
 
-$urlWithoutApiKey = "http://qaapi.opsgeni.us/v1/json/scom?apiKey="
+$urlWithoutApiKey = "https://api.opsgenie.com/v1/json/scom?apiKey="
 
 $endpoint = $urlWithoutApiKey + $ApiKey
 
