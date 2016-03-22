@@ -23,7 +23,6 @@ ObjectType=${N=Alerting;M=ObjectType}&
 Severity=${N=Alerting;M=Severity}&
 TimeOfDay=${N=Alerting;M=TimeOfDay}&
 DateTime=${N=Generic;M=DateTime;F=DateTime}&
-recipients=<comma_separated_list_of_recipients>&
 teams=<comma_separated_list_of_teams>&
 tags=<comma_separated_list_of_tags>
 
@@ -52,6 +51,5 @@ ObjectTypeµ#µ${N=Alerting;M=ObjectType}§#§
 Severityµ#µ${N=Alerting;M=Severity}§#§
 TimeOfDayµ#µ${N=Alerting;M=TimeOfDay}§#§
 DateTimeµ#µ${N=Generic;M=DateTime;F=DateTime}§#§
-recipientsµ#µ<comma_separated_list_of_recipients>§#§
 teamsµ#µ<comma_separated_list_of_teams>§#§
 tagsµ#µ<comma_separated_list_of_tags>
