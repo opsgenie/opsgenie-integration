@@ -173,6 +173,7 @@ func parseFlags()map[string]string{
 	itemKey := flag.String("itemKey","","ITEM.KEY")
 	itemValue := flag.String("itemValue", "", "ITEM.VALUE")
 	eventId := flag.String ("eventId","","EVENT.ID")
+	recoveryEventStatus := flag.String ("recoveryEventStatus","","EVENT.RECOVERY.STATUS")
 	tags := flag.String ("tags","","tags")
 	recipients := flag.String ("recipients","","recipients")
 	teams := flag.String("teams","","Teams")
@@ -193,6 +194,7 @@ func parseFlags()map[string]string{
 	parameters["itemKey"] = *itemKey
 	parameters["itemValue"] = *itemValue
 	parameters["eventId"] = *eventId
+	parameters["recoveryEventStatus"] = *recoveryEventStatus
 
 	if *apiKey != ""{
 		configParameters["apiKey"] = *apiKey
