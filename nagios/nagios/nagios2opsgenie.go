@@ -240,6 +240,7 @@ func parseFlags()map[string]string{
 
 	recipients := flag.String("recipients","","Recipients")
 	tags := flag.String("tags","","Tags")
+	alertAlias := flag.String("alias", "", "Alert alias (for deduplication)")
 	teams := flag.String("teams","","Teams")
 
 	flag.Parse()
@@ -271,6 +272,10 @@ func parseFlags()map[string]string{
 		parameters["tags"] = *tags
 	}else{
 		parameters["tags"] = configParameters ["tags"]
+	}
+
+	if *alertAlias != ""{
+		parameters["alias"] = *alertAlias
 	}
 
 	parameters["entity_type"] = *entityType
