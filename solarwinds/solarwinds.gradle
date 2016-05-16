@@ -1,0 +1,26 @@
+task prepareSolarwinds(dependsOn: 'generateIntegration') << {
+    def destination = "${project.buildDir}/solarwinds"
+    copy {
+        from "${project.buildDir}/opsgenie-integration"
+        into "${destination}"
+    }
+
+    copy {
+        from "${project.projectDir}/solarwinds/marid"
+        into "${destination}/marid"
+    }
+
+    mergeConfFile("${project.buildDir}/opsgenie-integration/conf/opsgenie-integration.conf",
+            "${project.projectDir}/solarwinds/common/marid.conf.part",
+            "${destination}/marid/conf/marid.conf")
+
+    delete "${destination}/conf"
+}
+
+task packageSolarwindsZip(dependsOn: 'prepareSolarwinds', type: Zip) {
+    from "${project.buildDir}/solarwinds"
+    baseName = 'opsgenie-solarwinds'
+    version = project.ext.versions.getProperty('solarwinds') + project.ext.versionSuffix
+}
+
+task packageSolarwinds(dependsOn: ['packageSolarwindsZip'])

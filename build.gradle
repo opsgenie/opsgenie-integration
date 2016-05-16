@@ -441,6 +441,7 @@ apply from: 'zenoss/zenoss.gradle'
 apply from: 'icinga/icinga.gradle'
 apply from: 'zendesk/zendesk.gradle'
 apply from: 'icinga2/icinga2.gradle'
+apply from: 'solarwinds/solarwinds.gradle'
 
 
 task packageIntegrations(dependsOn: [
@@ -455,7 +456,8 @@ task packageIntegrations(dependsOn: [
                                'packageZenoss',
                                'packageIcinga',
                                 'packageZendesk',
-                                'packageIcinga2'
+                                'packageIcinga2',
+                                'packageSolarwinds'
 ])
 
 task packageAll(dependsOn: ['packageIntegrations', 'packageLamp'])
