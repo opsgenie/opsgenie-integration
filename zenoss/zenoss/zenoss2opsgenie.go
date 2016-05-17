@@ -13,7 +13,7 @@ import (
 	"io"
 	"strconv"
 	"github.com/alexcesaro/log/golog"
-	log "github.com/alexcesaro/log"
+	"github.com/alexcesaro/log"
 	"fmt"
 	"io/ioutil"
 	"crypto/tls"
@@ -61,7 +61,7 @@ func readConfigFile(file io.Reader){
 
 		line = strings.TrimSpace(line)
 		if !strings.HasPrefix(line,"#") && line != "" {
-			l := strings.Split(line,"=")
+			l := strings.SplitN(line,"=",2)
 			l[0] = strings.TrimSpace(l[0])
 			l[1] = strings.TrimSpace(l[1])
 			configParameters[l[0]]=l[1]

@@ -7,6 +7,7 @@ zenoss2opsgenie.timeout=60
 #teams=<comma_separated_list_of_teams>
 #tags=<comma_separated_list_of_tags>
 
+#if you're using maridKey in your marid server, you can add it as a parameter to viaMaridUrl: &maridKey=your_marid_key
 #viaMaridUrl=http://maridHost:port/script/marid2opsgenie.groovy?async=true
 
 ########################################ZENOSS INTEGRATION - ALERT ACTION CONFIGURATION ######################

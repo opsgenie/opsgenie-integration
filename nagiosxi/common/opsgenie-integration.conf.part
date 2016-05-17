@@ -8,6 +8,7 @@ nagios2opsgenie.timeout=60
 
 #You can use different nagiosServer values for each of your Nagios servers (see marid configuration below)
 nagios_server=default
+#if you're using marid key, you can add it as a parameter to viaMaridUrl: &maridKey=your_marid_key
 #viaMaridUrl=http://maridHost:port/script/marid2opsgenie.groovy?async=true
 
 ######################################## NAGIOS CONFIGURATION #######################################

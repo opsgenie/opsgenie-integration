@@ -8,6 +8,7 @@ icinga2opsgenie.timeout=60
 
 #You can use different icingaServer values for each of your Icinga servers (see marid configuration below)
 icinga_server=default
+#if you're using marid key, you can add it as a parameter to viaMaridUrl: &maridKey=your_marid_key
 #viaMaridUrl=http://maridHost:port/script/marid2opsgenie.groovy?async=true
 
 ######################################## ICINGA CONFIGURATION #######################################
