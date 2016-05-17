@@ -39,7 +39,9 @@ def getMaridBasedPackageNames() {
             "zabbix",
             "zenoss",
             "zendesk",
-            "icinga2"]
+            "icinga2",
+            "solarwinds"
+            ]
 }
 
 
@@ -59,6 +61,7 @@ def generateDownloadsProperties() {
                     .replace('[[zenoss]]', project.ext.versions.getProperty('zenoss'))
                     .replace('[[zendesk]]', project.ext.versions.getProperty('zendesk'))
                     .replace('[[icinga2]]', project.ext.versions.getProperty('icinga2'))
+                    .replace('[[solarwinds]]', project.ext.versions.getProperty('solarwinds'))
         }
         into "${buildDir}/distributions"
         rename "downloads.template.properties", "downloads.properties"
