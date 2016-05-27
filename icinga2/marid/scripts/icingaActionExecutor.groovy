@@ -4,7 +4,6 @@ import com.ifountain.opsgenie.client.util.JsonUtils
 import org.apache.commons.lang.StringEscapeUtils
 import org.apache.commons.lang.StringUtils
 import org.apache.http.HttpHeaders
-import org.apache.http.HttpHost
 import org.apache.http.auth.UsernamePasswordCredentials
 
 import javax.imageio.ImageIO
@@ -23,13 +22,14 @@ if (alertFromOpsgenie.size() > 0) {
     String host = alertFromOpsgenie.details.host_name
     String service = alertFromOpsgenie.details.service_desc
     boolean isServiceAlert = StringUtils.isNotBlank(service)
-    def requestParams = [:]
     def contentMap = [:]
     def urlPath = ""
     if (isServiceAlert){
-        requestParams.service = host + "!" + service;
+        contentMap.type = "Service"
+        contentMap.filter = "service.name==\"${service}\"".toString()
     } else{
-        requestParams.host = host;
+        contentMap.type = "Host"
+        contentMap.filter = "host.name==\"${host}\"".toString()
     }
 
     boolean discardAction = false;
@@ -81,7 +81,7 @@ if (alertFromOpsgenie.size() > 0) {
         }
 
         if (!discardAction) {
-            postToIcingaApi(urlPath, requestParams, contentMap);
+            postToIcingaApi(urlPath, contentMap);
         }
     }
     finally {
@@ -115,11 +115,11 @@ def createHttpClient() {
     return new OpsGenieHttpClient(clientConfiguration)
 }
 
-def postToIcingaApi(String urlPath, Map requestParameters, Map contentMap) {
+def postToIcingaApi(String urlPath, Map contentMap) {
     String url = _conf("api_url", true) + urlPath;
     String jsonContent = JsonUtils.toJson(contentMap);
-    logger.debug("${LOG_PREFIX} Posting to Icinga. Url ${url} params:${requestParameters}, content:${jsonContent} , conmap:${contentMap}")
-    def httpPost = ((OpsGenieHttpClient) HTTP_CLIENT).preparePostMethod(url, jsonContent, [(HttpHeaders.ACCEPT): "application/json", (HttpHeaders.CONTENT_TYPE): "application/json"], requestParameters)
+    logger.debug("${LOG_PREFIX} Posting to Icinga. Url ${url}, content:${jsonContent} , conmap:${contentMap}")
+    def httpPost = ((OpsGenieHttpClient) HTTP_CLIENT).preparePostMethod(url, jsonContent, [(HttpHeaders.ACCEPT): "application/json", (HttpHeaders.CONTENT_TYPE): "application/json"], [:])
     def response = ((OpsGenieHttpClient) HTTP_CLIENT).executeHttpMethod(httpPost)
     if (response.getStatusCode() == 200) {
         logger.info("${LOG_PREFIX} Successfully executed at Icinga.");
