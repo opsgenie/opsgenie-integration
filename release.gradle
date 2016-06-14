@@ -377,14 +377,12 @@ def generateReleaseTasks() {
         tasks << 'packageSdk'
         if (!testMode) {
             tasks << 'uploadArchives'
-            tasks << 'uploadShadow'
         }
     }else{
         if(isReleaseForSdk()){
             args.addAll(getSdkBasedPackageNames())
             if (!testMode) {
                 tasks << 'uploadArchives'
-                tasks << 'uploadShadow'
             }
         }
         if(isReleaseForMarid()){
