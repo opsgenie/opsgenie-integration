@@ -1,8 +1,14 @@
 
-task generateSdk(dependsOn: ['sdk:jar', 'sdk:shadowJar', 'sdk:javadoc']) << {
+task generateSdk(dependsOn: ['sdk:jar', 'sdk-shaded:shadowJar', 'sdk:javadoc']) << {
     def destination = "${project.buildDir}/sdk"
     copy {
         from "${project(':sdk').buildDir}/libs"
+        into destination
+        rename {fileName -> return "opsgenie-${fileName}" };
+    }
+
+    copy {
+        from "${project(':sdk-shaded').buildDir}/libs"
         into destination
         rename {fileName -> return "opsgenie-${fileName}" };
     }
