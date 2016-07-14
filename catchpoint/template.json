@@ -1,0 +1,11 @@
+{
+    "testName": "${TestName}",
+    "testId": "${TestId}",
+    "testUrl": "${TestUrl}",
+    "alertTypeId": "${AlertTypeId}",
+    "productName": "${ProductName}",
+    "clientId": "${ClientId}",
+    "notificationLevel": "${switch("${notificationLevelId}","0","WARNING","1","CRITICAL","3","OK")}",
+    "nodeName":"${nodeDetails("${nodeName}")}",
+    "nodeServerAddress":"${nodeDetails("${NodeServerAddress}")}"
+}
