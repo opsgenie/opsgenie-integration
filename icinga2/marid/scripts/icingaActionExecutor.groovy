@@ -26,7 +26,7 @@ if (alertFromOpsgenie.size() > 0) {
     def urlPath = ""
     if (isServiceAlert){
         contentMap.type = "Service"
-        contentMap.filter = "service.name==\"${service}\"".toString()
+        contentMap.filter = "host.name==\"${host}\" && service.name==\"${service}\"".toString()
     } else{
         contentMap.type = "Host"
         contentMap.filter = "host.name==\"${host}\"".toString()
