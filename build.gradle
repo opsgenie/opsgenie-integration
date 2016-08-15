@@ -71,7 +71,7 @@ subprojects  {
     repositories {
         mavenCentral()
         maven {
-            url "http://repo.opsgenie.com:9393/content/groups/public/"
+            url "http://repo.opsgenie.com/content/groups/public/"
         }
     }
 
@@ -99,7 +99,7 @@ subprojects  {
 repositories {
     mavenCentral()
     maven {
-        url "http://repo.opsgenie.com:9393/content/groups/public/"
+        url "http://repo.opsgenie.com/content/groups/public/"
     }
 }
 
