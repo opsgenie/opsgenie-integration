@@ -11,6 +11,7 @@ The project includes OpsGenie's specific integration packages:
 * zabbix
 * zendesk
 * zenoss
+* oem
 
 ## Build
 
