@@ -438,6 +438,7 @@ apply from: 'icinga/icinga.gradle'
 apply from: 'zendesk/zendesk.gradle'
 apply from: 'icinga2/icinga2.gradle'
 apply from: 'solarwinds/solarwinds.gradle'
+apply from: 'oem/oem.gradle'
 
 
 task packageIntegrations(dependsOn: [
@@ -453,7 +454,8 @@ task packageIntegrations(dependsOn: [
                                'packageIcinga',
                                 'packageZendesk',
                                 'packageIcinga2',
-                                'packageSolarwinds'
+                                'packageSolarwinds',
+                                'packageOEM'
 ])
 
 task packageAll(dependsOn: ['packageIntegrations', 'packageLamp'])
