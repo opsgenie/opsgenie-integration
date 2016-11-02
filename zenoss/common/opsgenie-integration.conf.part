@@ -2,7 +2,7 @@
 #you can define log levels: warning, debug, info,error
 zenoss2opsgenie.logger=warning
 zenoss2opsgenie.timeout=60
-
+logPath=/var/log/opsgenie/zenoss2opsgenie.log
 #recipients=<comma_separated_list_of_recipients>
 #teams=<comma_separated_list_of_teams>
 #tags=<comma_separated_list_of_tags>

@@ -32,7 +32,7 @@ task packageZenossOS(dependsOn: ['generateIntegrationForNative', 'prepareZenoss'
 
     def fileMapping = [
             "${project.projectDir}/zenoss/zenoss/zenoss2opsgenie"   : "/usr/bin",
-            "${project.projectDir}/zenoss/zabbix/zabbix2opsgenie.go": "etc/opsgenie",
+            "${project.projectDir}/zenoss/zenoss/zenoss2opsgenie.go": "etc/opsgenie",
     ]
 
     buildRpm('zenoss', 'opsgenie-zenoss', 'OpsGenie - Zenoss integration files including marid and Zenoss scripts',
