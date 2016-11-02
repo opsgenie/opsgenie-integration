@@ -2,6 +2,7 @@
 #you can define log levels: warning, debug, info,error
 icinga2opsgenie.logger=warning
 icinga2opsgenie.timeout=60
+logPath=/var/log/opsgenie/icinga2opsgenie.log
 #recipients=<comma_separated_list_of_recipients>
 #tags=<comma_separated_list_of_tags>
 #teams=<comma_separated_list_of_teams>

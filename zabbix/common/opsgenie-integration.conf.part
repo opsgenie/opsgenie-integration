@@ -2,6 +2,7 @@
 #if you're using marid key, you can add it as a parameter to viaMaridUrl: &maridKey=your_marid_key
 #viaMaridUrl=http://maridHost:port/script/marid2opsgenie.groovy?async=true
 #logger=warning
+logPath=/var/log/opsgenie/zabbix2opsgenie.log
 
 #recipients=<comma_separated_list_of_recipients>
 #tags=<comma_separated_list_of_tags>

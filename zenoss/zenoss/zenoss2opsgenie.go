@@ -24,21 +24,27 @@ var TOTAL_TIME = 60
 var configParameters = map[string]string{"apiKey": API_KEY,"zenoss2opsgenie.logger":"warning","opsgenie.api.url":"https://api.opsgenie.com"}
 var parameters = make(map[string]interface{})
 var configPath = "/etc/opsgenie/conf/opsgenie-integration.conf"
-var logPath = "/var/log/opsgenie/zenoss2opsgenie.log"
 var levels = map [string]log.Level{"info":log.Info,"debug":log.Debug,"warning":log.Warning,"error":log.Error}
 var logger log.Logger
 var logPrefix string
 var eventState string
+
 func main() {
 	version := flag.String("v","","")
 	parseFlags()
+
+	logger = configureLogger()
+	printConfigToLog()
+
 	if *version != ""{
 		fmt.Println("Version: 1.0")
 		return
 	}
 	logPrefix = "[EventId: " + parameters["evid"].(string)  + "]"
 	if(strings.ToLower(eventState) == "close"){
-		logger.Info("eventState flag is set to close. Will not try to retrieve event details from zenoss")
+		if logger != nil {
+			logger.Info("eventState flag is set to close. Will not try to retrieve event details from zenoss")
+		}
 	}else{
 		getEventDetailsFromZenoss()
 	}
@@ -46,10 +52,12 @@ func main() {
 }
 
 func printConfigToLog(){
-	if(logger.LogDebug()){
-		logger.Debug("Config:")
-		for k, v := range configParameters {
-			logger.Debug(k +"="+v)
+	if logger != nil {
+		if (logger.LogDebug()) {
+			logger.Debug("Config:")
+			for k, v := range configParameters {
+				logger.Debug(k + "=" + v)
+			}
 		}
 	}
 }
@@ -77,12 +85,31 @@ func readConfigFile(file io.Reader){
 
 func configureLogger ()log.Logger{
 	level := configParameters["zenoss2opsgenie.logger"]
-	file, err := os.OpenFile(logPath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
-	if err != nil{
-		fmt.Println("Logging disabled. Reason: ", err)
+	var logFilePath = parameters["logPath"].(string)
+
+	if len(logFilePath) == 0 {
+		logFilePath = "/var/log/opsgenie/zenoss2opsgenie.log"
 	}
 
-	return golog.New(file, levels[strings.ToLower(level)])
+	var tmpLogger log.Logger
+
+	file, err := os.OpenFile(logFilePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+
+	if err != nil {
+		fmt.Println("Could not create log file \"" + logFilePath + "\", will log to \"/tmp/zenoss2opsgenie.log\" file. Error: ", err)
+
+		fileTmp, errTmp := os.OpenFile("/tmp/zenoss2opsgenie.log", os.O_CREATE | os.O_WRONLY | os.O_APPEND, 0666)
+
+		if errTmp != nil {
+			fmt.Println("Logging disabled. Reason: ", errTmp)
+		} else {
+			tmpLogger = golog.New(fileTmp, levels[strings.ToLower(level)])
+		}
+	} else {
+		tmpLogger = golog.New(file, levels[strings.ToLower(level)])
+	}
+
+	return tmpLogger
 }
 
 func getHttpClient (tryNumber int) *http.Client{
@@ -94,7 +121,10 @@ func getHttpClient (tryNumber int) *http.Client{
 			Dial: func(netw, addr string) (net.Conn, error) {
 				conn, err := net.DialTimeout(netw, addr, time.Second * time.Duration(timeout))
 				if err != nil {
-					logger.Error("Error occurred while connecting: ",err)
+					if logger != nil {
+						logger.Error("Error occurred while connecting: ", err)
+					}
+
 					return nil, err
 				}
 				conn.SetDeadline(time.Now().Add(time.Second * time.Duration(timeout)))
@@ -110,13 +140,17 @@ func getEventDetailsFromZenoss(){
 	data := [1]interface {}{map[string]interface {}{"evid":parameters["evid"].(string)}}
 	zenossParams := map[string]interface{}{"action":"EventsRouter", "method":"detail", "data": data, "type":"rpc", "tid":1}
 
-	logger.Debug("Data to be posted to Zenoss:")
-	logger.Debug(zenossParams)
+	if logger != nil {
+		logger.Debug("Data to be posted to Zenoss:")
+		logger.Debug(zenossParams)
+	}
 
 	var buf, _ = json.Marshal(zenossParams)
 	body := bytes.NewBuffer(buf)
 
-	logger.Warning(logPrefix + "Trying to get event details from Zenoss")
+	if logger != nil {
+		logger.Warning(logPrefix + "Trying to get event details from Zenoss")
+	}
 
 	request, _ := http.NewRequest("POST", zenossApiUrl, body)
 	request.Header.Set("Content-Type", "application/json")
@@ -131,9 +165,13 @@ func getEventDetailsFromZenoss(){
 		body, err := ioutil.ReadAll(resp.Body)
 		if err == nil{
 			if resp.StatusCode == 200{
-				logger.Warning(logPrefix + "Retrieved event data from Zenoss successfully;")
-				logger.Debug(logPrefix + "Response body: " + string(body[:]))
+				if logger != nil {
+					logger.Warning(logPrefix + "Retrieved event data from Zenoss successfully;")
+					logger.Debug(logPrefix + "Response body: " + string(body[:]))
+				}
+
 				var data map[string]interface{}
+
 				if err := json.Unmarshal(body, &data); err != nil {
 					logErrorAndExit("Error occurred while unmarshalling event data: ",err)
 				}
@@ -153,13 +191,17 @@ func getEventDetailsFromZenoss(){
 }
 
 func logErrorAndExit(log string, err error){
-	logger.Error(logPrefix + log,err)
+	if logger != nil {
+		logger.Error(logPrefix + log, err)
+	}
 	os.Exit(1)
 }
 
 func postToOpsGenie() {
-	logger.Debug("Data to be posted to OpsGenie:")
-	logger.Debug(parameters)
+	if logger != nil {
+		logger.Debug("Data to be posted to OpsGenie:")
+		logger.Debug(parameters)
+	}
 
 	apiUrl := configParameters["opsgenie.api.url"]+ "/v1/json/zenoss"
 	viaMaridUrl := configParameters["viaMaridUrl"]
@@ -178,7 +220,9 @@ func postToOpsGenie() {
 		request, _ := http.NewRequest("POST", apiUrl, body)
 		client := getHttpClient(i)
 
-		logger.Warning(logPrefix + "Trying to send data to OpsGenie with timeout: ",(TOTAL_TIME/12)*2*i)
+		if logger != nil {
+			logger.Warning(logPrefix + "Trying to send data to OpsGenie with timeout: ", (TOTAL_TIME / 12) * 2 * i)
+		}
 
 		resp, error := client.Do(request)
 		if error == nil {
@@ -186,18 +230,28 @@ func postToOpsGenie() {
 			body, err := ioutil.ReadAll(resp.Body)
 			if err == nil{
 				if resp.StatusCode == 200{
-					logger.Warning(logPrefix + "Data from Zenoss posted to " + target + " successfully; response:" + string(body[:]))
+					if logger != nil {
+						logger.Warning(logPrefix + "Data from Zenoss posted to " + target + " successfully; response:" + string(body[:]))
+					}
 				}else{
-					logger.Warning(logPrefix + "Couldn't post data from Zenoss to " + target + " successfully; Response code: " + strconv.Itoa(resp.StatusCode) + " Response Body: " + string(body[:]))
+					if logger != nil {
+						logger.Warning(logPrefix + "Couldn't post data from Zenoss to " + target + " successfully; Response code: " + strconv.Itoa(resp.StatusCode) + " Response Body: " + string(body[:]))
+					}
 				}
 			}else{
-				logger.Warning(logPrefix + "Couldn't read the response from " + target, err)
+				if logger != nil {
+					logger.Warning(logPrefix + "Couldn't read the response from " + target, err)
+				}
 			}
 			break
 		}else if i < 3 {
-			logger.Warning(logPrefix + "Error occurred while sending data, will retry.", error)
+			if logger != nil {
+				logger.Warning(logPrefix + "Error occurred while sending data, will retry.", error)
+			}
 		}else {
-			logger.Error(logPrefix + "Failed to post data from Zenoss to " + target, error)
+			if logger != nil {
+				logger.Error(logPrefix + "Failed to post data from Zenoss to " + target, error)
+			}
 		}
 		if resp != nil{
 			defer resp.Body.Close()
@@ -213,7 +267,8 @@ func parseFlags(){
 	teams := flag.String("teams","","Teams")
 	state := flag.String("eventState", "", "Event State")
 	configloc := flag.String("config", "", "Config File Location")
-        logloc := flag.String("logfile", "", "Log File Location")
+	logPath := flag.String("logPath", "", "LOGPATH")
+
 	flag.Parse()
 
 	eventState = *state
@@ -222,19 +277,13 @@ func parseFlags(){
 		configPath = *configloc
 	}
 
-	if *configloc != ""{
-		logPath = *logloc
-	}
-
 	configFile, err := os.Open(configPath)
+
 	if err == nil{
 		readConfigFile(configFile)
 	}else{
 		panic(err)
 	}
-	logger = configureLogger()
-	printConfigToLog()
-
 
 	if *apiKey != ""{
 		parameters["apiKey"] = *apiKey
@@ -258,6 +307,12 @@ func parseFlags(){
 		parameters["teams"] = *teams
 	}else{
 		parameters["teams"] = configParameters ["teams"]
+	}
+
+	if *logPath != "" {
+		parameters["logPath"] = *logPath
+	} else {
+		parameters["logPath"] = configParameters["logPath"]
 	}
 
 	parameters["evid"] = *evid

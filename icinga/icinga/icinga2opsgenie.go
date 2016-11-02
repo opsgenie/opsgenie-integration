@@ -30,41 +30,54 @@ var logger log.Logger
 
 func main() {
 	configFile, err := os.Open(configPath)
+
 	if err == nil{
 		readConfigFile(configFile)
 	}else{
 		panic(err)
 	}
-	logger = configureLogger()
-	printConfigToLog()
+
 	version := flag.String("v","","")
 	parseFlags()
+
+	logger = configureLogger()
+	printConfigToLog()
+
 	if *version != ""{
 		fmt.Println("Version: 1.0")
 		return
 	}
+
 	if parameters["notification_type"] == "" {
-		logger.Warning("Stopping, Icinga NOTIFICATIONTYPE param has no value, please make sure your Icinga and OpsGenie files pass necessary parameters")
+		if logger != nil {
+			logger.Warning("Stopping, Icinga NOTIFICATIONTYPE param has no value, please make sure your Icinga and OpsGenie files pass necessary parameters")
+		}
+
 		return
 	}
+
 	http_post()
 }
 
 func printConfigToLog(){
-	if(logger.LogDebug()){
-		logger.Debug("Config:")
-		for k, v := range configParameters {
-			logger.Debug(k +"="+v)
+	if logger != nil {
+		if (logger.LogDebug()) {
+			logger.Debug("Config:")
+			for k, v := range configParameters {
+				logger.Debug(k + "=" + v)
+			}
 		}
 	}
 }
 
 func readConfigFile(file io.Reader){
 	scanner := bufio.NewScanner(file)
+
 	for scanner.Scan(){
 		line := scanner.Text()
 
 		line = strings.TrimSpace(line)
+
 		if !strings.HasPrefix(line,"#") && line != "" {
 			l := strings.SplitN(line,"=",2)
 			l[0] = strings.TrimSpace(l[0])
@@ -75,6 +88,7 @@ func readConfigFile(file io.Reader){
 			}
 		}
 	}
+
 	if err := scanner.Err(); err != nil {
 		panic(err)
 	}
@@ -82,12 +96,30 @@ func readConfigFile(file io.Reader){
 
 func configureLogger ()log.Logger{
 	level := configParameters["icinga2opsgenie.logger"]
-	file, err := os.OpenFile("/var/log/opsgenie/icinga2opsgenie.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
-	if err != nil{
-		fmt.Println("Logging disabled. Reason: ", err)
+	var logFilePath = parameters["logPath"]
+
+	if len(logFilePath) == 0 {
+		logFilePath = "/var/log/opsgenie/icinga2opsgenie.log"
 	}
 
-	return golog.New(file, levels[strings.ToLower(level)])
+	var tmpLogger log.Logger
+
+	file, err := os.OpenFile(logFilePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+
+	if err != nil {
+		fmt.Println("Could not create log file \"" + logFilePath + "\", will log to \"/tmp/icinga2opsgenie.log\" file. Error: ", err)
+		fileTmp, errTmp := os.OpenFile("/tmp/icinga2opsgenie.log", os.O_CREATE | os.O_WRONLY | os.O_APPEND, 0666)
+
+		if errTmp != nil {
+			fmt.Println("Logging disabled. Reason: ", errTmp)
+		} else {
+			tmpLogger = golog.New(fileTmp, levels[strings.ToLower(level)])
+		}
+	} else {
+		tmpLogger = golog.New(file, levels[strings.ToLower(level)])
+	}
+
+	return tmpLogger
 }
 
 func getHttpClient (timeout int) *http.Client{
@@ -99,7 +131,10 @@ func getHttpClient (timeout int) *http.Client{
 			Dial: func(netw, addr string) (net.Conn, error) {
 				conn, err := net.DialTimeout(netw, addr, time.Second * time.Duration(seconds))
 				if err != nil {
-					logger.Error("Error occurred while connecting: ",err)
+					if logger != nil {
+						logger.Error("Error occurred while connecting: ", err)
+					}
+
 					return nil, err
 				}
 				conn.SetDeadline(time.Now().Add(time.Second * time.Duration(seconds)))
@@ -118,8 +153,10 @@ func http_post()  {
 		logPrefix = "[HostName: "+ parameters["host_name"] + ", ServiceDesc: "+ parameters["service_desc"] + ", ServiceState: " + parameters["service_state"] +"]"
 	}
 
-	logger.Debug("Data to be posted:")
-	logger.Debug(parameters)
+	if logger != nil {
+		logger.Debug("Data to be posted:")
+		logger.Debug(parameters)
+	}
 
 	apiUrl := configParameters["opsgenie.api.url"] + "/v1/json/icinga"
 	viaMaridUrl := configParameters["viaMaridUrl"]
@@ -138,7 +175,9 @@ func http_post()  {
 		request, _ := http.NewRequest("POST", apiUrl, body)
 		client := getHttpClient(i)
 
-		logger.Warning(logPrefix + "Trying to send data to OpsGenie with timeout: ",(TOTAL_TIME/12)*2*i)
+		if logger != nil {
+			logger.Warning(logPrefix + "Trying to send data to OpsGenie with timeout: ", (TOTAL_TIME / 12) * 2 * i)
+		}
 
 		resp, error := client.Do(request)
 		if error == nil {
@@ -146,18 +185,28 @@ func http_post()  {
 			body, err := ioutil.ReadAll(resp.Body)
 			if err == nil{
 				if resp.StatusCode == 200{
-					logger.Warning(logPrefix + "Data from Icinga posted to " + target + " successfully; response:" + string(body[:]))
+					if logger != nil {
+						logger.Warning(logPrefix + "Data from Icinga posted to " + target + " successfully; response:" + string(body[:]))
+					}
 				}else{
-					logger.Warning(logPrefix + "Couldn't post data from Icinga to " + target + " successfully; Response code: " + strconv.Itoa(resp.StatusCode) + " Response Body: " + string(body[:]))
+					if logger != nil {
+						logger.Warning(logPrefix + "Couldn't post data from Icinga to " + target + " successfully; Response code: " + strconv.Itoa(resp.StatusCode) + " Response Body: " + string(body[:]))
+					}
 				}
 			}else{
-				logger.Warning(logPrefix + "Couldn't read the response from " + target, err)
+				if logger != nil {
+					logger.Warning(logPrefix + "Couldn't read the response from " + target, err)
+				}
 			}
 			break
 		}else if i < 3 {
-			logger.Warning(logPrefix + "Error occurred while sending data, will retry.", error)
+			if logger != nil {
+				logger.Warning(logPrefix + "Error occurred while sending data, will retry.", error)
+			}
 		}else {
-			logger.Error(logPrefix + "Failed to post data from Icinga to " + target, error)
+			if logger != nil {
+				logger.Error(logPrefix + "Failed to post data from Icinga to " + target, error)
+			}
 		}
 		if resp != nil{
 			defer resp.Body.Close()
@@ -237,6 +286,7 @@ func parseFlags()map[string]string{
 	serviceOutput := flag.String("so", "", "SERVICEOUTPUT")
 	longServiceOutput := flag.String("lso", "", "LONGSERVICEOUTPUT")
 	servicePerfData := flag.String("spd", "", "SERVICEPERFDATA")
+	logPath := flag.String("logPath", "", "LOGPATH")
 
 	recipients := flag.String("recipients","","Recipients")
 	tags := flag.String("tags","","Tags")
@@ -271,6 +321,12 @@ func parseFlags()map[string]string{
 		parameters["teams"] = *teams
 	}else{
 		parameters["teams"] = configParameters ["teams"]
+	}
+
+	if *logPath != "" {
+		parameters["logPath"] = *logPath
+	} else {
+		parameters["logPath"] = configParameters["logPath"]
 	}
 
 

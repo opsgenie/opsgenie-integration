@@ -16,6 +16,7 @@ import (
 	"net"
 	"time"
 	"io/ioutil"
+	"fmt"
 )
 
 var API_KEY = ""
@@ -33,20 +34,23 @@ func main() {
 	}else{
 		panic(err)
 	}
+
+	parseFlags()
+
 	logger = configureLogger()
 
 	printConfigToLog()
-
-	parseFlags()
 
 	http_post()
 }
 
 func printConfigToLog(){
-	if(logger.LogDebug()){
-		logger.Debug("Config:")
-		for k, v := range configParameters {
-			logger.Debug(k +"="+v)
+	if logger != nil {
+		if (logger.LogDebug()) {
+			logger.Debug("Config:")
+			for k, v := range configParameters {
+				logger.Debug(k + "=" + v)
+			}
 		}
 	}
 }
@@ -74,10 +78,31 @@ func readConfigFile(file io.Reader){
 
 func configureLogger ()log.Logger{
 	level := configParameters["logger"]
-	var logFilePath = "/var/log/opsgenie/oem2opsgenie.log"
-	file, _ := os.OpenFile(logFilePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	var logFilePath = parameters["logPath"]
 
-	return golog.New(file, levels[strings.ToLower(level)])
+	if len(logFilePath) == 0 {
+		logFilePath = "/var/log/opsgenie/oem2opsgenie.log"
+	}
+
+	var tmpLogger log.Logger
+
+	file, err := os.OpenFile(logFilePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+
+	if err != nil {
+		fmt.Println("Could not create log file \"" + logFilePath + "\", will log to \"/tmp/oem2opsgenie.log\" file. Error: ", err)
+
+		fileTmp, errTmp := os.OpenFile("/tmp/oem2opsgenie.log", os.O_CREATE | os.O_WRONLY | os.O_APPEND, 0666)
+
+		if errTmp != nil {
+			fmt.Println("Logging disabled. Reason: ", errTmp)
+		} else {
+			tmpLogger = golog.New(fileTmp, levels[strings.ToLower(level)])
+		}
+	} else {
+		tmpLogger = golog.New(file, levels[strings.ToLower(level)])
+	}
+
+	return tmpLogger
 }
 
 func getHttpClient (timeout int) *http.Client{
@@ -89,7 +114,10 @@ func getHttpClient (timeout int) *http.Client{
 			Dial: func(netw, addr string) (net.Conn, error) {
 				conn, err := net.DialTimeout(netw, addr, time.Second * time.Duration(seconds))
 				if err != nil {
-					logger.Error("Error occurred while connecting: ",err)
+					if logger != nil {
+						logger.Error("Error occurred while connecting: ", err)
+					}
+
 					return nil, err
 				}
 				conn.SetDeadline(time.Now().Add(time.Second * time.Duration(seconds)))
@@ -105,36 +133,64 @@ func http_post()  {
 
 	var logPrefix = "[OEM2OpsGenie] "
 
-	logger.Debug("Data to be posted:")
-	logger.Debug(parameters)
+	if logger != nil {
+		logger.Debug("Data to be posted:")
+		logger.Debug(parameters)
+	}
 
 	apiUrl := configParameters["opsgenie.api.url"] + "/v1/json/oem"
 	target := "OpsGenie"
 
+	var tmpLogPath string
+
+	if val, ok := parameters["logPath"]; ok {
+		tmpLogPath = val
+		delete(parameters, "logPath")
+	}
+
 	var buf, _ = json.Marshal(parameters)
+
+	parameters["logPath"] = tmpLogPath
+
 	body := bytes.NewBuffer(buf)
 	request, _ := http.NewRequest("POST", apiUrl, body)
 	for i := 1; i <= 3; i++ {
 		client := getHttpClient(i)
-		logger.Warning(logPrefix + "Trying to send data to " + target + " with timeout: ", (TOTAL_TIME/12)*2*i)
+
+		if logger != nil {
+			logger.Warning(logPrefix + "Trying to send data to " + target + " with timeout: ", (TOTAL_TIME / 12) * 2 * i)
+		}
+
 		resp, error := client.Do(request)
+
 		if error == nil {
 			defer resp.Body.Close()
 			body, err := ioutil.ReadAll(resp.Body)
+
 			if err == nil{
 				if resp.StatusCode == 200{
-					logger.Debug(logPrefix + "Data from OEM posted to " + target + " successfully; response:" + string(body[:]))
+					if logger != nil {
+						logger.Debug(logPrefix + "Data from OEM posted to " + target + " successfully; response:" + string(body[:]))
+					}
 				}else{
-					logger.Warning(logPrefix + "Couldn't post data from OEM to " + target + " successfully; Response code: " + strconv.Itoa(resp.StatusCode) + " Response Body: " + string(body[:]))
+					if logger != nil {
+						logger.Warning(logPrefix + "Couldn't post data from OEM to " + target + " successfully; Response code: " + strconv.Itoa(resp.StatusCode) + " Response Body: " + string(body[:]))
+					}
 				}
 			}else{
-				logger.Warning(logPrefix + "Couldn't read the response from " + target, err)
+				if logger != nil {
+					logger.Warning(logPrefix + "Couldn't read the response from " + target, err)
+				}
 			}
 			break
 		}else if i < 3 {
-			logger.Warning(logPrefix + "Error occurred while sending data, will retry.", error)
+			if logger != nil {
+				logger.Warning(logPrefix + "Error occurred while sending data, will retry.", error)
+			}
 		}else {
-			logger.Error(logPrefix + "Failed to post data from OEM to " + target, error)
+			if logger != nil {
+				logger.Error(logPrefix + "Failed to post data from OEM to " + target, error)
+			}
 		}
 		if resp != nil{
 			defer resp.Body.Close()
@@ -144,10 +200,9 @@ func http_post()  {
 
 func parseFlags()map[string]string{
 	apiKey := flag.String("apiKey","","apiKey")
-
 	tags := flag.String ("tags","","tags")
-
 	teams := flag.String("teams", "", "teams")
+	logPath := flag.String("logPath", "", "LOGPATH")
 
 	flag.Parse()
 
@@ -165,6 +220,12 @@ func parseFlags()map[string]string{
 		parameters["teams"] = *teams
 	} else {
 		parameters["teams"] = configParameters["teams"]
+	}
+
+	if *logPath != "" {
+		parameters["logPath"] = *logPath
+	} else {
+		parameters["logPath"] = configParameters["logPath"]
 	}
 
 	var envVars map[string]string = make(map[string]string)
