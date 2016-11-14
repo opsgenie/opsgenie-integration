@@ -17,8 +17,10 @@ def main():
     if "PARAMETER_1" in context:
         opsgenie_api_key = context["PARAMETER_1"]
 
-        del context["PARAMETER_1"]
-        del context["PARAMETERS"]
+        if "PARAMETER_1" in context.keys():
+            del context["PARAMETER_1"]
+        if "PARAMETERS" in context.keys():
+            del context["PARAMETERS"]
     else:
         return "No API Key Specified."
 
