@@ -18,6 +18,7 @@ def main():
         opsgenie_api_key = context["PARAMETER_1"]
 
         del context["PARAMETER_1"]
+        del context["PARAMETERS"]
     else:
         return "No API Key Specified."
 
