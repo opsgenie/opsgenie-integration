@@ -1,0 +1,41 @@
+#!/usr/bin/python
+# OpsGenie
+
+import json
+import urllib
+import urllib2
+import os
+
+opsGenieAPIURL = "https://api.opsgenie.com/v1/json/checkmk"
+
+
+def main():
+    context = dict([(var[7:], value.decode("utf-8"))
+                    for (var, value) in os.environ.items()
+                    if var.startswith("NOTIFY_")])
+
+    if "PARAMETER_1" in context:
+        opsgenie_api_key = context["PARAMETER_1"]
+
+        if "PARAMETER_1" in context.keys():
+            del context["PARAMETER_1"]
+        if "PARAMETERS" in context.keys():
+            del context["PARAMETERS"]
+    else:
+        return "No API Key Specified."
+
+    req = urllib2.Request(opsGenieAPIURL + "?" + urllib.urlencode({"apiKey": opsgenie_api_key}))
+    req.add_header('Content-Type', 'application/json')
+
+    try:
+        urllib2.urlopen(req, json.dumps(context))
+        is_success = True
+    except:
+        is_success = False
+
+    if is_success:
+        return "Script finished successfully."
+    else:
+        return "Script failed."
+
+main()
