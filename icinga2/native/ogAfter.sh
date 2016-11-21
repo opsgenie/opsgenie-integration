@@ -10,8 +10,11 @@ chown -R opsgenie:opsgenie /tmp/marid
 if id -u icinga >/dev/null 2>&1; then
         usermod -a -G opsgenie icinga
         chown -R icinga:opsgenie /var/log/opsgenie
+elif id -u nagios >/dev/null 2>&1; then
+        usermod -a -G opsgenie nagios
+        chown -R nagios:opsgenie /var/log/opsgenie
 else
-        echo "WARNING : icinga user does not exist. Please don't forget to add your icinga user to opsgenie group!"
+        echo "WARNING : Neither icinga nor nagios user exists. Please don't forget to add your icinga or nagios user to opsgenie group!"
 fi
 
 if [ -d "/etc/icinga2/conf.d" ]; then

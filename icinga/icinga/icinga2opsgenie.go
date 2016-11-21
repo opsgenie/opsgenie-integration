@@ -286,6 +286,7 @@ func parseFlags()map[string]string{
 	serviceOutput := flag.String("so", "", "SERVICEOUTPUT")
 	longServiceOutput := flag.String("lso", "", "LONGSERVICEOUTPUT")
 	servicePerfData := flag.String("spd", "", "SERVICEPERFDATA")
+	serviceCheckCommand := flag.String("sc", "", "SERVICECHECKCOMMAND")
 	logPath := flag.String("logPath", "", "LOGPATH")
 
 	recipients := flag.String("recipients","","Recipients")
@@ -398,6 +399,7 @@ func parseFlags()map[string]string{
 	parameters["service_output"] = *serviceOutput
 	parameters["long_service_output"] = *longServiceOutput
 	parameters["service_perf_data"] = *servicePerfData
+	parameters["service_check_command"] = *serviceCheckCommand
 
 	return parameters
 }
