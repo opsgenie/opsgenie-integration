@@ -139,7 +139,15 @@ func http_post()  {
 	}
 
 	apiUrl := configParameters["opsgenie.api.url"] + "/v1/json/oem"
-	target := "OpsGenie"
+	viaMaridUrl := configParameters["viaMaridUrl"]
+	target := ""
+
+	if viaMaridUrl != ""{
+		apiUrl = viaMaridUrl
+		target = "Marid"
+	}else{
+		target = "OpsGenie"
+	}
 
 	var tmpLogPath string
 
