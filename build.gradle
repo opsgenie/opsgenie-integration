@@ -280,6 +280,41 @@ def buildRpm(String sourceDir, String name, String descrpt, Map fileMappingInput
         configFiles.put("${project.buildDir}/${sourceDir}/opsgenie-integration/conf/opsgenie-integration.conf", 'etc/opsgenie/conf')
         configFiles.put("${project.buildDir}/${sourceDir}/opsgenie-integration/marid/conf/log.properties", 'etc/opsgenie/marid')
 
+        // The code block below is added not to replace default Marid scripts if the user had customized those scripts.
+        // The package will replace integration-only Marid scripts (like marid2opsgenie.groovy, nagiosActionExecutor.groovy), but won't touch
+        // to default Marid scripts (like UnAcknowledge.groovy) if the user had customized it.
+        // If the user didn't touch the Marid script and we updated it in the new package, it will be got updated.
+
+        def confFilesToBeDeleted = []
+
+        File maridScriptsDir = new File("${project.buildDir}/${sourceDir}/opsgenie-integration/marid/scripts")
+        def maridScripts = maridScriptsDir.listFiles()
+
+        for(def maridScript : maridScripts) {
+            configFiles.put(maridScript.getAbsolutePath(), 'var/opsgenie/marid/scripts')
+        }
+
+        File intScriptsDir = new File("${projectDir}/${sourceDir}/marid/scripts")
+        def intScripts = intScriptsDir.listFiles()
+
+        for(def confFile : configFiles.keySet()) {
+            File fConfFile = new File(confFile.toString())
+
+            for(def intScript : intScripts) {
+                if (fConfFile.getName().equals(intScript.getName())) {
+                    if (!confFilesToBeDeleted.contains(confFile)) {
+                        confFilesToBeDeleted.add(confFile);
+                    }
+                }
+            }
+        }
+
+        for(def confFile : confFilesToBeDeleted) {
+            configFiles.remove(confFile)
+        }
+
+        // #################################################################################################################################
+
         fileMapping.put("${project.buildDir}/${sourceDir}/opsgenie-integration/marid/scripts", 'var/opsgenie/marid/scripts')
         fileMapping.put("${project.buildDir}/${sourceDir}/opsgenie-integration/marid/conf/.keystore", 'etc/opsgenie/marid')
         fileMapping.put("${project.buildDir}/${sourceDir}/opsgenie-integration/marid/lib", 'var/lib/opsgenie/marid')
