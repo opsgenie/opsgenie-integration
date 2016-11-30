@@ -212,6 +212,7 @@ func parseFlags()map[string]string{
 	triggerDescription := flag.String("triggerDescription", "", "TRIGGER.DESCRIPTION")
 	triggerUrl := flag.String("triggerUrl", "", "TRIGGER.URL")
 	triggerValue := flag.String("triggerValue","","TRIGGER.VALUE")
+	triggerHostGroupName := flag.String("triggerHostGroupName", "", "TRIGGER.HOSTGROUP.NAME")
 	hostName := flag.String("hostName","","HOSTNAME")
 	ipAddress := flag.String("ipAddress", "", "IPADDRESS")
 	date := flag.String("date", "", "DATE")
@@ -234,6 +235,7 @@ func parseFlags()map[string]string{
 	parameters["triggerDescription"] = *triggerDescription
 	parameters["triggerUrl"] = *triggerUrl
 	parameters["triggerValue"] = *triggerValue
+	parameters["triggerHostGroupName"] = *triggerHostGroupName
 	parameters["hostName"] = *hostName
 	parameters["ipAddress"] = *ipAddress
 	parameters["date"] = *date
