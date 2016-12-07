@@ -39,20 +39,32 @@ void createTicketInZendesk(def alertFromOpsgenie) {
         ]
 
         def post = ((OpsGenieHttpClient) HTTP_CLIENT).preparePostMethod(url, JsonUtils.toJson(contentParams), [:], requestParameters)
-        sendHttpRequestToZendesk(post, HTTP_CLIENT)
+        def responseMap = sendHttpRequestToZendesk(post, HTTP_CLIENT)
+
+        if (responseMap != null) {
+            Map ticket = responseMap.get("ticket")
+            def ticketId = ticket.get("id")
+
+            opsgenie.addDetails(["id": alert.alertId, "details": ["ticket_id": ticketId]])
+        }
     } finally {
         HTTP_CLIENT.close();
     }
 }
 
-void sendHttpRequestToZendesk(def httpMethod, OpsGenieHttpClient HTTP_CLIENT) {
+Map sendHttpRequestToZendesk(def httpMethod, OpsGenieHttpClient HTTP_CLIENT) {
     httpMethod.setHeader("Content-Type", "application/json")
     response = HTTP_CLIENT.executeHttpMethod(httpMethod)
+
     if (response.getStatusCode() < 299) {
         logger.info("${LOG_PREFIX} Successfully executed at Zendesk.");
         logger.debug("${LOG_PREFIX} Zendesk response: ${response.statusCode} ${response.getContentAsString()}")
+
+        return JsonUtils.parse(response.content)
     } else {
         logger.warn("${LOG_PREFIX} Could not execute at Zendesk; response: ${response.statusCode} ${response.getContentAsString()}")
+
+        return null
     }
 }
 
