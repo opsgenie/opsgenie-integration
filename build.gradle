@@ -474,6 +474,7 @@ apply from: 'zendesk/zendesk.gradle'
 apply from: 'icinga2/icinga2.gradle'
 apply from: 'solarwinds/solarwinds.gradle'
 apply from: 'oem/oem.gradle'
+apply from: 'vcenter/vcenter.gradle'
 
 
 task packageIntegrations(dependsOn: [
