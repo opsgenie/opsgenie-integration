@@ -1,5 +1,5 @@
 task prepareVCenter() << {
-    def destination = "${project.buildDir}/vcenter"
+    def destination = "${project.buildDir}/opsgenie"
     copy {
         from "${project.buildDir}/opsgenie-integration"
         into "${destination}/opsgenie-integration"
@@ -7,25 +7,25 @@ task prepareVCenter() << {
 
     copy {
         from "${project.projectDir}/vcenter/vcenter/vcenter2opsgenie.go"
-        into "${destination}/vcenter"
+        into "${destination}/opsgenie"
     }
 
     copy {
         from "${project.projectDir}/vcenter/vcenter/vcenter2opsgenie"
-        into "${destination}/vcenter"
+        into "${destination}/opsgenie"
     }
     copy {
         from "${project.projectDir}/vcenter/vcenter/vcenter2opsgenie.exe"
-        into "${destination}/vcenter"
+        into "${destination}/opsgenie"
     }
 
     copy {
         from "${project.projectDir}/vcenter/common/opsgenie-integration.conf"
-        into "${destination}/opsgenie-integration/conf"
+        into "${destination}/opsgenie/opsgenie-integration/conf"
     }
 }
 task packageVCenterZip(dependsOn: 'prepareVCenter', type: Zip) {
-    from "${project.buildDir}/vcenter"
+    from "${project.buildDir}/opsgenie"
     baseName = 'opsgenie-vcenter'
     version = project.ext.versions.getProperty('vcenter') + project.ext.versionSuffix
 
