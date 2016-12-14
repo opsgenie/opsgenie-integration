@@ -68,8 +68,8 @@ def lambda_handler(event, context):
 
     # Prepare body to send the IP to add blockList
     body = {
-        "source": alertDetails["IPtoBlock"],
-        "note": alertDetails["IPtoBlock"] + " added to blackList."
+        "source": alertDetails["ip"],
+        "note": alertDetails["ip"] + " added to blackList."
     }
     print "PUT request is sending to " + endpoint + "/corps/" + corpName + "/sites/" + siteName + "/blacklist"
     print "Body to be sent: " + json.dumps(body)
