@@ -9,6 +9,7 @@ import org.apache.http.auth.UsernamePasswordCredentials
 import javax.imageio.ImageIO
 import java.awt.image.BufferedImage
 import java.text.SimpleDateFormat
+import java.util.concurrent.TimeUnit
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 
@@ -65,6 +66,13 @@ if (alertFromOpsgenie.size() > 0) {
                 contentMap.put("author", alert.username)
                 contentMap.put("notify", true)
                 contentMap.put("sticky", true)
+
+                long expireAcknowledgementAfter = (long) _conf("expire_acknowledgement_after", false);
+
+                if (!expireAcknowledgementAfter) {
+                    def timestamp = TimeUnit.NANOSECONDS.toSeconds(System.nanoTime() + TimeUnit.MINUTES.toNanos(expireAcknowledgementAfter));
+                    contentMap.put("expiry", timestamp)
+                }
             }
         } else if (action == "TakeOwnership") {
             urlPath = "/v1/actions/add-comment"

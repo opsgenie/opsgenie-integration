@@ -19,6 +19,9 @@ icinga.user=icingaadmin
 icinga.password=icingaadmin
 icinga.http.timeout=30000
 
+#If you would like to define an expiry time for acknowledgement, you can use the parameter below. Its value is in minutes.
+#icinga.expire_acknowledgement_after=30
+
 ########################################ICINGA INTEGRATION - ALERT ACTION CONFIGURATION ######################
 actions.Acknowledge.script=icingaActionExecutor.groovy
 actions.AddNote.script=icingaActionExecutor.groovy
