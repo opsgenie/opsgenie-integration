@@ -61,7 +61,7 @@
             },
 
             getAlertFromOpsGenie: function(alertId){
-            var rest = new sn_ws.RESTMessageV2('OpsGenie Alert Endpoint', 'get');
+            var rest = new sn_ws.RESTMessageV2('OpsGenie Alert API Endpoint', 'get');
             rest.setStringParameter("apiKey", this.apiKey);
             rest.setStringParameter("id", alertId);
             gs.log("AlertId" + alertId);
