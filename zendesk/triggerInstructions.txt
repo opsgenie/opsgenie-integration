@@ -48,5 +48,5 @@ latest_comment : {{ticket.latest_comment_formatted}}
 action: close ||
 id: {{ticket.id}} ||
 status: {{ticket.status}} ||
-{{ticket.latest_comment_formatted}}
+latest_comment : {{ticket.latest_comment_formatted}}
 - Click "Create trigger".
