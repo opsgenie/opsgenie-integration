@@ -30,6 +30,7 @@ description: {{ticket.description}}
 - Put "OpsGenie Add Note" into "Trigger title".
 - Under "Meet all of the following conditions:", add a condition as specified below:
     - Ticket: Is Updated
+    - Ticket:Status Is Not Solved
 - Under "Perform these actions:", select "Notifications: Notify target" and pick the URL target you have added earlier for the integration.
 - Paste into "Message" the following template:
 action: addnote ||
