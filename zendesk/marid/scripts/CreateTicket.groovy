@@ -11,8 +11,12 @@ CONF_PREFIX = "zendesk.";
 def alertFromOpsgenie = opsgenie.getAlert(alertId: alert.alertId)
 
 if (alertFromOpsgenie.size() > 0) {
-    if (source.name?.toLowerCase() != "zendesk") {
-        createTicketInZendesk(alertFromOpsgenie)
+    if (alert.username.toLowerCase() != "zendesk") {
+        if (!alertFromOpsgenie.details.containsKey("ticket_id")) {
+            createTicketInZendesk(alertFromOpsgenie)
+        } else {
+            logger.warn("${LOG_PREFIX} Alert has the ticket_id extra property; discarding action in order to prevent looping.")
+        }
     } else {
         logger.warn("${LOG_PREFIX} Action source is Zendesk; discarding action in order to prevent looping.")
     }
@@ -29,6 +33,7 @@ void createTicketInZendesk(def alertFromOpsgenie) {
         def contentParams = [
             "ticket" : [
                 "subject" : alert.message,
+                "external_id": "og_" + alert.alias,
                 "comment" : [
                         "body" : String.valueOf("Ticket created by ${alert.username}\n" +
                                         "Description: ${alertFromOpsgenie.description}"),

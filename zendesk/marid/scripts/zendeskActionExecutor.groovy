@@ -10,7 +10,7 @@ alertFromOpsgenie = opsgenie.getAlert(alertId: alert.alertId)
 HTTP_CLIENT = createHttpClient();
 try {
     if (alertFromOpsgenie.size() > 0) {
-        if(source.name?.toLowerCase() != "zendesk") {
+        if(alert.username.toLowerCase() != "zendesk") {
             String ticketId = alertFromOpsgenie.details.ticket_id;
             if (ticketId) {
                 String message;

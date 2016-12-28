@@ -4,7 +4,6 @@ zendesk.email=
 zendesk.apiToken=
 ######################################## ZENDESK INTEGRATION - ALERT ACTION CONFIGURATION ######################
 actions.Create.script=CreateTicket.groovy
-actions.CreateTicket.script=CreateTicket.groovy
 actions.Acknowledge.script=zendeskActionExecutor.groovy
 actions.AddNote.script=zendeskActionExecutor.groovy
 actions.AddRecipient.script=zendeskActionExecutor.groovy
