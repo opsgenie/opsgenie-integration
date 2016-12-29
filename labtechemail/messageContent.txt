@@ -1,0 +1,10 @@
+name:%NAME%
+status:%STATUS%
+clientName:%CLIENTNAME%
+computerName:%COMPUTERNAME%
+locationName:%LOCATIONNAME%
+fieldName:%FIELDNAME%
+result:%RESULT%
+failCount:%FailCount%
+when:%when%
+contactName:%ContactName%
