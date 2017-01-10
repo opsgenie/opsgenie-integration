@@ -36,17 +36,22 @@ func main() {
 	logger = configureLogger()
 	printConfigToLog()
 
+
 	if *version != ""{
 		fmt.Println("Version: 1.0")
 		return
 	}
 	logPrefix = "[EventId: " + parameters["evid"].(string)  + "]"
-	if(strings.ToLower(eventState) == "close"){
-		if logger != nil {
-			logger.Info("eventState flag is set to close. Will not try to retrieve event details from zenoss")
+	if parameters["test"] == true {
+		logger.Warning("Sending test alert to OpsGenie.")
+	} else {
+		if(strings.ToLower(eventState) == "close"){
+			if logger != nil {
+				logger.Info("eventState flag is set to close. Will not try to retrieve event details from zenoss")
+			}
+		} else{
+			getEventDetailsFromZenoss()
 		}
-	}else{
-		getEventDetailsFromZenoss()
 	}
 	postToOpsGenie()
 }
@@ -268,6 +273,8 @@ func parseFlags(){
 	state := flag.String("eventState", "", "Event State")
 	configloc := flag.String("config", "", "Config File Location")
 	logPath := flag.String("logPath", "", "LOGPATH")
+	test := flag.Bool("test", false, "Test (boolean)")
+
 
 	flag.Parse()
 
@@ -313,6 +320,10 @@ func parseFlags(){
 		parameters["logPath"] = *logPath
 	} else {
 		parameters["logPath"] = configParameters["logPath"]
+	}
+
+	if *test != false {
+		parameters["test"] = *test
 	}
 
 	parameters["evid"] = *evid
