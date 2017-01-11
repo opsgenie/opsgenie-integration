@@ -1,9 +1,8 @@
 ## OpsGenie expects the following fields like below, use them without changing names (in both contents)
-## you can send alias, teams, recipients and tags to be used in OpsGenie alerts. Notice that these fields start with lowercase in example content do not change it.
-
+## you can send alias, teams, recipients and tags to be used in OpsGenie alerts. Notice that these fields start with lowercase in example content do not change it.d
 ActionType=Create&
-alias=${ObjectID}-${N=Alerting;M=AlertID}&
-ObjectID=${ObjectID}&
+alias=${N=Alerting;M=AlertObjectID}-${N=Alerting;M=AlertID}&
+ObjectID=${N=Alerting;M=AlertObjectID}&
 NodeName=${NodeName}&
 AlertID=${N=Alerting;M=AlertID}&
 AlertDefID=${N=Alerting;M=AlertDefID}&
@@ -30,8 +29,8 @@ tags=<comma_separated_list_of_tags>
 ## you can send alias, teams, recipients and tags to be used in OpsGenie alerts. Notice that these fields start with lowercase in example content do not change it.
 
 ActionTypeµ#µCreate§#§
-aliasµ#µ${ObjectID}-${N=Alerting;M=AlertID}§#§
-ObjectIDµ#µ${ObjectID}§#§
+aliasµ#µ${N=Alerting;M=AlertObjectID}-${N=Alerting;M=AlertID}§#§
+ObjectIDµ#µ${N=Alerting;M=AlertObjectID}§#§
 NodeNameµ#µ${NodeName}§#§
 AlertIDµ#µ${N=Alerting;M=AlertID}§#§
 AlertDefIDµ#µ${N=Alerting;M=AlertDefID}§#§
