@@ -1,9 +1,8 @@
 ########################################SOLARWINDS INTEGRATION - ALERT ACTION CONFIGURATION ######################
 actions.AddNote.script=solarwindsActionExecutor.groovy
-actions.Close.script=solarwindsActionExecutor.groovy
+#actions.Close.script=solarwindsActionExecutor.groovy
 actions.Acknowledge.script=solarwindsActionExecutor.groovy
 
 solarwinds.url=https://<your solarwinds server IP or FQDN>:17778
-solarwinds.host=<your solarwinds server IP or FQDN>
 solarwinds.login=<name of Solarwinds user that can acknowledge alerts>
 solarwinds.password=<password for Solarwinds user that can acknowledge alerts>

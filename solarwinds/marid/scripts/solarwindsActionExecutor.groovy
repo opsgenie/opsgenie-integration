@@ -29,11 +29,15 @@ try {
 
             if (action == "Acknowledge") {
                 message = alert.username + " acknowledged alert: \"" + alert.note + "\" on alert: \"" + alert.message + "\"";
-                acknowledgeSolarwindsAlert(definitionID, objectType, objectID, "${strUpdated} Acknowledged in OpsGenie by ${alert.username}");
+                acknowledgeSolarwindsAlert(objectID, "${strUpdated} Acknowledged in OpsGenie by ${alert.username}");
             } else if (action == "AddNote") {
                 message = alert.username + " added note to alert: \"" + alert.note + "\" on alert: \"" + alert.message + "\"";
                 comment = "${strUpdated} Updated by " + alert.username + " from OpsGenie: " + alert.note;
-                addNoteSolarwindsAlert(definitionID, objectType, objectID, comment);
+                addNoteSolarwindsAlert(objectID, comment);
+            } else if (action == "Close"){
+                message = alert.username + "close alert: \"" + alert.note + "\" on alert: \"" + alert.message + "\"";
+                comment = "${strUpdated} Updated by " + alert.username + " from OpsGenie: " + alert.note;
+                closeSolarwindsAlert(objectID, comment);
             } else{
                 message = alert.username + " executed [" + action + "] action on alert: \"" + alert.message + "\"";
             }
@@ -50,19 +54,17 @@ finally {
     HTTP_CLIENT.close();
 }
 
-void acknowledgeSolarwindsAlert(String definitionID, String objectType, String objectID, String comment) {
-    String url = _conf("url", true) + "/SolarWinds/InformationService/v3/Json/Invoke/Orion.AlertStatus/Acknowledge"
+void acknowledgeSolarwindsAlert(String objectID, String comment) {
+    String url = _conf("url", true) + "/SolarWinds/InformationService/v3/Json/Invoke/Orion.AlertActive/Acknowledge"
     def requestParameters = [:]
     def requestHeaders = ["Content-Type":"application/json"];
 
     def contentArray = [
             [
-                    [
-                            "DefinitionID":definitionID,
-                            "ObjectType":objectType,
-                            "ObjectID":objectID
-                    ]
-            ]
+                    objectID
+
+            ],
+            comment
     ]
     def builder = new groovy.json.JsonBuilder(contentArray);
     String content = builder.toString();
@@ -72,17 +74,43 @@ void acknowledgeSolarwindsAlert(String definitionID, String objectType, String o
     def post = ((OpsGenieHttpClient) HTTP_CLIENT).preparePostMethod(url, content, requestHeaders, requestParameters);
     sendHttpRequestToSolarwinds(post);
 
-    addNoteSolarwindsAlert(definitionID, objectType, objectID, comment);
-
 }
 
-void addNoteSolarwindsAlert(String definitionID, String objectType, String objectID, String comment) {
-    String url = _conf("url", true) + "/SolarWinds/InformationService/v3/Json/Invoke/Orion.AlertStatus/AddNote";
+void closeSolarwindsAlert(String objectID, String comment) {
+    String url = _conf("url", true) + "/SolarWinds/InformationService/v3/Json/Invoke/Orion.AlertActive/ClearAlert";
+    def requestParameters = [:]
+    def requestHeaders = ["Content-Type":"application/json"];
+
+    def contentArray = [
+            [
+                    objectID
+
+            ]
+    ]
+    def builder = new groovy.json.JsonBuilder(contentArray);
+    String content = builder.toString();
+
+    logger.warn ("Close details: ${content}");
+
+    def post = ((OpsGenieHttpClient) HTTP_CLIENT).preparePostMethod(url, content, requestHeaders, requestParameters);
+    sendHttpRequestToSolarwinds(post);
+
+    addNoteSolarwindsAlert(objectID, comment);
+}
+
+void addNoteSolarwindsAlert(String objectID, String comment) {
+    String url = _conf("url", true) + "/SolarWinds/InformationService/v3/Json/Invoke/Orion.AlertActive/AppendNote";
     def requestParameters = [:];
     def requestHeaders = ["Content-Type":"application/json"];
 
-    contentList = [definitionID, objectID, objectType, comment]
-    def builder = new groovy.json.JsonBuilder(contentList);
+    def contentArray = [
+            [
+                    objectID
+
+            ],
+            comment
+    ]
+    def builder = new groovy.json.JsonBuilder(contentArray);
     String content = builder.toString();
 
     logger.warn ("AddNote details: ${content}");
