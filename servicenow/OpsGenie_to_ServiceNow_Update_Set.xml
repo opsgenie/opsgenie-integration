@@ -319,7 +319,7 @@
             var inc = new GlideRecord('incident');
             inc.short_description = responseBody.message;
 
-            //	var teamName = alert.teams[0];
+            //	var teamName = body.alert.teams[0];
             //	var group = new GlideRecord('sys_user_group');
             //	group.addQuery('name', teamName);
             //	group.query();
