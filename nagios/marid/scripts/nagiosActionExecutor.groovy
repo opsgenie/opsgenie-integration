@@ -62,7 +62,7 @@ if (alertFromOpsgenie.size() > 0) {
                 logger.warn("OpsGenie alert is already unacknowledged by nagios. Discarding!!!");
                 discardAction = true;
             } else {
-                postParams.com_data = "Acknowledged by ${alert.username} via OpsGenie"
+                postParams.com_data = "UnAcknowledged by ${alert.username} via OpsGenie"
                 postParams.cmd_typ = service ? "52" : "51";
             }
         } else if (action == "TakeOwnership") {
