@@ -250,6 +250,7 @@ func parseFlags()map[string]string{
 	lastHostUnreachable := flag.String("lhur", "", "LASTHOSTUNREACHABLE")
 	hostOutput := flag.String("ho", "", "HOSTOUTPUT")
 	longHostOutput := flag.String("lho", "", "LONGHOSTOUTPUT")
+	hostNotesUrl := flag.String("hnu", "", "HOSTNOTESURL")
 	hostPerfData := flag.String("hpd", "", "HOSTPERFDATA")
 
 	serviceDesc := flag.String("s", "", "SERVICEDESC")
@@ -282,6 +283,7 @@ func parseFlags()map[string]string{
 	lastServiceCritical := flag.String("lsc","","LASTSERVICECRITICAL")
 	serviceOutput := flag.String("so", "", "SERVICEOUTPUT")
 	longServiceOutput := flag.String("lso", "", "LONGSERVICEOUTPUT")
+	serviceNotesUrl := flag.String("snu", "", "SERVICENOTESURL")
 	servicePerfData := flag.String("spd", "", "SERVICEPERFDATA")
 	logPath := flag.String("logPath", "", "LOGPATH")
 
@@ -361,6 +363,7 @@ func parseFlags()map[string]string{
 	parameters["last_host_unreachable"] = *lastHostUnreachable
 	parameters["host_output"] = *hostOutput
 	parameters["long_host_output"] = *longHostOutput
+	parameters["host_notes_url"] = *hostNotesUrl
 	parameters["host_perf_data"] = *hostPerfData
 
 	parameters["service_desc"] = *serviceDesc
@@ -393,6 +396,7 @@ func parseFlags()map[string]string{
 	parameters["last_service_critical"] = *lastServiceCritical
 	parameters["service_output"] = *serviceOutput
 	parameters["long_service_output"] = *longServiceOutput
+	parameters["service_notes_url"] = *serviceNotesUrl
 	parameters["service_perf_data"] = *servicePerfData
 
 	return parameters
