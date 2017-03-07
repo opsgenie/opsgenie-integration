@@ -111,12 +111,6 @@ def createDownloadBucketIfNonExist() {
     createBucketIfNonExist(downloadsBucket)
 }
 
-def createJavadocBucketIfNonExist() {
-    def props = getUploadOptions()
-    def javaDoc = props.getProperty('amazonJavadocBucket')
-    createBucketIfNonExist(javaDoc)
-}
-
 def createBucketIfNonExist(String bucketName) {
     def client = getAWSClient()
 
@@ -131,10 +125,11 @@ def uploadJavaDocToS3() {
 
     def client = getAWSClient()
     def props = getUploadOptions()
-    def javadocBucket = props.getProperty('amazonJavadocBucket')
+    def javadocBucket = props.getProperty('amazonDownloadsBucket')
+    def folderName = "java-sdk-doc/"
 
     println '[Release] Deleting existing JavaDoc'
-    ObjectListing objects = client.listObjects(new ListObjectsRequest().withBucketName(javadocBucket));
+    ObjectListing objects = client.listObjects(new ListObjectsRequest().withBucketName(javadocBucket).withPrefix(folderName));
     List<S3ObjectSummary> objectSummaries = objects.getObjectSummaries();
     for (S3ObjectSummary next : objectSummaries) {
         client.deleteObject(new DeleteObjectRequest(next.getBucketName(), next.getKey()));
@@ -144,8 +139,8 @@ def uploadJavaDocToS3() {
     client.setBucketWebsiteConfiguration(javadocBucket, new BucketWebsiteConfiguration("index.html"))
     FileTree javadoc = fileTree(dir: "${project(':sdk').buildDir}/docs/javadoc")
     javadoc.each { File file ->
-        println("Uploading " + file.getAbsolutePath() + " to bucket [${javadocBucket}]")
-        def fileName = file.getCanonicalPath().replace("${project(':sdk').buildDir}/docs/javadoc/", '')
+        println("Uploading " + file.getAbsolutePath() + " to bucket [${javadocBucket}/${folderName}]")
+        def fileName = file.getCanonicalPath().replace("${project(':sdk').buildDir}/docs/javadoc/", folderName)
         PutObjectRequest request = new PutObjectRequest(javadocBucket, fileName, file)
         request.setCannedAcl(CannedAccessControlList.PublicRead)
         client.putObject(request)
@@ -431,7 +426,6 @@ task release(type: GradleBuild ) {
     doLast {
         generateDownloadsProperties()
         createDownloadBucketIfNonExist()
-        createJavadocBucketIfNonExist()
         uploadIntegrationsToS3()
         if (isReleaseForAll() || isReleaseForSdk()) {
             uploadSdkPackageToS3()
