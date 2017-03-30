@@ -475,6 +475,7 @@ apply from: 'icinga2/icinga2.gradle'
 apply from: 'solarwinds/solarwinds.gradle'
 apply from: 'oem/oem.gradle'
 apply from: 'vcenter/vcenter.gradle'
+apply from: 'xmpp/xmpp.gradle'
 
 
 task packageIntegrations(dependsOn: [
@@ -491,7 +492,8 @@ task packageIntegrations(dependsOn: [
                                 'packageZendesk',
                                 'packageIcinga2',
                                 'packageSolarwinds',
-                                'packageOEM'
+                                'packageOEM',
+                                'packageXmpp'
 ])
 
 task packageAll(dependsOn: ['packageIntegrations', 'packageLamp'])

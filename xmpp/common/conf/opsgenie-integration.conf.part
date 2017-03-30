@@ -1,0 +1,12 @@
+########################################JABBER INTEGRATION - ALERT ACTION CONFIGURATION ######################
+
+
+xmpp.hostUrl=<your service name>
+xmpp.username=<your username>
+xmpp.password=<your password>
+xmpp.room=<room name>
+
+actions.Create.script=xmppActionExecutor.groovy
+actions.Acknowledge.script=xmppActionExecutor.groovy
+actions.Close.script=xmppActionExecutor.groovy
+actions.AddNote.script=xmppActionExecutor.groovy

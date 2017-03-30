@@ -1,0 +1,48 @@
+configurations {
+    xmpp
+}
+dependencies {
+    xmpp 'org.igniterealtime.smack:smackx:3.2.1'
+    xmpp 'org.igniterealtime.smack:smack:3.2.1'
+}
+
+task prepareXmpp(dependsOn: 'generateIntegration') << {
+    def destination = "${project.buildDir}/xmpp"
+    copy {
+        from "${project.buildDir}/opsgenie-integration"
+        into "${destination}/opsgenie-integration"
+    }
+
+    copy {
+        from "${project.projectDir}/xmpp/marid"
+        into "${destination}/opsgenie-integration/marid"
+    }
+
+    copy {
+        from configurations.xmpp
+        into "${destination}/opsgenie-integration/marid/lib"
+    }
+
+    mergeConfFile("${project.buildDir}/opsgenie-integration/conf/opsgenie-integration.conf",
+            "${project.projectDir}/xmpp/common/conf/opsgenie-integration.conf.part",
+            "${destination}/opsgenie-integration/conf/opsgenie-integration.conf")
+}
+
+task packageXmppZip(dependsOn: 'prepareXmpp', type: Zip) {
+    from "${project.buildDir}/xmpp"
+    baseName = 'opsgenie-xmpp'
+    version = project.ext.versions.getProperty('xmpp') + project.ext.versionSuffix
+}
+
+
+task packageXmppOS(dependsOn: ['generateIntegrationForNative', 'prepareXmpp']) << {
+    copyNativeFiles('xmpp')
+
+
+
+    buildRpm("xmpp", "opsgenie-xmpp", "OpsGenie - Xmpp integrations files including marid script", [:], [:])
+    buildDeb("xmpp", "opsgenie-xmpp", "OpsGenie - Icinga2 integrations files including marid and Icinga2 scripts", [:], [:])
+}
+
+
+task packageXmpp(dependsOn: ['packageXmppZip', 'packageXmppOS'])
