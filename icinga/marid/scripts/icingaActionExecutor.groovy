@@ -57,12 +57,11 @@ if (alertFromOpsgenie.size() > 0) {
                 postParams.sticky_ack = "on"
                 postParams.cmd_typ = service ? "34" : "33";
             }
-        } else if (action == "Acknowledge") {
+        } else if (action == "UnAcknowledge") {
             if (source != null && source.name?.toLowerCase()?.startsWith("icinga")) {
-                logger.warn("OpsGenie alert is already unacknowledged by icinga. Discarding!!!");
+                logger.warn("OpsGenie alert is already unacknowledged by Icinga. Discarding!!!");
                 discardAction = true;
             } else {
-                postParams.com_data = "UnAcknowledged by ${alert.username} via OpsGenie"
                 postParams.cmd_typ = service ? "52" : "51";
             }
         } else if (action == "TakeOwnership") {

@@ -59,10 +59,9 @@ if (alertFromOpsgenie.size() > 0) {
             }
         } else if (action == "UnAcknowledge") {
             if (source != null && source.name?.toLowerCase()?.startsWith("nagios")) {
-                logger.warn("OpsGenie alert is already unacknowledged by nagios. Discarding!!!");
+                logger.warn("OpsGenie alert is already unacknowledged by Nagios. Discarding!!!");
                 discardAction = true;
             } else {
-                postParams.com_data = "UnAcknowledged by ${alert.username} via OpsGenie"
                 postParams.cmd_typ = service ? "52" : "51";
             }
         } else if (action == "TakeOwnership") {
