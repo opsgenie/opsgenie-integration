@@ -11,7 +11,7 @@ cd $INTEGRATION_PATH
 /usr/bin/git add version.properties
 /usr/bin/git commit -m "$COMMIT_MSG"
 
-result=$(/usr/bin/git branch -D master)
+result=$(/usr/bin/git branch -D master || true)
 echo $result
 
 /usr/bin/git fetch origin master
