@@ -6,6 +6,8 @@ COMMIT_MSG=$3
 TAG_NAME=$4
 
 cd $INTEGRATION_PATH
+result=$(/usr/bin/git branch -D master || true)
+echo $result
 #/usr/bin/git stash save before_release
 /usr/bin/git checkout -b before-release
 /usr/bin/git add version.properties
