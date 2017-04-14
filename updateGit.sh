@@ -31,7 +31,7 @@ echo $result
 #
 # /usr/bin/git push origin master
 # /usr/bin/git push --tags
-cd $CLIENT_PATH
-/usr/bin/git checkout master
-/usr/bin/git tag -a $TAG_NAME -m $TAG_NAME
-/usr/bin/git push --tags
+#cd $CLIENT_PATH
+#/usr/bin/git checkout master
+#/usr/bin/git tag -a $TAG_NAME -m $TAG_NAME
+#/usr/bin/git push --tags
