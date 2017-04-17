@@ -1,0 +1,26 @@
+task prepareTrackIt(dependsOn: 'generateIntegration') << {
+    def destination = "${project.buildDir}/trackit"
+    copy {
+        from "${project.buildDir}/opsgenie-integration"
+        into "${destination}"
+    }
+
+    copy {
+        from "${project.projectDir}/trackit/marid"
+        into "${destination}/marid"
+    }
+
+    mergeConfFile("${project.buildDir}/opsgenie-integration/conf/opsgenie-integration.conf",
+            "${project.projectDir}/trackit/common/conf/opsgenie-integration.conf.part",
+            "${destination}/marid/conf/marid.conf")
+
+    delete "${destination}/conf"
+}
+
+task packageTrackItZip(dependsOn: 'prepareTrackIt', type: Zip) {
+    from "${project.buildDir}/trackit"
+    baseName = 'opsgenie-trackit'
+    version = project.ext.versions.getProperty('trackit') + project.ext.versionSuffix
+}
+
+task packageTrackIt(dependsOn: ['packageTrackItZip'])

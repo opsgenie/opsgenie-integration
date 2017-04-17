@@ -1,0 +1,9 @@
+########################################TRACK-IT INTEGRATION - ALERT ACTION CONFIGURATION ######################
+actions.Create.script=createTrackItWorkflow.groovy
+actions.AddNote.script=trackItActionExecutor.groovy
+actions.Close.script=trackItActionExecutor.groovy
+
+
+trackit.url=http://<your Track-It server IP or FQDN>
+trackit.login=<Track-It username>
+trackit.password=<Track-It password>

@@ -476,6 +476,7 @@ apply from: 'solarwinds/solarwinds.gradle'
 apply from: 'oem/oem.gradle'
 apply from: 'vcenter/vcenter.gradle'
 apply from: 'xmpp/xmpp.gradle'
+apply from: 'trackit/trackIt.gradle'
 
 
 task packageIntegrations(dependsOn: [
@@ -493,6 +494,7 @@ task packageIntegrations(dependsOn: [
                                 'packageIcinga2',
                                 'packageSolarwinds',
                                 'packageOEM',
+                                'packageTrackIt',
                                 'packageXmpp'
 ])
 

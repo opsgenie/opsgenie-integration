@@ -65,6 +65,7 @@ def generateDownloadsProperties() {
                     .replace('[[oem]]', project.ext.versions.getProperty('oem'))
                     .replace('[[vcenter]]', project.ext.versions.getProperty('vcenter'))
                     .replace('[[xmpp]]', project.ext.versions.getProperty('xmpp'))
+                    .replace('[[trackit]]', project.ext.versions.getProperty('trackit'))
         }
         into "${buildDir}/distributions"
         rename "downloads.template.properties", "downloads.properties"
