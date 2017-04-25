@@ -396,6 +396,15 @@ func parseFlags()map[string]string{
 	parameters["long_service_output"] = *longServiceOutput
 	parameters["service_perf_data"] = *servicePerfData
 
+	args := flag.Args()
+	for i := 0; i < len(args); i += 2 {
+		if(len(args)%2 != 0 && i==len(args)-1){
+			parameters[args[i]] = ""
+		} else {
+			parameters[args[i]] = args[i+1]
+		}
+	}
+
 	return parameters
 }
 

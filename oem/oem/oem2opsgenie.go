@@ -214,6 +214,15 @@ func parseFlags()map[string]string{
 
 	flag.Parse()
 
+	args := flag.Args()
+	for i := 0; i < len(args); i += 2 {
+		if(len(args)%2 != 0 && i==len(args)-1){
+			parameters[args[i]] = ""
+		} else {
+			parameters[args[i]] = args[i+1]
+		}
+	}
+
 	if *apiKey != ""{
 		configParameters["apiKey"] = *apiKey
 	}

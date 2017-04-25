@@ -235,6 +235,14 @@ func parseFlags()map[string]string{
 	} else {
 		parameters["logPath"] = configParameters["logPath"]
 	}
+	args := flag.Args()
+	for i := 0; i < len(args); i += 2 {
+		if(len(args)%2 != 0 && i==len(args)-1){
+			parameters[args[i]] = ""
+		} else {
+			parameters[args[i]] = args[i+1]
+		}
+	}
 
 	var envVars map[string]string = make(map[string]string)
 
@@ -251,6 +259,7 @@ func parseFlags()map[string]string{
 	for key, value := range envVars {
 		parameters[key] = value;
 	}
+
 
 	return parameters
 }
