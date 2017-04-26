@@ -26,6 +26,7 @@ actions.AddNote.script=nagiosActionExecutor.groovy
 actions.TakeOwnership.script=nagiosActionExecutor.groovy
 actions.AssignOwnership.script=nagiosActionExecutor.groovy
 actions.Create.script=nagiosActionExecutor.groovy
+action.UnAcknowledge.script=nagiosActionExecutor.groovy
 
 #You can configure more than one Nagios Server like the following (used in marid)
 #In order to use feature you should also set nagios_server:server1
