@@ -1,0 +1,34 @@
+task prepareJira(dependsOn: 'generateIntegration') << {
+    def destination = "${project.buildDir}/jira"
+    copy {
+        from "${project.buildDir}/opsgenie-integration"
+        into "${destination}/opsgenie-integration"
+    }
+
+    copy {
+        from "${project.projectDir}/jira/marid"
+        into "${destination}/opsgenie-integration/marid"
+    }
+
+    mergeConfFile("${project.buildDir}/opsgenie-integration/conf/opsgenie-integration.conf",
+            "${project.projectDir}/jira/common/conf/opsgenie-integration.conf.part",
+            "${destination}/opsgenie-integration/conf/opsgenie-integration.conf")
+}
+
+task packageJiraZip(dependsOn: 'prepareJira', type: Zip) {
+    from "${project.buildDir}/jira"
+    baseName = 'opsgenie-jira'
+    version = project.ext.versions.getProperty('jira') + project.ext.versionSuffix
+}
+
+task packageJiraOS(dependsOn: ['generateIntegrationForNative', 'prepareJira']) << {
+    copyNativeFiles('jira')
+
+    buildRpm('jira', 'opsgenie-jira', 'OpsGenie - Jira integration files including marid',
+            [:], [:])
+
+    buildDeb('jira', 'opsgenie-jira', 'OpsGenie - Jira integration files including marid',
+            [:], [:])
+}
+
+task packageJira(dependsOn: ['packageJiraZip', 'packageJiraOS'])

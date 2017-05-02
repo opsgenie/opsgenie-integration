@@ -1,0 +1,15 @@
+######################################## JIRA CONFIGURATION #######################################
+jira.issueType=Task
+jira.url=https://jiratestopsgenie.atlassian.net/
+jira.username=cagla+hipchattest@opsgenie.com
+jira.password=opsGenie123..
+jira.projectKey=OPSGENIE
+
+######################################## JIRA INTEGRATION - ALERT ACTION CONFIGURATION ######################
+mappedActions.addCommentToIssue.script=jiraActionExecutor.groovy
+mappedActions.createIssue.script=jiraActionExecutor.groovy
+mappedActions.resolveIssue.script=jiraActionExecutor.groovy
+mappedActions.closeIssue.script=jiraActionExecutor.groovy
+mappedActions.issueDone.script=jiraActionExecutor.groovy
+mappedActions.inProgressIssue.script=jiraActionExecutor.groovy
+##############################################################################################################
