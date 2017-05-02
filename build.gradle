@@ -477,25 +477,27 @@ apply from: 'oem/oem.gradle'
 apply from: 'vcenter/vcenter.gradle'
 apply from: 'xmpp/xmpp.gradle'
 apply from: 'trackit/trackIt.gradle'
+apply from: 'webex/webex.gradle'
 
 
 task packageIntegrations(dependsOn: [
-//                                'packageSmarts',
-//                               'packageSplunk',
-//                               'packageOpennms',
-                               'packageNagios',
-                               'packageNagiosxi',
-                               'packageNetcool',
-                               'packageZabbix',
-                               'packageRedmine',
-                               'packageZenoss',
-                               'packageIcinga',
+//                              'packageSmarts',
+//                              'packageSplunk',
+//                              'packageOpennms',
+                                'packageNagios',
+                                'packageNagiosxi',
+                                'packageNetcool',
+                                'packageZabbix',
+                                'packageRedmine',
+                                'packageZenoss',
+                                'packageIcinga',
                                 'packageZendesk',
                                 'packageIcinga2',
                                 'packageSolarwinds',
                                 'packageOEM',
                                 'packageTrackIt',
-                                'packageXmpp'
+                                'packageXmpp',
+                                'packageWebex'
 ])
 
 task packageAll(dependsOn: ['packageIntegrations', 'packageLamp'])

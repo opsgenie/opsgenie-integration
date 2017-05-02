@@ -1,0 +1,9 @@
+######################################## WEBEX - ALERT ACTION CONFIGURATION ######################
+
+webex.server.url=[YOUR WEBEX SERVER URL]/WBXService/XMLService
+webex.username=[YOUR WEBEX SERVER USERNAME]
+webex.password=[YOUR WEBEX SERVER PASSWORD]
+webex.siteId=[YOUR WEBEX SERVER SITE ID]
+webex.partnerId=[YOUR WEBEX SERVER PARTNER ID]
+
+actions.CreateWebexMeetingViaMarid.script=webexActionExecutor.groovy

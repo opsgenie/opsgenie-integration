@@ -1,0 +1,31 @@
+task prepareWebex(dependsOn: 'generateIntegration') << {
+    def destination = "${project.buildDir}/webex"
+    copy {
+        from "${project.buildDir}/opsgenie-integration"
+        into "${destination}/opsgenie-integration"
+    }
+
+    copy {
+        from "${project.projectDir}/webex/marid"
+        into "${destination}/opsgenie-integration/marid"
+    }
+
+    mergeConfFile("${project.buildDir}/opsgenie-integration/conf/opsgenie-integration.conf",
+            "${project.projectDir}/webex/common/conf/opsgenie-integration.conf.part",
+            "${destination}/opsgenie-integration/conf/opsgenie-integration.conf")
+}
+
+task packageWebexZip(dependsOn: 'prepareWebex', type: Zip) {
+    from "${project.buildDir}/webex"
+    baseName = 'opsgenie-webex'
+    version = project.ext.versions.getProperty('webex') + project.ext.versionSuffix
+}
+
+task packageWebexOS(dependsOn: ['generateIntegrationForNative', 'prepareWebex']) << {
+    copyNativeFiles('webex')
+    buildRpm("webex", "opsgenie-webex", "OpsGenie - Webex files including marid script", [:], [:])
+    buildDeb("webex", "opsgenie-webex", "OpsGenie - Webex files including marid script", [:], [:])
+}
+
+
+task packageWebex(dependsOn: ['packageWebexZip', 'packageWebexOS'])
