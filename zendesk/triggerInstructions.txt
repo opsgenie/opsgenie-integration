@@ -36,7 +36,8 @@ description: {{ticket.description}}
 action: addnote ||
 id: {{ticket.id}} ||
 status: {{ticket.status}} ||
-latest_comment : {{ticket.latest_comment_formatted}}
+latest_comment : {{ticket.latest_comment_formatted}} ||
+external_id: {{ticket.external_id}}
 - Click "Create trigger".
 
 - Now click "add trigger" to add the last one.
@@ -49,5 +50,6 @@ latest_comment : {{ticket.latest_comment_formatted}}
 action: close ||
 id: {{ticket.id}} ||
 status: {{ticket.status}} ||
-latest_comment : {{ticket.latest_comment_formatted}}
+latest_comment : {{ticket.latest_comment_formatted}} ||
+external_id: {{ticket.external_id}}
 - Click "Create trigger".
