@@ -3,8 +3,8 @@ import com.ifountain.opsgenie.client.util.ClientConfiguration
 import com.ifountain.opsgenie.client.util.JsonUtils
 import org.apache.http.HttpHeaders
 
-LOG_PREFIX = "[${params.mappedAction}]:";
-logger.info("${LOG_PREFIX} Will execute [${params.mappedAction}] for alertId ${params.alertId}");
+LOG_PREFIX = "[${mappedAction}]:";
+logger.info("${LOG_PREFIX} Will execute [${mappedAction}] for alertId ${params.alertId}");
 
 CONF_PREFIX = "jira.";
 HTTP_CLIENT = createHttpClient();
@@ -39,8 +39,6 @@ try {
     def authString = (username + ":" + password).getBytes().encodeBase64().toString()
     contentTypeHeader[HttpHeaders.AUTHORIZATION] = "Basic ${authString}".toString()
     contentTypeHeader[HttpHeaders.ACCEPT_LANGUAGE] = "application/json"
-
-    String mappedAction = params.mappedAction
 
     def contentParams = [:]
     def fields = [:]
