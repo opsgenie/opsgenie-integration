@@ -145,7 +145,7 @@ def uploadJavaDocToS3() {
     FileTree javadoc = fileTree(dir: "${project(':sdk').buildDir}/docs/all")
     javadoc.each { File file ->
         println("Uploading " + file.getAbsolutePath() + " to bucket [${javadocBucket}/${folderName}]")
-        def fileName = file.getCanonicalPath().replace("${project(':sdk').buildDir}/docs/javadoc/", folderName)
+        def fileName = file.getCanonicalPath().replace("${project(':sdk').buildDir}/docs/all/", folderName)
         PutObjectRequest request = new PutObjectRequest(javadocBucket, fileName, file)
         request.setCannedAcl(CannedAccessControlList.PublicRead)
         client.putObject(request)
