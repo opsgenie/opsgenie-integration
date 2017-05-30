@@ -1,5 +1,5 @@
 
-task generateSdk(dependsOn: ['sdk:jar', 'sdk-shaded:shadowJar', 'sdk:javadoc']) << {
+task generateSdk(dependsOn: ['sdk:jar', 'sdk-shaded:shadowJar', 'sdk-swagger:jar','sdk:generateAllDocs']) << {
     def destination = "${project.buildDir}/sdk"
     copy {
         from "${project(':sdk').buildDir}/libs"
@@ -14,12 +14,18 @@ task generateSdk(dependsOn: ['sdk:jar', 'sdk-shaded:shadowJar', 'sdk:javadoc']) 
     }
 
     copy {
+        from "${project(':sdk-swagger').buildDir}/libs"
+        into destination
+        rename {fileName -> return "opsgenie-${fileName}" };
+    }
+
+    copy {
         from project(':sdk').configurations.runtime
         into "${destination}/third_party"
     }
 
     copy {
-        from "${project(':sdk').buildDir}/docs/javadoc"
+        from "${project(':sdk').buildDir}/docs/all"
         into "${destination}/javadoc"
     }
 }
