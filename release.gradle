@@ -142,7 +142,7 @@ def uploadJavaDocToS3() {
     println '[Release] Deleting existing JavaDoc - Finished'
     println '[Release] Started to upload JavaDoc'
     client.setBucketWebsiteConfiguration(javadocBucket, new BucketWebsiteConfiguration("index.html"))
-    FileTree javadoc = fileTree(dir: "${project(':sdk').buildDir}/docs/javadoc")
+    FileTree javadoc = fileTree(dir: "${project(':sdk').buildDir}/docs/all")
     javadoc.each { File file ->
         println("Uploading " + file.getAbsolutePath() + " to bucket [${javadocBucket}/${folderName}]")
         def fileName = file.getCanonicalPath().replace("${project(':sdk').buildDir}/docs/javadoc/", folderName)

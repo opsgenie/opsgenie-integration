@@ -1,5 +1,5 @@
 
-task generateSdk(dependsOn: ['sdk:jar', 'sdk-shaded:shadowJar', 'sdk-swagger:jar','sdk:generateAllDocs']) << {
+task generateSdk(dependsOn: ['sdk:jar', ':sdk-shaded:shadowJar', ':sdk-swagger:jar',':sdk:generateAllDocs']) << {
     def destination = "${project.buildDir}/sdk"
     copy {
         from "${project(':sdk').buildDir}/libs"
