@@ -67,11 +67,14 @@ if (alertFromOpsgenie.size() > 0) {
                 contentMap.put("notify", true)
                 contentMap.put("sticky", true)
 
-                long expireAcknowledgementAfter = Long.valueOf(_conf("expire_acknowledgement_after", false));
+                def expireAcknowledgementAfter = _conf("expire_acknowledgement_after", false)
 
-                if (!expireAcknowledgementAfter) {
-                    def timestamp = TimeUnit.NANOSECONDS.toSeconds(System.nanoTime() + TimeUnit.MINUTES.toNanos(expireAcknowledgementAfter));
-                    contentMap.put("expiry", timestamp)
+                if (expireAcknowledgementAfter != null) {
+                    expireAcknowledgementAfter = Long.valueOf(expireAcknowledgementAfter)
+                    if (!expireAcknowledgementAfter) {
+                        def timestamp = TimeUnit.NANOSECONDS.toSeconds(System.nanoTime() + TimeUnit.MINUTES.toNanos(expireAcknowledgementAfter))
+                        contentMap.put("expiry", timestamp)
+                    }
                 }
             }
         } else if (action == "TakeOwnership") {
