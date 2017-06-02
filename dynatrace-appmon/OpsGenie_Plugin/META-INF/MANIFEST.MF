@@ -1,0 +1,9 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: com.opsgenie.plugin;singleton:=true
+Bundle-Name: OpsGenie Plugin
+Bundle-Version: 1.0.0
+Bundle-ClassPath: .,lib/json-simple-1.1.1.jar
+Require-Bundle: com.dynatrace.diagnostics.sdk
+Bundle-ManifestVersion: 2
+Bundle-Vendor: OpsGenie
+
