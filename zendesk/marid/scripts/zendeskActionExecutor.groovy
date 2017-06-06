@@ -1,76 +1,139 @@
 import com.ifountain.opsgenie.client.http.OpsGenieHttpClient
 import com.ifountain.opsgenie.client.util.ClientConfiguration
+import com.ifountain.opsgenie.client.util.JsonUtils
 import org.apache.http.auth.UsernamePasswordCredentials
+import org.apache.http.HttpHeaders
 
-LOG_PREFIX = "[${action}]:";
-logger.warn("${LOG_PREFIX} Will execute action for alertId ${alert.alertId}");
+LOG_PREFIX = "[${mappedAction}]:";
+logger.info("${LOG_PREFIX} Will execute [${mappedAction}] for alertId ${params.alertId}");
 
 CONF_PREFIX = "zendesk.";
-alertFromOpsgenie = opsgenie.getAlert(alertId: alert.alertId)
 HTTP_CLIENT = createHttpClient();
+
 try {
-    if (alertFromOpsgenie.size() > 0) {
-        if(alert.username.toLowerCase() != "zendesk") {
-            String ticketId = alertFromOpsgenie.details.ticket_id;
-            if (ticketId) {
-                String message;
-                if (action == "Acknowledge") {
-                    message = alert.username + " acknowledged alert: \"" + alert.message + "\"";
-                } else if (action == "AddNote") {
-                    message = alert.username + " noted: \"" + alert.note + "\" on alert: \"" + alert.message + "\"";
-                } else if (action == "AddRecipient") {
-                    message = alert.username + " added recipient " + alert.recipient + " to alert: \"" + alert.message + "\"";
-                } else if (action == "AddTeam") {
-                    message = alert.username + " added team " + alert.team + " to alert: \"" + alert.message + "\"";
-                } else if (action == "AssignOwnership") {
-                    message = alert.username + " assigned ownership of the alert: \"" + alert.message + "\" to " + alert.owner;
-                } else if (action == "Close") {
-                    message = alert.username + " closed alert: \"" + alert.message + "\"";
-                } else if (action == "TakeOwnership") {
-                    message = alert.username + " took ownership of the alert: \"" + alert.message + "\"";
-                } else{
-                    message = alert.username + " executed [" + action + "] action on alert: \"" + alert.message + "\"";
-                }
-                addCommentToTicketInZendesk(message, ticketId)
-            } else {
-                logger.warn("${LOG_PREFIX} Cannot send action to Zendesk because ticket_id is not found on alert")
-            }
-        } else{
-            logger.warn("${LOG_PREFIX} Action source is Zendesk; discarding action in order to prevent looping.")
-        }
-    } else {
-        logger.warn("${LOG_PREFIX} Alert with id [${alert.alertId}] does not exist in OpsGenie. It is probably deleted.")
+    String zendeskUrl = params.zendeskUrl
+    if (zendeskUrl == null || "".equals(zendeskUrl)) {
+        zendeskUrl = "https://" + _conf("subdomain", true) + ".zendesk.com"
     }
+    String ticketID = params.ticketID
+    Map contentTypeHeader = [:]
+    contentTypeHeader[HttpHeaders.CONTENT_TYPE] = "application/json"
+    contentTypeHeader[HttpHeaders.ACCEPT_LANGUAGE] = "application/json"
+
+    def contentParams = [:]
+    def ticket = [:]
+    def comment = [:]
+
+    String resultUri = zendeskUrl + "/api/v2/tickets"
+    if (mappedAction == "addInternalComment") {
+        resultUri += "/" + ticketID + ".json"
+        comment.put("body", params.body)
+        comment.put("public", false)
+        ticket.put("comment", comment)
+        contentParams.put("ticket", ticket)
+
+    } else if (mappedAction == "addPublicComment") {
+        resultUri += "/" + ticketID + ".json"
+        comment.put("body", params.body)
+        comment.put("public", true)
+        ticket.put("comment", comment)
+    } else if (mappedAction == "createTicket") {
+        resultUri += ".json";
+        comment.put("body", params.body)
+        comment.put("public", false)
+        ticket.put("comment", comment)
+        ticket.put("external_id", params.external_id)
+        ticket.put("subject", params.subject)
+        ticket.put("tags", params.tags)
+        contentParams.put("ticket", ticket)
+    } else if (mappedAction == "setStatusToClosed") {
+        resultUri += "/" + ticketID + ".json"
+        comment.put("body", params.body)
+        comment.put("public", false)
+        ticket.put("comment", comment)
+        ticket.put("status", "closed")
+        contentParams.put("ticket", ticket)
+    } else if (mappedAction == "setStatusToOpen") {
+        resultUri += "/" + ticketID + ".json"
+        comment.put("body", params.body)
+        comment.put("public", false)
+        ticket.put("comment", comment)
+        ticket.put("status", "open")
+        contentParams.put("ticket", ticket)
+    } else if (mappedAction == "setStatusToSolved") {
+        resultUri += "/" + ticketID + ".json"
+        comment.put("body", params.body)
+        comment.put("public", false)
+        ticket.put("comment", comment)
+        ticket.put("status", "solved")
+        contentParams.put("ticket", ticket)
+    } else if (mappedAction == "setStatusToPending") {
+        resultUri += "/" + ticketID + ".json"
+        comment.put("body", params.body)
+        comment.put("public", false)
+        ticket.put("comment", comment)
+        ticket.put("status", "pending")
+        contentParams.put("ticket", ticket)
+    }
+
+    logger.debug("${LOG_PREFIX} The payload to be sent to Zendesk: ${contentParams}")
+    logger.debug("${LOG_PREFIX} OpsGenie will send the payload to: ${resultUri}")
+
+    if (mappedAction == "createTicket") {
+        def responseBody = postActionsToZendesk(contentParams, contentTypeHeader, resultUri)
+        addTicketIDtoAlert(params, responseBody)
+    } else {
+        def put = ((OpsGenieHttpClient) HTTP_CLIENT).preparePutMethod(resultUri, contentParams, [:])
+         putActionsToZendesk(put)  
+    }
+}
+catch (Exception e) {
+    logger.error(e.getMessage(), e)
 }
 finally {
     HTTP_CLIENT.close()
 }
 
-void addCommentToTicketInZendesk(String message, String ticketId) {
-    String url = _conf("url", true) + "/api/v2/tickets/${ticketId}.json"
-    requestParameters = [:]
-    requestParameters.key = _conf("apiToken", true)
-    def contentParams = [
-            "ticket": [
-                    "comment": [
-                            "body"  : "OpsGenie: " + message,
-                            "public": false
-                    ]
-            ]
-    ]
+void putActionsToZendesk(def httpMethod) {
 
-    def put = ((OpsGenieHttpClient) HTTP_CLIENT).preparePutMethod(url, contentParams, [:])
-    sendHttpRequestToZendesk(put)
+    httpMethod.setHeader("Content-Type", "application/json")  
+    response = ((OpsGenieHttpClient) HTTP_CLIENT).executeHttpMethod(httpMethod)  
+    if (response.getStatusCode() < 299) {
+        logger.info("${LOG_PREFIX} Successfully executed at Zendesk.");  
+        logger.debug("${LOG_PREFIX} Zendesk response: ${response.statusCode} ${response.getContentAsString()}")  
+    } else {
+        logger.warn("${LOG_PREFIX} Could not execute at Zendesk; response: ${response.statusCode} ${response.getContentAsString()}")  
+    }  
+
 }
 
-void sendHttpRequestToZendesk(def httpMethod) {
-    httpMethod.setHeader("Content-Type", "application/json")
-    response = ((OpsGenieHttpClient) HTTP_CLIENT).executeHttpMethod(httpMethod)
-    if (response.getStatusCode() < 299) {
-        logger.info("${LOG_PREFIX} Successfully executed at Zendesk.");
-        logger.debug("${LOG_PREFIX} Zendesk response: ${response.statusCode} ${response.getContentAsString()}")
+def postActionsToZendesk(Map<String, Object> postParams, Map headers, String zendeskUrl) {
+    def response = HTTP_CLIENT.post(zendeskUrl, JsonUtils.toJson(postParams), headers)
+
+    def responseMap = [:]
+    def body = response.content
+    if (body != null) {
+        responseMap = JsonUtils.parse(body)
+        if (response.getStatusCode() < 400) {
+            logger.info("${LOG_PREFIX} Successfully executed at Zendesk.");
+            logger.debug("${LOG_PREFIX} Zendesk response: ${response.statusCode} ${response.getContentAsString()}")
+        } else {
+            logger.warn("${LOG_PREFIX} Could not execute at Zendesk; response: ${response.statusCode} ${response.getContentAsString()}");
+        }
+    }
+    return responseMap
+}
+
+void addTicketIDtoAlert(Map params, Map responseBody) {
+    def ticket = responseBody.ticket
+    String ticketId = ticket?.id
+    String alertId = params.alertId
+
+    if (responseBody != null) {
+
+        opsgenie.addDetails(["id": alertId, "details": ["ticket_id": ticketId]])
     } else {
-        logger.warn("${LOG_PREFIX} Could not execute at Zendesk; response: ${response.statusCode} ${response.getContentAsString()}")
+        logger.warn("${LOG_PREFIX} Zendesk response body is null.")
     }
 }
 
@@ -82,10 +145,19 @@ def createHttpClient() {
         timeout = timeout.toInteger();
     }
 
-    String username = _conf("email", true) + "/token"
-    String password = _conf("apiToken", true)
+    String zendeskEmail = params.zendeskEmail
+    if (zendeskEmail == null || "".equals(zendeskEmail)) {
+        zendeskEmail = _conf("zendeskEmail", true)
+    }
+    String apiToken = params.apiToken
+    if (apiToken == null || "".equals(apiToken)) {
+        apiToken = _conf("apiToken", true)
+    }
+    zendeskEmail = zendeskEmail + "/token"
+    logger.debug("${LOG_PREFIX} Zendesk Email: ${zendeskEmail}")
+    logger.debug("${LOG_PREFIX} API Token: ${apiToken}")
     ClientConfiguration clientConfiguration = new ClientConfiguration().setSocketTimeout(timeout)
-            .setCredentials(new UsernamePasswordCredentials(username, password))
+            .setCredentials(new UsernamePasswordCredentials(zendeskEmail, apiToken))
     return new OpsGenieHttpClient(clientConfiguration)
 }
 

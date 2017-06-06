@@ -1,14 +1,13 @@
 ######################################## ZENDESK CONFIGURATION #######################################
-zendesk.url=https://mycompany.zendesk.com
-zendesk.email=
+zendesk.zendeskEmail=
+zendesk.subdomain=
 zendesk.apiToken=
-######################################## ZENDESK INTEGRATION - ALERT ACTION CONFIGURATION ######################
-actions.Create.script=CreateTicket.groovy
-actions.Acknowledge.script=zendeskActionExecutor.groovy
-actions.AddNote.script=zendeskActionExecutor.groovy
-actions.AddRecipient.script=zendeskActionExecutor.groovy
-actions.AddTeam.script=zendeskActionExecutor.groovy
-actions.AssignOwnership.script=zendeskActionExecutor.groovy
-actions.Close.script=zendeskActionExecutor.groovy
-actions.TakeOwnership.script=zendeskActionExecutor.groovy
+######################################## ZENDESK INTEGRATION - ACTION MAPPING CONFIGURATION ######################
+mappedActions.createTicket.script=zendeskActionExecutor.groovy
+mappedActions.addInternalComment.script=zendeskActionExecutor.groovy
+mappedActions.addPublicComment.script=zendeskActionExecutor.groovy
+mappedActions.setStatusToOpen.script=zendeskActionExecutor.groovy
+mappedActions.setStatusToPending.script=zendeskActionExecutor.groovy
+mappedActions.setStatusToSolved.script=zendeskActionExecutor.groovy
+mappedActions.setStatusToClosed.script=zendeskActionExecutor.groovy
 ##############################################################################################################
