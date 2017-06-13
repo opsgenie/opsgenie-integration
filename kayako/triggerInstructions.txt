@@ -1,0 +1,14 @@
+- From the "Triggers" page, click "New trigger".
+- Put "OpsGenie Create Alert" into "Rule title".
+- Under "When these conditions are met: ", add the conditions as specified below:
+    - Conversations:Status equal to New
+- Under "Perform the following actions:", select the Endpoint that you created.
+- Click "Save".
+
+- After the trigger is saved, click "New trigger" to add the second trigger.
+- Put "OpsGenie Close Alert" into "Rule title".
+- Under "Meet any of the following conditions:", add two conditions as specified below:
+    - Conversations:Status changed to Completed
+    - Conversations:Status equal to Completed
+- Under "Perform the following actions:", select the Endpoint that you created.
+- Click "Save".
