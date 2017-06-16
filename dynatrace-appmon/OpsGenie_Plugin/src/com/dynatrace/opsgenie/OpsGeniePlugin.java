@@ -5,7 +5,7 @@
  * For information how to publish a plugin please visit https://community.dynatrace.com/community/display/DL/How+to+add+a+new+plugin/
  **/
 
-package com.opsgenie.plugin;
+package com.dynatrace.opsgenie;
 
 import com.dynatrace.diagnostics.pdk.*;
 import java.util.logging.Logger;
@@ -23,7 +23,8 @@ public class OpsGeniePlugin implements ActionV2 {
 
     private static final Logger logger = Logger.getLogger(OpsGeniePlugin .class.getName());
 
-    private final static String  URL = "url";
+    private final static String TEAMS = "teams";
+    private final static String URL = "url";
 
     private final static String KEY = "key";
     private final static String STATE = "state";
@@ -45,6 +46,7 @@ public class OpsGeniePlugin implements ActionV2 {
     private final static String THRESHOLD_TYPE = "threaholdType";
     private final static String THRESHOLD_VALUE = "thresholdValue";
 
+    private String teams;
     private URL url;
 
 
@@ -73,7 +75,7 @@ public class OpsGeniePlugin implements ActionV2 {
      */
     @Override
     public Status setup(ActionEnvironment env) throws Exception {
-
+        teams = env.getConfigString(TEAMS);
         url = env.getConfigUrl(URL);
 
         return new Status(Status.StatusCode.Success);
@@ -113,6 +115,7 @@ public class OpsGeniePlugin implements ActionV2 {
             con.setReadTimeout(20000);
 
             JSONObject jsonObj = new JSONObject();
+            jsonObj.put(TEAMS, teams);
 
             Key keyObj = incident.getKey();
             if (keyObj != null) {
