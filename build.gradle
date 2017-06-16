@@ -479,6 +479,7 @@ apply from: 'xmpp/xmpp.gradle'
 apply from: 'trackit/trackIt.gradle'
 apply from: 'webex/webex.gradle'
 apply from: 'jira/jira.gradle'
+apply from: 'dynatrace-appmon/dynatraceappmon.gradle'
 
 
 task packageIntegrations(dependsOn: [
@@ -499,7 +500,8 @@ task packageIntegrations(dependsOn: [
                                 'packageTrackIt',
                                 'packageXmpp',
                                 'packageWebex',
-                                'packageJira'
+                                'packageJira',
+                                'packageDynatraceAppMon'
 ])
 
 task packageAll(dependsOn: ['packageIntegrations', 'packageLamp'])
