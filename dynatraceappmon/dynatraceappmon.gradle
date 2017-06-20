@@ -1,33 +1,33 @@
 task prepareDynatraceAppMon(dependsOn: 'generateIntegration') << {
-    def destination = "${project.buildDir}/dynatrace-appmon"
+    def destination = "${project.buildDir}/dynatraceappmon"
     copy {
         from "${project.buildDir}/opsgenie-integration"
         into "${destination}/opsgenie-integration"
     }
 
     copy {
-        from "${project.projectDir}/dynatrace-appmon/marid"
+        from "${project.projectDir}/dynatraceappmon/marid"
         into "${destination}/opsgenie-integration/marid"
     }
 
     mergeConfFile("${project.buildDir}/opsgenie-integration/conf/opsgenie-integration.conf",
-            "${project.projectDir}/dynatrace-appmon/common/conf/opsgenie-integration.conf.part",
+            "${project.projectDir}/dynatraceappmon/common/conf/opsgenie-integration.conf.part",
             "${destination}/opsgenie-integration/conf/opsgenie-integration.conf")
 }
 
 task packageDynatraceAppMonZip(dependsOn: 'prepareDynatraceAppMon', type: Zip) {
-    from "${project.buildDir}/dynatrace-appmon"
-    baseName = 'opsgenie-dynatrace-appmon'
-    version = project.ext.versions.getProperty('dynatrace-appmon') + project.ext.versionSuffix
+    from "${project.buildDir}/dynatraceappmon"
+    baseName = 'opsgenie-dynatraceappmon'
+    version = project.ext.versions.getProperty('dynatraceappmon') + project.ext.versionSuffix
 }
 
 task packageDynatraceAppMonOS(dependsOn: ['generateIntegrationForNative', 'prepareDynatraceAppMon']) << {
-    copyNativeFiles('dynatrace-appmon')
+    copyNativeFiles('dynatraceappmon')
 
-    buildRpm('dynatrace-appmon', 'opsgenie-dynatrace-appmon', 'OpsGenie - Dynatrace AppMon integration files including marid',
+    buildRpm('dynatraceappmon', 'opsgenie-dynatraceappmon', 'OpsGenie - Dynatrace AppMon integration files including marid',
             [:], [:])
 
-    buildDeb('dynatrace-appmon', 'opsgenie-dynatrace-appmon', 'OpsGenie - Dynatrace AppMon integration files including marid',
+    buildDeb('dynatraceappmon', 'opsgenie-dynatraceappmon', 'OpsGenie - Dynatrace AppMon integration files including marid',
             [:], [:])
 }
 

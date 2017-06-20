@@ -479,7 +479,7 @@ apply from: 'xmpp/xmpp.gradle'
 apply from: 'trackit/trackIt.gradle'
 apply from: 'webex/webex.gradle'
 apply from: 'jira/jira.gradle'
-apply from: 'dynatrace-appmon/dynatraceappmon.gradle'
+apply from: 'dynatraceappmon/dynatraceappmon.gradle'
 
 
 task packageIntegrations(dependsOn: [
