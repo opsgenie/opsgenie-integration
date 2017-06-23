@@ -10,21 +10,18 @@ import (
 	"os"
 	"strings"
 	"strconv"
-	"github.com/alexcesaro/log/golog"
-	"github.com/alexcesaro/log"
 	"fmt"
 	"io/ioutil"
 	"crypto/tls"
+    "log"
+    "log/syslog"
 )
 
 var TOTAL_TIME = 60
 var configParameters = map[string]string {
-    "logLevel" : "warning",
-    "logPath" : "/var/log/opsgenie/nagios2opsgenie.log",
     "opsgenieApiUrl" : "https://api.opsgenie.com"}
 var parameters = make(map[string]string)
-var levels = map [string]log.Level{"info":log.Info,"debug":log.Debug,"warning":log.Warning,"error":log.Error}
-var logger log.Logger
+var logger *syslog.Writer
 
 func main() {
 	version := flag.String("v","","")
@@ -34,8 +31,10 @@ func main() {
         return
     }
 
-
-	logger = configureLogger()
+    logger, e := syslog.New(syslog.LOG_NOTICE, "opsgenie")
+    if e == nil {
+    log.SetOutput(logger)
+    }
 	printConfigToLog()
 
 	http_post()
@@ -43,38 +42,11 @@ func main() {
 
 func printConfigToLog(){
 	if logger != nil {
-		if (logger.LogDebug()) {
-			logger.Debug("Config:")
-			for k, v := range configParameters {
-				logger.Debug(k + "=" + v)
-			}
-		}
+        logger.Debug("Config:")
+        for k, v := range configParameters {
+            logger.Debug(k + "=" + v)
+        }
 	}
-}
-
-func configureLogger ()log.Logger{
-	level := configParameters["logLevel"]
-	var logFilePath = configParameters["logPath"]
-
-	var tmpLogger log.Logger
-
-	file, err := os.OpenFile(logFilePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
-
-	if err != nil {
-		fmt.Println("Could not create log file \"" + logFilePath + "\", will log to \"/tmp/nagios2opsgenie.log\" file. Error: ", err)
-
-		fileTmp, errTmp := os.OpenFile("/tmp/nagios2opsgenie.log", os.O_CREATE | os.O_WRONLY | os.O_APPEND, 0666)
-
-		if errTmp != nil {
-			fmt.Println("Logging disabled. Reason: ", errTmp)
-		} else {
-			tmpLogger = golog.New(fileTmp, levels[strings.ToLower(level)])
-		}
-	} else {
-		tmpLogger = golog.New(file, levels[strings.ToLower(level)])
-	}
-
-	return tmpLogger
 }
 
 func getHttpClient (timeout int) *http.Client{
@@ -87,7 +59,7 @@ func getHttpClient (timeout int) *http.Client{
 				conn, err := net.DialTimeout(netw, addr, time.Second * time.Duration(seconds))
 				if err != nil {
 					if logger != nil {
-						logger.Error("Error occurred while connecting: ", err)
+						logger.Err("Error occurred while connecting: " + err.Error())
 					}
 
 					return nil, err
@@ -104,19 +76,21 @@ func http_post()  {
 	apiUrl := configParameters["opsgenieApiUrl"] + "/v1/json/opsview"
 	target := "OpsGenie"
 
-	if logger != nil {
-		logger.Debug("Data to be posted:")
-		logger.Debug(parameters)
-	    logger.Debug("url: " + apiUrl)
-	}
 	var buf, _ = json.Marshal(parameters)
 	for i := 1; i <= 3; i++ {
 		body := bytes.NewBuffer(buf)
+
+		if logger != nil {
+            logger.Debug("Data to be posted:")
+            logger.Debug(string(buf))
+            logger.Debug("url: " + apiUrl)
+        }
+
 		request, _ := http.NewRequest("POST", apiUrl, body)
 		client := getHttpClient(i)
 
 		if logger != nil {
-			logger.Warning("Trying to send data to " + target + " with timeout: ", (TOTAL_TIME / 12) * 2 * i)
+			logger.Warning("Trying to send data to " + target + " with timeout: " + strconv.Itoa((TOTAL_TIME / 12) * 2 * i))
 		}
 
 		resp, error := client.Do(request)
@@ -135,17 +109,17 @@ func http_post()  {
 				}
 			}else{
 				if logger != nil {
-					logger.Warning("Couldn't read the response from " + target, err)
+					logger.Warning("Couldn't read the response from " + target + " : " + err.Error())
 				}
 			}
 			break
 		}else if i < 3 {
 			if logger != nil {
-				logger.Warning("Error occurred while sending data, will retry.", error)
+				logger.Warning("Error occurred while sending data, will retry : " + error.Error())
 			}
 		}else {
 			if logger != nil {
-				logger.Error("Failed to post data from Nagios to " + target, error)
+				logger.Err("Failed to post data from Nagios to " + target + " : " + error.Error())
 			}
 		}
 		if resp != nil{
