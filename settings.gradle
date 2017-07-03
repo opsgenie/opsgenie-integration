@@ -13,12 +13,10 @@ include ":marid"
 include ":common"
 include ":sdk"
 include ":sdk-swagger"
-include ":sdk-shaded"
 include ":test"
 
 project(":marid").projectDir = file("${clientDir}/marid")
 project(":common").projectDir = file("${clientDir}/common")
 project(":sdk").projectDir = file("${clientDir}/sdk")
-project(":sdk-shaded").projectDir = file("${clientDir}/sdk-shaded")
 project(":sdk-swagger").projectDir = file("${clientDir}/sdk-swagger")
 project(":test").projectDir = file("${clientDir}/test")
