@@ -17,11 +17,20 @@ import (
 	"fmt"
 	"io/ioutil"
 	"crypto/tls"
+	"net/url"
 )
 
 var API_KEY = ""
 var TOTAL_TIME = 60
-var configParameters = map[string]string{"apiKey": API_KEY,"zenoss2opsgenie.logger":"warning","opsgenie.api.url":"https://api.opsgenie.com"}
+var configParameters = map[string]string{"apiKey": API_KEY,
+	"zenoss2opsgenie.logger":"warning",
+	"opsgenie.api.url":"https://api.opsgenie.com",
+	"zenoss2opsgenie.http.proxy.enabled" : "false",
+	"zenoss2opsgenie.http.proxy.port" : "1111",
+	"zenoss2opsgenie.http.proxy.host": "localhost",
+	"zenoss2opsgenie.http.proxy.protocol":"http",
+	"zenoss2opsgenie.http.proxy.username": "",
+	"zenoss2opsgenie.http.proxy.password": ""}
 var parameters = make(map[string]interface{})
 var configPath = "/etc/opsgenie/conf/opsgenie-integration.conf"
 var levels = map [string]log.Level{"info":log.Info,"debug":log.Debug,"warning":log.Warning,"error":log.Error}
@@ -38,7 +47,7 @@ func main() {
 
 
 	if *version != ""{
-		fmt.Println("Version: 1.0")
+		fmt.Println("Version: 1.1")
 		return
 	}
 	logPrefix = "[EventId: " + parameters["evid"].(string)  + "]"
@@ -117,22 +126,44 @@ func configureLogger ()log.Logger{
 	return tmpLogger
 }
 
-func getHttpClient (tryNumber int) *http.Client{
-	timeout := (TOTAL_TIME/12)*2*tryNumber
+
+func getHttpClient (timeout int) *http.Client {
+	seconds := (TOTAL_TIME / 12) * 2 * timeout
+	var proxyEnabled = configParameters["zenoss2opsgenie.http.proxy.enabled"]
+	var proxyHost = configParameters["zenoss2opsgenie.http.proxy.host"]
+	var proxyPort = configParameters["zenoss2opsgenie.http.proxy.port"]
+	var scheme = configParameters["zenoss2opsgenie.http.proxy.protocol"]
+	var proxyUsername = configParameters["zenoss2opsgenie.http.proxy.username"]
+	var proxyPassword = configParameters["zenoss2opsgenie.http.proxy.password"]
+	proxy := http.ProxyFromEnvironment
+
+
+	if proxyEnabled == "true" {
+
+		u := new(url.URL)
+		u.Scheme = scheme
+		u.Host =  proxyHost + ":" + proxyPort
+		if len(proxyUsername) > 0 {
+			u.User = url.UserPassword(proxyUsername,proxyPassword)
+		}
+		if logger != nil {
+			logger.Debug("Formed Proxy url: ", u)
+		}
+		proxy = http.ProxyURL(u)
+	}
 	client := &http.Client{
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{InsecureSkipVerify : true},
-			Proxy: http.ProxyFromEnvironment,
+			Proxy: proxy,
 			Dial: func(netw, addr string) (net.Conn, error) {
-				conn, err := net.DialTimeout(netw, addr, time.Second * time.Duration(timeout))
+				conn, err := net.DialTimeout(netw, addr, time.Second * time.Duration(seconds))
 				if err != nil {
 					if logger != nil {
 						logger.Error("Error occurred while connecting: ", err)
 					}
-
 					return nil, err
 				}
-				conn.SetDeadline(time.Now().Add(time.Second * time.Duration(timeout)))
+				conn.SetDeadline(time.Now().Add(time.Second * time.Duration(seconds)))
 				return conn, nil
 			},
 		},
@@ -142,6 +173,7 @@ func getHttpClient (tryNumber int) *http.Client{
 
 func getEventDetailsFromZenoss(){
 	zenossApiUrl := configParameters["zenoss.command_url"]
+
 	data := [1]interface {}{map[string]interface {}{"evid":parameters["evid"].(string)}}
 	zenossParams := map[string]interface{}{"action":"EventsRouter", "method":"detail", "data": data, "type":"rpc", "tid":1}
 
@@ -171,7 +203,7 @@ func getEventDetailsFromZenoss(){
 		if err == nil{
 			if resp.StatusCode == 200{
 				if logger != nil {
-					logger.Warning(logPrefix + "Retrieved event data from Zenoss successfully;")
+					logger.Info(logPrefix + "Retrieved event data from Zenoss successfully;")
 					logger.Debug(logPrefix + "Response body: " + string(body[:]))
 				}
 
@@ -203,11 +235,6 @@ func logErrorAndExit(log string, err error){
 }
 
 func postToOpsGenie() {
-	if logger != nil {
-		logger.Debug("Data to be posted to OpsGenie:")
-		logger.Debug(parameters)
-	}
-
 	apiUrl := configParameters["opsgenie.api.url"]+ "/v1/json/zenoss"
 	viaMaridUrl := configParameters["viaMaridUrl"]
 	target := ""
@@ -219,6 +246,12 @@ func postToOpsGenie() {
 		target = "OpsGenie"
 	}
 
+	if logger != nil {
+		logger.Debug("URL: ", apiUrl)
+		logger.Debug("Data to be posted:")
+		logger.Debug(parameters)
+	}
+
 	var buf, _ = json.Marshal(parameters)
 	for i := 1; i <= 3; i++ {
 		body := bytes.NewBuffer(buf)
@@ -226,7 +259,7 @@ func postToOpsGenie() {
 		client := getHttpClient(i)
 
 		if logger != nil {
-			logger.Warning(logPrefix + "Trying to send data to OpsGenie with timeout: ", (TOTAL_TIME / 12) * 2 * i)
+			logger.Debug(logPrefix + "Trying to send data to OpsGenie with timeout: ", (TOTAL_TIME / 12) * 2 * i)
 		}
 
 		resp, error := client.Do(request)
@@ -236,26 +269,28 @@ func postToOpsGenie() {
 			if err == nil{
 				if resp.StatusCode == 200{
 					if logger != nil {
-						logger.Warning(logPrefix + "Data from Zenoss posted to " + target + " successfully; response:" + string(body[:]))
+						logger.Debug(logPrefix + " Response code: " + strconv.Itoa(resp.StatusCode))
+						logger.Debug(logPrefix + "Response: " + string(body[:]))
+						logger.Info(logPrefix +  "Data from Zenoss posted to " + target + " successfully")
 					}
 				}else{
 					if logger != nil {
-						logger.Warning(logPrefix + "Couldn't post data from Zenoss to " + target + " successfully; Response code: " + strconv.Itoa(resp.StatusCode) + " Response Body: " + string(body[:]))
+						logger.Error(logPrefix + "Couldn't post data from Zenoss to " + target + " successfully; Response code: " + strconv.Itoa(resp.StatusCode) + " Response Body: " + string(body[:]))
 					}
 				}
 			}else{
 				if logger != nil {
-					logger.Warning(logPrefix + "Couldn't read the response from " + target, err)
+					logger.Error(logPrefix + "Couldn't read the response from " + target, err)
 				}
 			}
 			break
 		}else if i < 3 {
 			if logger != nil {
-				logger.Warning(logPrefix + "Error occurred while sending data, will retry.", error)
+				logger.Error(logPrefix + "Error occurred while sending data, will retry.", error)
 			}
 		}else {
 			if logger != nil {
-				logger.Error(logPrefix + "Failed to post data from Zenoss to " + target, error)
+				logger.Error(logPrefix + "Failed to post data from Zenoss.", error)
 			}
 		}
 		if resp != nil{

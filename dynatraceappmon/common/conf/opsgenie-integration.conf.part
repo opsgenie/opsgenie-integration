@@ -1,11 +1,14 @@
-######################################## JIRA CONFIGURATION #######################################
+######################################## DynatraceAppMon CONFIGURATION #######################################
 dynatraceappmon.userName=
 dynatraceappmon.password=
 dynatraceappmon.url=
 dynatraceappmon.profileName=
 
-######################################## JIRA INTEGRATION - ALERT ACTION CONFIGURATION ######################
+######################################## DynatraceAppMon - ALERT ACTION CONFIGURATION ######################
 mappedActions.inProgressIncident.script=dynatraceAppMonActionExecutor.groovy
 mappedActions.confirmIncident.script=dynatraceAppMonActionExecutor.groovy
 
 ##############################################################################################################
+
+
+

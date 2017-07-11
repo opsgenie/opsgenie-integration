@@ -10,6 +10,14 @@ logPath=/var/log/opsgenie/zenoss2opsgenie.log
 #if you're using maridKey in your marid server, you can add it as a parameter to viaMaridUrl: &maridKey=your_marid_key
 #viaMaridUrl=http://maridHost:port/script/marid2opsgenie.groovy?async=true
 
+####################################### PROXY CONFIGURATION FOR ZENOSS ############################################
+zenoss2opsgenie.http.proxy.enabled=false
+zenoss2opsgenie.http.proxy.port=11111
+zenoss2opsgenie.http.proxy.host=localhost
+zenoss2opsgenie.http.proxy.protocol=http
+#zenoss2opsgenie.http.proxy.username=admin
+#zenoss2opsgenie.http.proxy.password=changeme
+
 ########################################ZENOSS INTEGRATION - ALERT ACTION CONFIGURATION ######################
 actions.Acknowledge.script=zenossActionExecutor.groovy
 actions.Close.script=zenossActionExecutor.groovy

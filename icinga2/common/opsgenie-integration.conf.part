@@ -12,6 +12,15 @@ icinga_server=default
 #if you're using marid key, you can add it as a parameter to viaMaridUrl: &maridKey=your_marid_key
 #viaMaridUrl=http://maridHost:port/script/marid2opsgenie.groovy?async=true
 
+####################################### PROXY CONFIGURATION FOR ICINGA ############################################
+icinga2opsgenie.http.proxy.enabled=false
+icinga2opsgenie.http.proxy.port=11111
+icinga2opsgenie.http.proxy.host=localhost
+icinga2opsgenie.http.proxy.protocol=http
+#icinga2opsgenie.http.proxy.username=admin
+#icinga2opsgenie.http.proxy.password=changeme
+
+
 ######################################## ICINGA CONFIGURATION #######################################
 icinga.api_url=https://localhost:5665
 icinga.graphite_url=http://localhost:5003

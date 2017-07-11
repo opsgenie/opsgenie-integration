@@ -17,17 +17,27 @@ import (
 	"fmt"
 	"io/ioutil"
 	"crypto/tls"
+	"net/url"
 )
 
 var API_KEY = ""
 var TOTAL_TIME = 60
 var parameters = map[string]string{}
-var configParameters = map[string]string{"apiKey": API_KEY, "opsgenie.api.url" : "https://api.opsgenie.com", "logger":"warning"}
+var configParameters = map[string]string{"apiKey": API_KEY,
+	"opsgenie.api.url" : "https://api.opsgenie.com",
+	"zabbix2opsgenie.logger":"warning",
+	"zabbix2opsgenie.http.proxy.enabled" : "false",
+	"zabbix2opsgenie.http.proxy.port" : "1111",
+	"zabbix2opsgenie.http.proxy.host": "localhost",
+	"zabbix2opsgenie.http.proxy.protocol":"http",
+	"zabbix2opsgenie.http.proxy.username": "",
+	"zabbix2opsgenie.http.proxy.password": ""}
 var configPath = "/etc/opsgenie/conf/opsgenie-integration.conf"
 var levels = map [string]log.Level{"info":log.Info,"debug":log.Debug,"warning":log.Warning,"error":log.Error}
 var logger log.Logger
 
 func main() {
+
 	configFile, err := os.Open(configPath)
 
 	if err == nil{
@@ -43,7 +53,7 @@ func main() {
 	printConfigToLog()
 
 	if *version != ""{
-		fmt.Println("Version: 1.0")
+		fmt.Println("Version: 1.1")
 		return
 	}
 
@@ -85,7 +95,7 @@ func readConfigFile(file io.Reader){
 }
 
 func configureLogger ()log.Logger{
-	level := configParameters["logger"]
+	level := configParameters["zabbix2opsgenie.logger"]
 	var logFilePath = parameters["logPath"]
 
 	if len(logFilePath) == 0 {
@@ -113,12 +123,35 @@ func configureLogger ()log.Logger{
 	return tmpLogger
 }
 
-func getHttpClient (timeout int) *http.Client{
-	seconds := (TOTAL_TIME/12)*2*timeout
+func getHttpClient (timeout int) *http.Client {
+	seconds := (TOTAL_TIME / 12) * 2 * timeout
+	var proxyEnabled = configParameters["zabbix2opsgenie.http.proxy.enabled"]
+	var proxyHost = configParameters["zabbix2opsgenie.http.proxy.host"]
+	var proxyPort = configParameters["zabbix2opsgenie.http.proxy.port"]
+	var scheme = configParameters["zabbix2opsgenie.http.proxy.protocol"]
+	var proxyUsername = configParameters["zabbix2opsgenie.http.proxy.username"]
+	var proxyPassword = configParameters["zabbix2opsgenie.http.proxy.password"]
+	proxy := http.ProxyFromEnvironment
+
+
+	if proxyEnabled == "true" {
+
+		u := new(url.URL)
+		u.Scheme = scheme
+		u.Host =  proxyHost + ":" + proxyPort
+		if len(proxyUsername) > 0 {
+			u.User = url.UserPassword(proxyUsername,proxyPassword)
+		}
+		if logger != nil {
+			logger.Debug("Formed Proxy url: ", u)
+		}
+		proxy = http.ProxyURL(u)
+	}
+	logger.Warning("final proxy", proxy)
 	client := &http.Client{
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{InsecureSkipVerify : true},
-			Proxy: http.ProxyFromEnvironment,
+			Proxy: proxy,
 			Dial: func(netw, addr string) (net.Conn, error) {
 				conn, err := net.DialTimeout(netw, addr, time.Second * time.Duration(seconds))
 				if err != nil {
@@ -140,12 +173,7 @@ func http_post()  {
 
 	var logPrefix = "[TriggerId: " + parameters["triggerId"] + ", HostName: " + parameters["hostName"] + "]"
 
-	if logger != nil {
-		logger.Debug("Data to be posted:")
-		logger.Debug(parameters)
-	}
-
-    apiUrl := configParameters["opsgenie.api.url"] + "/v1/json/zabbix"
+    	apiUrl := configParameters["opsgenie.api.url"] + "/v1/json/zabbix"
 	viaMaridUrl := configParameters["viaMaridUrl"]
 	target := ""
 
@@ -156,6 +184,12 @@ func http_post()  {
 		target = "OpsGenie"
 	}
 
+	if logger != nil {
+		logger.Debug("URL: ", apiUrl)
+		logger.Debug("Data to be posted:")
+		logger.Debug(parameters)
+	}
+
 	var buf, _ = json.Marshal(parameters)
 	body := bytes.NewBuffer(buf)
 	request, _ := http.NewRequest("POST", apiUrl, body)
@@ -164,7 +198,7 @@ func http_post()  {
 		client := getHttpClient(i)
 
 		if logger != nil {
-			logger.Warning(logPrefix + "Trying to send data to " + target + " with timeout: ", (TOTAL_TIME / 12) * 2 * i)
+			logger.Debug(logPrefix + "Trying to send data to " + target + " with timeout: ", (TOTAL_TIME / 12) * 2 * i)
 		}
 
 		resp, error := client.Do(request)
@@ -174,26 +208,28 @@ func http_post()  {
 			if err == nil{
 				if resp.StatusCode == 200{
 					if logger != nil {
-						logger.Warning(logPrefix + "Data from Zabbix posted to " + target + " successfully; response:" + string(body[:]))
+						logger.Debug(logPrefix + " Response code: " + strconv.Itoa(resp.StatusCode))
+						logger.Debug(logPrefix + "Response: " + string(body[:]))
+						logger.Info(logPrefix +  "Data from Zabbix posted to " + target + " successfully")
 					}
 				}else {
 					if logger != nil {
-						logger.Warning(logPrefix + "Couldn't post data from Zabbix to " + target + " successfully; Response code: " + strconv.Itoa(resp.StatusCode) + " Response Body: " + string(body[:]))
+						logger.Error(logPrefix + "Couldn't post data from Zabbix to " + target + " successfully; Response code: " + strconv.Itoa(resp.StatusCode) + " Response Body: " + string(body[:]))
 					}
 				}
 			}else{
 				if logger != nil {
-					logger.Warning(logPrefix + "Couldn't read the response from " + target, err)
+					logger.Error(logPrefix + "Couldn't read the response from " + target, err)
 				}
 			}
 			break
 		}else if i < 3 {
 			if logger != nil {
-				logger.Warning(logPrefix + "Error occurred while sending data, will retry.", error)
+				logger.Error(logPrefix + "Error occurred while sending data, will retry.", error)
 			}
 		}else {
 			if logger != nil {
-				logger.Error(logPrefix + "Failed to post data from Zabbix to " + target, error)
+				logger.Error(logPrefix + "Failed to post data from Zabbix ", error)
 			}
 		}
 		if resp != nil{

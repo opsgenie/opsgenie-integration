@@ -90,7 +90,7 @@ func http_post()  {
 		client := getHttpClient(i)
 
 		if logger != nil {
-			logger.Warning("Trying to send data to " + target + " with timeout: " + strconv.Itoa((TOTAL_TIME / 12) * 2 * i))
+			logger.Debug("Trying to send data to " + target + " with timeout: " + strconv.Itoa((TOTAL_TIME / 12) * 2 * i))
 		}
 
 		resp, error := client.Do(request)
@@ -100,22 +100,24 @@ func http_post()  {
 			if err == nil{
 				if resp.StatusCode == 200{
 					if logger != nil {
-						logger.Warning("Data from Nagios posted to " + target + " successfully; response:" + string(body[:]))
+						logger.Debug(" Response code: " + strconv.Itoa(resp.StatusCode))
+						logger.Debug("Response: " + string(body[:]))
+						logger.Info("Data from Nagios posted to " + target + " successfully")
 					}
 				}else{
 					if logger != nil {
-						logger.Warning("Couldn't post data from Nagios to " + target + " successfully; Response code: " + strconv.Itoa(resp.StatusCode) + " Response Body: " + string(body[:]))
+						logger.Err("Couldn't post data from Nagios to " + target + " successfully; Response code: " + strconv.Itoa(resp.StatusCode) + " Response Body: " + string(body[:]))
 					}
 				}
 			}else{
 				if logger != nil {
-					logger.Warning("Couldn't read the response from " + target + " : " + err.Error())
+					logger.Err("Couldn't read the response from " + target + " : " + err.Error())
 				}
 			}
 			break
 		}else if i < 3 {
 			if logger != nil {
-				logger.Warning("Error occurred while sending data, will retry : " + error.Error())
+				logger.Err("Error occurred while sending data, will retry : " + error.Error())
 			}
 		}else {
 			if logger != nil {

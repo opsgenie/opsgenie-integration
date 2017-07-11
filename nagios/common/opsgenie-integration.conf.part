@@ -12,6 +12,14 @@ nagios_server=default
 #if you're using marid key, you can add it as a parameter to viaMaridUrl: &maridKey=your_marid_key
 #viaMaridUrl=http://maridHost:port/script/marid2opsgenie.groovy?async=true
 
+####################################### PROXY CONFIGURATION FOR NAGIOS ############################################
+nagios2opsgenie.http.proxy.enabled=false
+nagios2opsgenie.http.proxy.port=11111
+nagios2opsgenie.http.proxy.host=localhost
+nagios2opsgenie.http.proxy.protocol=http
+#nagios2opsgenie.http.proxy.username=admin
+#nagios2opsgenie.http.proxy.password=changeme
+
 ######################################## NAGIOS CONFIGURATION #######################################
 nagios.alert_histogram_image_url=http://localhost/nagios/cgi-bin/histogram.cgi
 nagios.trends_image_url=http://localhost/nagios/cgi-bin/trends.cgi

@@ -17,12 +17,21 @@ import (
 	"time"
 	"io/ioutil"
 	"fmt"
+	"net/url"
 )
 
 var API_KEY = ""
 var TOTAL_TIME = 60
 var parameters = map[string]string{}
-var configParameters = map[string]string{"apiKey": API_KEY, "opsgenie.api.url": "https://api.opsgenie.com", "logger": "warning"}
+var configParameters = map[string]string{"apiKey": API_KEY,
+	"opsgenie.api.url" : "https://api.opsgenie.com",
+	"vcenter2opsgenie.logger":"warning",
+	"vcenter2opsgenie.http.proxy.enabled" : "false",
+	"vcenter2opsgenie.http.proxy.port" : "1111",
+	"vcenter2opsgenie.http.proxy.host": "localhost",
+	"vcenter2opsgenie.http.proxy.protocol":"http",
+	"vcenter2opsgenie.http.proxy.username": "",
+	"vcenter2opsgenie.http.proxy.password": ""}
 var configPath = "C:/opsgenie/opsgenie-integration/conf/opsgenie-integration.conf"
 var levels = map[string]log.Level{"info": log.Info, "debug": log.Debug, "warning": log.Warning, "error": log.Error}
 var logger log.Logger
@@ -35,7 +44,13 @@ func main() {
 		panic(err)
 	}
 
+	version := flag.String("v","","")
 	parseFlags()
+
+	if *version != ""{
+		fmt.Println("Version: 1.1")
+		return
+	}
 
 	logger = configureLogger()
 
@@ -77,7 +92,7 @@ func readConfigFile(file io.Reader){
 }
 
 func configureLogger ()log.Logger{
-	level := configParameters["logger"]
+	level := configParameters["vcenter2opsgenie.logger"]
 	var logFilePath = parameters["logPath"]
 
 	if len(logFilePath) == 0 {
@@ -104,20 +119,43 @@ func configureLogger ()log.Logger{
 
 	return tmpLogger
 }
+func getHttpClient (timeout int) *http.Client {
+	seconds := (TOTAL_TIME / 12) * 2 * timeout
+	var proxyEnabled = configParameters["vcenter2opsgenie.http.proxy.enabled"]
+	var proxyHost = configParameters["vcenter2opsgenie.http.proxy.host"]
+	var proxyPort = configParameters["vcenter2opsgenie.http.proxy.port"]
+	var scheme = configParameters["vcenter2opsgenie.http.proxy.protocol"]
+	var proxyUsername = configParameters["vcenter2opsgenie.http.proxy.username"]
+	var proxyPassword = configParameters["vcenter2opsgenie.http.proxy.password"]
 
-func getHttpClient (timeout int) *http.Client{
-	seconds := (TOTAL_TIME/12)*2*timeout
+	proxy := http.ProxyFromEnvironment
+
+
+	if proxyEnabled == "true" {
+
+		u := new(url.URL)
+		u.Host =  proxyHost + ":" + proxyPort
+		if len(proxyUsername) > 0 {
+			u.User = url.UserPassword(proxyUsername,proxyPassword)
+		}
+		u.Scheme = scheme
+
+		if logger != nil {
+			logger.Debug("Formed Proxy url: ", u)
+		}
+
+		proxy = http.ProxyURL(u)
+	}
 	client := &http.Client{
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{InsecureSkipVerify : true},
-			Proxy: http.ProxyFromEnvironment,
+			Proxy: proxy,
 			Dial: func(netw, addr string) (net.Conn, error) {
 				conn, err := net.DialTimeout(netw, addr, time.Second * time.Duration(seconds))
 				if err != nil {
 					if logger != nil {
 						logger.Error("Error occurred while connecting: ", err)
 					}
-
 					return nil, err
 				}
 				conn.SetDeadline(time.Now().Add(time.Second * time.Duration(seconds)))
@@ -132,11 +170,6 @@ func http_post()  {
 	parameters["apiKey"] = configParameters["apiKey"]
 
 	var logPrefix = "[VCenter2OpsGenie] "
-
-	if logger != nil {
-		logger.Debug("Data to be posted:")
-		logger.Debug(parameters)
-	}
 
 	apiUrl := configParameters["opsgenie.api.url"] + "/v1/json/vcenter"
 	viaMaridUrl := configParameters["viaMaridUrl"]
@@ -156,6 +189,12 @@ func http_post()  {
 		delete(parameters, "logPath")
 	}
 
+	if logger != nil {
+		logger.Debug("URL: ", apiUrl)
+		logger.Debug("Data to be posted:")
+		logger.Debug(parameters)
+	}
+
 	var buf, _ = json.Marshal(parameters)
 
 	parameters["logPath"] = tmpLogPath
@@ -166,7 +205,7 @@ func http_post()  {
 		client := getHttpClient(i)
 
 		if logger != nil {
-			logger.Warning(logPrefix + "Trying to send data to " + target + " with timeout: ", (TOTAL_TIME / 12) * 2 * i)
+			logger.Debug(logPrefix + "Trying to send data to " + target + " with timeout: ", (TOTAL_TIME / 12) * 2 * i)
 		}
 
 		resp, error := client.Do(request)
@@ -178,26 +217,27 @@ func http_post()  {
 			if err == nil{
 				if resp.StatusCode == 200{
 					if logger != nil {
-						logger.Debug(logPrefix + "Data from VCenter posted to " + target + " successfully; response:" + string(body[:]))
-					}
+						logger.Debug(logPrefix + " Response code: " + strconv.Itoa(resp.StatusCode))
+						logger.Debug(logPrefix + "Response: " + string(body[:]))
+						logger.Info(logPrefix +  "Data from vCenter posted to " + target + " successfully")					}
 				}else{
 					if logger != nil {
-						logger.Warning(logPrefix + "Couldn't post data from VCenter to " + target + " successfully; Response code: " + strconv.Itoa(resp.StatusCode) + " Response Body: " + string(body[:]))
+						logger.Error(logPrefix + "Couldn't post data from vCenter to " + target + " successfully; Response code: " + strconv.Itoa(resp.StatusCode) + " Response Body: " + string(body[:]))
 					}
 				}
 			}else{
 				if logger != nil {
-					logger.Warning(logPrefix + "Couldn't read the response from " + target, err)
+					logger.Error(logPrefix + "Couldn't read the response from " + target, err)
 				}
 			}
 			break
 		}else if i < 3 {
 			if logger != nil {
-				logger.Warning(logPrefix + "Error occurred while sending data, will retry.", error)
+				logger.Error(logPrefix + "Error occurred while sending data, will retry.", error)
 			}
 		}else {
 			if logger != nil {
-				logger.Error(logPrefix + "Failed to post data from VCenter to " + target, error)
+				logger.Error(logPrefix + "Failed to post data from vCenter. ", error)
 			}
 		}
 		if resp != nil{

@@ -1,11 +1,20 @@
 ######################################## ZABBIX CONFIGURATION #######################################
 #if you're using marid key, you can add it as a parameter to viaMaridUrl: &maridKey=your_marid_key
 #viaMaridUrl=http://maridHost:port/script/marid2opsgenie.groovy?async=true
-#logger=warning
+#zabbix2opsgenie.logger=warning
 logPath=/var/log/opsgenie/zabbix2opsgenie.log
 
 #recipients=<comma_separated_list_of_recipients>
 #tags=<comma_separated_list_of_tags>
+
+####################################### PROXY CONFIGURATION FOR ZABBIX ############################################
+zabbix2opsgenie.http.proxy.enabled=false
+zabbix2opsgenie.http.proxy.port=11111
+zabbix2opsgenie.http.proxy.host=localhost
+zabbix2opsgenie.http.proxy.protocol=http
+#zabbix2opsgenie.http.proxy.username=admin
+#zabbix2opsgenie.http.proxy.password=changeme
+
 
 ########################################ZABBIX INTEGRATION - ALERT ACTION CONFIGURATION ######################
 actions.Acknowledge.script=zabbixActionExecutor.groovy
