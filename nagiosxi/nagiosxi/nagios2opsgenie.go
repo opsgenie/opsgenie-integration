@@ -74,12 +74,15 @@ func printConfigToLog(){
 		if (logger.LogDebug()) {
 			logger.Debug("Config:")
 			for k, v := range configParameters {
-				logger.Debug(k + "=" + v)
+				if strings.Contains(k, "password") {
+					logger.Debug(k + "=*******")
+				} else {
+					logger.Debug(k + "=" + v)
+				}
 			}
 		}
 	}
 }
-
 func readConfigFile(file io.Reader){
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan(){
