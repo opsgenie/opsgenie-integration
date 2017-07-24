@@ -1,0 +1,34 @@
+task prepareOP5(dependsOn: 'generateIntegration') << {
+    def destination = "${project.buildDir}/op5"
+    copy {
+        from "${project.buildDir}/opsgenie-integration"
+        into "${destination}/opsgenie-integration"
+    }
+
+    copy {
+        from "${project.projectDir}/op5/marid"
+        into "${destination}/opsgenie-integration/marid"
+    }
+
+    mergeConfFile("${project.buildDir}/opsgenie-integration/conf/opsgenie-integration.conf",
+            "${project.projectDir}/op5/common/conf/opsgenie-integration.conf.part",
+            "${destination}/opsgenie-integration/conf/opsgenie-integration.conf")
+}
+
+task packageOP5Zip(dependsOn: 'prepareOP5', type: Zip) {
+    from "${project.buildDir}/op5"
+    baseName = 'opsgenie-op5'
+    version = project.ext.versions.getProperty('op5') + project.ext.versionSuffix
+}
+
+task packageOP5OS(dependsOn: ['generateIntegrationForNative', 'prepareOP5']) << {
+    copyNativeFiles('op5')
+
+    buildRpm('op5', 'opsgenie-op5', 'OpsGenie - OP5 integration files including marid',
+            [:], [:])
+
+    buildDeb('op5', 'opsgenie-op5', 'OpsGenie - OP5 integration files including marid',
+            [:], [:])
+}
+
+task packageOP5(dependsOn: ['packageOP5Zip', 'packageOP5OS'])
