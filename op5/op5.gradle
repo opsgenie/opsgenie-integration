@@ -1,0 +1,49 @@
+task prepareOP5(dependsOn: 'generateIntegration') << {
+    def destination = "${project.buildDir}/op5"
+    copy {
+        from "${project.buildDir}/opsgenie-integration"
+        into "${destination}/opsgenie-integration"
+    }
+
+    copy {
+        from "${project.projectDir}/op5/marid"
+        into "${destination}/opsgenie-integration/marid"
+    }
+
+    copy{
+        from "${project.projectDir}/op5/op5"
+        into "${destination}/op5"
+    }
+
+    mergeConfFile("${project.buildDir}/opsgenie-integration/conf/opsgenie-integration.conf",
+            "${project.projectDir}/op5/common/conf/opsgenie-integration.conf.part",
+            "${destination}/opsgenie-integration/conf/opsgenie-integration.conf")
+}
+
+task packageOP5Zip(dependsOn: 'prepareOP5', type: Zip) {
+    from "${project.buildDir}/op5"
+    baseName = 'opsgenie-op5'
+    version = project.ext.versions.getProperty('op5') + project.ext.versionSuffix
+}
+
+task packageOP5OS(dependsOn: ['generateIntegrationForNative', 'prepareOP5']) << {
+    copyNativeFiles('op5')
+    mergeConfFile("${project.buildDir}/native/ogAfter.sh",
+            "${project.projectDir}/op5/native/ogAfter.sh",
+            "${project.buildDir}/os_client/op5/ogAfter.sh")
+
+    def fileMapping = [
+            "${project.projectDir}/op5/op5/nagios2opsgenie"   : "usr/bin",
+            "${project.projectDir}/op5/op5/nagios2opsgenie.go": "etc/opsgenie"
+    ]
+
+    def configFiles = ["${project.projectDir}/op5/op5/opsgenie.cfg": "etc/opsgenie"]
+
+    buildRpm('op5', 'opsgenie-op5', 'OpsGenie - OP5 integration files including marid',
+            fileMapping, configFiles)
+
+    buildDeb('op5', 'opsgenie-op5', 'OpsGenie - OP5 integration files including marid',
+            fileMapping, configFiles)
+}
+
+task packageOP5(dependsOn: ['packageOP5Zip', 'packageOP5OS'])
