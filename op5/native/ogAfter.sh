@@ -13,8 +13,11 @@ else
         echo "WARNING : nagios user does not exist. Please don't forget to add your nagios user to opsgenie group!"
 fi
 
-if [ -d "/usr/local/nagios/etc/objects" ]; then
-    cp /etc/opsgenie/opsgenie.cfg  /usr/local/nagios/etc/objects/
+if [ -d "/opt/monitor/etc/mconf" ]; then
+    cp /etc/opsgenie/opsgenie.cfg  /opt/monitor/etc/mconf
+    cp /etc/opsgenie/opsgenie.cfg  /opt/monitor/etc
+    chown monitor:apache /etc/opsgenie/opsgenie.cfg
+    chmod 664 /etc/opsgenie/opsgenie.cfg
 else
-        echo "WARNING : Could not find your NAGIOS_HOME directory. Please copy /etc/opsgenie/opsgenie.cfg file to your <NAGIOS_HOME>/etc/objects directory manually!"
+        echo "WARNING : Could not find your /opt/monitor directory. Please copy /etc/opsgenie/opsgenie.cfg file to your /opt/monitor/etc/mconf directory manually!"
 fi
