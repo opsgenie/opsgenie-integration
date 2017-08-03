@@ -18,11 +18,9 @@ nagios2opsgenie.http.proxy.protocol=http
 #nagios2opsgenie.http.proxy.username=admin
 #nagios2opsgenie.http.proxy.password=changeme
 
-######################################## NAGIOS CONFIGURATION #######################################
-nagios.user=admin
-nagios.password=monitor
-nagios.http.timeout=30000
-nagios.url=
+######################################## OP5 CONFIGURATION #######################################
+op5.http.timeout=30000
+op5.url=
 op5.username=
 op5.password=
 ########################################OP5 INTEGRATION - ALERT ACTION CONFIGURATION ######################

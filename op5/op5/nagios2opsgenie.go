@@ -51,7 +51,7 @@ func main() {
 	printConfigToLog()
 
 	if *version != "" {
-		fmt.Println("Version: 1.0")
+		fmt.Println("OpsGenie - OP5 1.0")
 		return
 	}
 

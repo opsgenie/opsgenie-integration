@@ -20,12 +20,6 @@ task prepareOP5(dependsOn: 'generateIntegration') << {
             "${destination}/opsgenie-integration/conf/opsgenie-integration.conf")
 }
 
-task packageOP5Zip(dependsOn: 'prepareOP5', type: Zip) {
-    from "${project.buildDir}/op5"
-    baseName = 'opsgenie-op5'
-    version = project.ext.versions.getProperty('op5') + project.ext.versionSuffix
-}
-
 task packageOP5OS(dependsOn: ['generateIntegrationForNative', 'prepareOP5']) << {
     copyNativeFiles('op5')
     mergeConfFile("${project.buildDir}/native/ogAfter.sh",
@@ -46,4 +40,4 @@ task packageOP5OS(dependsOn: ['generateIntegrationForNative', 'prepareOP5']) << 
             fileMapping, configFiles)
 }
 
-task packageOP5(dependsOn: ['packageOP5Zip', 'packageOP5OS'])
+task packageOP5(dependsOn: ['packageOP5OS'])
