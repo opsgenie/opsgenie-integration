@@ -475,6 +475,7 @@ apply from: 'icinga2/icinga2.gradle'
 apply from: 'solarwinds/solarwinds.gradle'
 apply from: 'oem/oem.gradle'
 apply from: 'vcenter/vcenter.gradle'
+apply from: 'vcsa/vcsa.gradle'
 apply from: 'xmpp/xmpp.gradle'
 apply from: 'trackit/trackIt.gradle'
 apply from: 'webex/webex.gradle'
@@ -507,7 +508,8 @@ task packageIntegrations(dependsOn: [
                                 'packageDynatraceAppMon',
                                 'packageOP5',
                                 'packageBMCRemedy',
-                                'packageOpsview'
+                                'packageOpsview',
+                                'packageVCSA'
 ])
 
 task packageAll(dependsOn: ['packageIntegrations', 'packageLamp'])

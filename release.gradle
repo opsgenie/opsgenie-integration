@@ -77,6 +77,7 @@ def generateDownloadsProperties() {
                     .replace('[[dynatraceappmon]]', project.ext.versions.getProperty('dynatraceappmon'))
                     .replace('[[op5]]', project.ext.versions.getProperty('op5'))
                     .replace('[[bmcRemedy]]', project.ext.versions.getProperty('bmcRemedy'))
+                    .replace('[[vcsa]]', project.ext.versions.getProperty('vcsa'))
         }
         into "${buildDir}/distributions"
         rename "downloads.template.properties", "downloads.properties"
