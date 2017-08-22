@@ -3,7 +3,7 @@ bmcRemedy.midtierServerUrl=
 bmcRemedy.username=
 bmcRemedy.password=
 bmcRemedy.serverName=
-bmcRemedy.logger=warning
+bmcRemedy2opsgenie.logger=warning
 
 ####################################### PROXY CONFIGURATION FOR BMC REMEDY ############################################
 bmcRemedy2opsgenie.http.proxy.enabled=false
