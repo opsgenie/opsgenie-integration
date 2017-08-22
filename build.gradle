@@ -481,6 +481,7 @@ apply from: 'webex/webex.gradle'
 apply from: 'jira/jira.gradle'
 apply from: 'dynatraceappmon/dynatraceappmon.gradle'
 apply from: 'op5/op5.gradle'
+apply from: 'bmcRemedy/bmcRemedy.gradle'
 
 
 task packageIntegrations(dependsOn: [
@@ -503,7 +504,8 @@ task packageIntegrations(dependsOn: [
                                 'packageWebex',
                                 'packageJira',
                                 'packageDynatraceAppMon',
-                                'packageOP5'
+                                'packageOP5',
+                                'packageBMCRemedy'
 ])
 
 task packageAll(dependsOn: ['packageIntegrations', 'packageLamp'])

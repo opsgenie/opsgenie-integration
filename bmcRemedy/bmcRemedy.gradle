@@ -1,0 +1,39 @@
+configurations {
+    bmcRemedy
+}
+dependencies {
+    bmcRemedy 'com.github.groovy-wslite:groovy-wslite:1.1.2'
+}
+
+task prepareBMCRemedy(dependsOn: 'generateIntegration') << {
+    def destination = "${project.buildDir}/bmcRemedy"
+    copy {
+        from "${project.buildDir}/opsgenie-integration"
+        into "${destination}/OpsGenie/BMCRemedyIntegration/opsgenie-integration"
+    }
+
+    copy {
+        from "${project.projectDir}/bmcRemedy/marid"
+        into "${destination}/OpsGenie/BMCRemedyIntegration/opsgenie-integration/marid"
+    }
+    copy {
+        from "${project.projectDir}/bmcRemedy/bmcRemedy"
+        into "${destination}/OpsGenie/BMCRemedyIntegration/"
+    }
+
+    mergeConfFile("${project.buildDir}/opsgenie-integration/conf/opsgenie-integration.conf",
+            "${project.projectDir}/bmcRemedy/common/conf/opsgenie-integration.conf.part",
+            "${destination}/OpsGenie/BMCRemedyIntegration/opsgenie-integration/conf/opsgenie-integration.conf")
+}
+
+task packageBMCRemedyZip(dependsOn: 'prepareBMCRemedy', type: Zip) {
+    from "${project.buildDir}/bmcRemedy"
+    baseName = 'opsgenie-bmcRemedy'
+    version = project.ext.versions.getProperty('bmcRemedy') + project.ext.versionSuffix
+}
+
+task packageBMCRemedyOS(dependsOn: ['generateIntegrationForNative', 'prepareBMCRemedy']) << {
+    copyNativeFiles('bmcRemedy')
+}
+
+task packageBMCRemedy(dependsOn: ['packageBMCRemedyZip', 'packageBMCRemedyOS'])
