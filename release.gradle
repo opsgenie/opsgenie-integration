@@ -45,7 +45,8 @@ def getMaridBasedPackageNames() {
             "webex",
             "dynatraceappmon",
             "jira",
-            "op5"
+            "op5",
+            "bmcRemedy"
             ]
 }
 
@@ -75,6 +76,7 @@ def generateDownloadsProperties() {
                     .replace('[[jira]]', project.ext.versions.getProperty('jira'))
                     .replace('[[dynatraceappmon]]', project.ext.versions.getProperty('dynatraceappmon'))
                     .replace('[[op5]]', project.ext.versions.getProperty('op5'))
+                    .replace('[[bmcRemedy]]', project.ext.versions.getProperty('bmcRemedy'))
         }
         into "${buildDir}/distributions"
         rename "downloads.template.properties", "downloads.properties"
