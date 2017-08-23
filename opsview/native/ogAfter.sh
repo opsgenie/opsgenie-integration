@@ -1,0 +1,1 @@
+chmod 755 /usr/local/nagios/libexec/notifications/nagios2opsgenie
