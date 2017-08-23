@@ -14,7 +14,7 @@ begin filter
    schema-name    : HPD:Help Desk
    export-version : 12
    action {
-      command     : C:\OpsGenie\BMCRemedyIntegration\OpsGenieSender.exe --incident-id "$1000000161$" --co
+      command     : C:\OpsGenie\BMCRemedyIntegration\bmcRemedy2opsgenie.exe --incident-id "$1000000161$" --co
       command     : mpany "$1000000001$" --customer "$303530000$" --contact-first-name "$1000005783$" --contact-last-name "$1000005782$" --contact-company "$1000000082$" --c
       command     : ontact-sensitivity "$1000000027$" --contact-client-type "$1000000022$" --notes "$1000000151$" --template "$303558600$" --summary "$1000000000$" --service
       command     :  "$303544300$" --CI "$303544200$" --target-date "$1000005261$" --impact "$1000000163$" --urgency "$1000000162$" --priority "$1000000164$" --incident-type
