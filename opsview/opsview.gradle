@@ -51,6 +51,7 @@ def buildRpmForOpsview(String sourceDir, String name, String descrpt, Map fileMa
             }
         }
 
+        preInstall file("${project.projectDir}/opsview/native/ogBefore.sh")
         postInstall file("${project.projectDir}/opsview/native/ogAfter.sh")
     }
 
@@ -98,6 +99,12 @@ def buildDebForOpsview(String sourceDir, String name, String descrpt, Map fileMa
                 from(source)
                 into("${dataDir}/${dest}")
             }
+        }
+
+        copy {
+            from "${project.projectDir}/opsview/native/ogBefore.sh"
+            into controlDir
+            rename "ogBefore.sh", "preinst"
         }
 
         copy {
