@@ -48,7 +48,7 @@ func main() {
 	parseFlags()
 
 	if *version != ""{
-		fmt.Println("Version: 1.1")
+		fmt.Println("VCSA Version: 1.0")
 		return
 	}
 
