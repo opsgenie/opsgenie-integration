@@ -66,10 +66,14 @@
 
 )
 
+for ($i=0; $i -lt $args.Count; $i++){
+       [String]$restOfAlertDesc += $($args[$i])
+}
+
 $params = @{
 alertId=$AlertID;
 alertName=$AlertName;
-alertDescription=$AlertDesc;
+alertDescription=$AlertDesc + $restOfAlertDesc;
 resolutionState=$ResolutionState;
 resolutionStateLastModified=$ResolutionStateLastModified;
 priority=$Priority;
