@@ -485,6 +485,7 @@ apply from: 'dynatraceappmon/dynatraceappmon.gradle'
 apply from: 'op5/op5.gradle'
 apply from: 'bmcRemedy/bmcRemedy.gradle'
 apply from: 'opsview/opsview.gradle'
+apply from: 'librenms/librenms.gradle'
 
 
 task packageIntegrations(dependsOn: [
@@ -511,7 +512,8 @@ task packageIntegrations(dependsOn: [
                                 'packageOP5',
                                 'packageBMCRemedy',
                                 'packageOpsview',
-                                'packageVCSA'
+                                'packageVCSA',
+                                'packageLibreNMS'
 ])
 
 task packageAll(dependsOn: ['packageIntegrations', 'packageLamp'])

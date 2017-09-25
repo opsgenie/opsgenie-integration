@@ -1,0 +1,8 @@
+####################################### LIBRENMS CONFIGURATION #######################################
+librenms.url=YOUR_LIBRE_NMS_SERVER_URL
+librenms.apiToken=YOUR_LIBRE_NMS_API_TOKEN
+
+######################################## LIBRENMS INTEGRATION - ALERT ACTION CONFIGURATION ######################
+mappedActions.ackAlert.script=librenmsActionExecutor.groovy
+mappedActions.unmuteAlert.script=librenmsActionExecutor.groovy
+##############################################################################################################

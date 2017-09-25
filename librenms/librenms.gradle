@@ -1,0 +1,28 @@
+task prepareLibreNMS(dependsOn: 'generateIntegration') << {
+    def destination = "${project.buildDir}/librenms"
+    copy {
+        from "${project.buildDir}/opsgenie-integration"
+        into "${destination}/opsgenie-integration"
+    }
+
+    copy {
+        from "${project.projectDir}/librenms/marid"
+        into "${destination}/opsgenie-integration/marid"
+    }
+
+    mergeConfFile("${project.buildDir}/opsgenie-integration/conf/opsgenie-integration.conf",
+            "${project.projectDir}/librenms/common/conf/opsgenie-integration.conf.part",
+            "${destination}/opsgenie-integration/conf/opsgenie-integration.conf")
+}
+
+task packageLibreNMSOS(dependsOn: ['generateIntegrationForNative', 'prepareLibreNMS']) << {
+    copyNativeFiles('librenms')
+
+    buildRpm('librenms', 'opsgenie-librenms', 'OpsGenie - LibreNMS integration files including marid',
+            [:], [:])
+
+    buildDeb('librenms', 'opsgenie-librenms', 'OpsGenie - LibreNMS integration files including marid',
+            [:], [:])
+}
+
+task packageLibreNMS(dependsOn: ['packageLibreNMSOS'])

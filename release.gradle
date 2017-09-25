@@ -47,7 +47,8 @@ def getMaridBasedPackageNames() {
             "dynatraceappmon",
             "jira",
             "op5",
-            "bmcRemedy"
+            "bmcRemedy",
+            "librenms"
             ]
 }
 
@@ -80,6 +81,7 @@ def generateDownloadsProperties() {
                     .replace('[[op5]]', project.ext.versions.getProperty('op5'))
                     .replace('[[bmcRemedy]]', project.ext.versions.getProperty('bmcRemedy'))
                     .replace('[[vcsa]]', project.ext.versions.getProperty('vcsa'))
+                    .replace('[[librenms]]', project.ext.versions.getProperty('librenms'))
         }
         into "${buildDir}/distributions"
         rename "downloads.template.properties", "downloads.properties"
