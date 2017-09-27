@@ -473,6 +473,7 @@ apply from: 'icinga/icinga.gradle'
 apply from: 'zendesk/zendesk.gradle'
 apply from: 'icinga2/icinga2.gradle'
 apply from: 'solarwinds/solarwinds.gradle'
+apply from: 'solarwindsmspncentral/solarwindsmspncentral.gradle'
 apply from: 'oem/oem.gradle'
 apply from: 'vcenter/vcenter.gradle'
 apply from: 'vcsa/vcsa.gradle'
@@ -500,6 +501,7 @@ task packageIntegrations(dependsOn: [
                                 'packageZendesk',
                                 'packageIcinga2',
                                 'packageSolarwinds',
+                                'packageSolarwindsMSPNcentral',
                                 'packageOEM',
                                 'packageTrackIt',
                                 'packageXmpp',

@@ -1,0 +1,32 @@
+configurations {
+    solarwindsmspncentral
+}
+dependencies {
+    solarwindsmspncentral 'com.github.groovy-wslite:groovy-wslite:1.1.2'
+}
+task prepareSolarwindsMSPNcentral(dependsOn: 'generateIntegration') << {
+    def destination = "${project.buildDir}/solarwindsmspncentral"
+    copy {
+        from "${project.buildDir}/opsgenie-integration"
+        into "${destination}"
+    }
+
+    copy {
+        from "${project.projectDir}/solarwindsmspncentral/marid"
+        into "${destination}/marid"
+    }
+
+    mergeConfFile("${project.buildDir}/opsgenie-integration/conf/opsgenie-integration.conf",
+            "${project.projectDir}/solarwindsmspncentral/common/conf/opsgenie-integration.conf.part",
+            "${destination}/marid/conf/marid.conf")
+
+    delete "${destination}/conf"
+}
+
+task packageSolarwindsMSPNcentralZip(dependsOn: 'prepareSolarwindsMSPNcentral', type: Zip) {
+    from "${project.buildDir}/solarwindsmspncentral"
+    baseName = 'opsgenie-solarwindsmspncentral'
+    version = project.ext.versions.getProperty('solarwindsmspncentral') + project.ext.versionSuffix
+}
+
+task packageSolarwindsMSPNcentral(dependsOn: ['packageSolarwindsMSPNcentralZip'])

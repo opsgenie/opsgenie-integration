@@ -1,0 +1,6 @@
+########################################SOLARWINDS MSP N-central INTEGRATION - ALERT ACTION CONFIGURATION ######################
+mappedActions.acknowledgeNotification.script=solarwindsMSPNcentralActionExecutor.groovy
+
+solarwindsMSPNcentral.url=https://<your Solarwinds MSP N-central server IP or FQDN>
+solarwindsMSPNcentral.username=<name of Solarwinds MSP N-central user that can acknowledge alerts>
+solarwindsMSPNcentral.password=<password for Solarwinds MSP N-central user that can acknowledge alerts>
