@@ -515,7 +515,7 @@ task packageIntegrations(dependsOn: [
                                 'packageOpsview',
                                 'packageVCSA',
                                 'packageLibreNMS',
-                                'packagePRTG'
+                                'packagePrtg'
 ])
 
 task packageAll(dependsOn: ['packageIntegrations', 'packageLamp'])
