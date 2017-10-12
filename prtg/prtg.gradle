@@ -1,0 +1,25 @@
+task preparePrtg(dependsOn: 'generateIntegration') << {
+    def destination = "${project.buildDir}/prtg"
+    copy {
+        from "${project.buildDir}/opsgenie-integration"
+        into "${destination}/opsgenie-integration"
+    }
+
+    copy {
+        from "${project.projectDir}/prtg/marid"
+        into "${destination}/opsgenie-integration/marid"
+    }
+
+    mergeConfFile("${project.buildDir}/opsgenie-integration/conf/opsgenie-integration.conf",
+            "${project.projectDir}/prtg/common/conf/opsgenie-integration.conf.part",
+            "${destination}/opsgenie-integration/conf/opsgenie-integration.conf")
+}
+
+task packagePrtgZip(dependsOn: 'preparePrtg', type: Zip) {
+    from "${project.buildDir}/prtg"
+    baseName = 'opsgenie-prtg'
+    version = project.ext.versions.getProperty('prtg') + project.ext.versionSuffix
+}
+
+
+task packagePrtg(dependsOn: ['packagePrtgZip'])

@@ -1,0 +1,8 @@
+######################################## PRTG CONFIGURATION #######################################
+prtg.prtgUrl=
+prtg.username=
+prtg.passhash=
+
+######################################## PRTG INTEGRATION - ALERT ACTION CONFIGURATION ######################
+mappedActions.acknowledgeSensor.script=prtgActionExecutor.groovy
+##############################################################################################################
