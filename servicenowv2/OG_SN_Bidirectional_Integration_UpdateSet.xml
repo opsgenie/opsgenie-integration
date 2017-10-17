@@ -3036,6 +3036,7 @@ OpsGenie_Client.prototype = {
 	var workNotes = current.work_notes.getJournalEntry(1);
 	var incidentLink = current.getLink(false);
 	var sysId = current.getUniqueValue();
+	var configurationItem = current.cmdb_ci.getDisplayValue().toString();
 	
 	var alertAlias = current.x_86994_opsgenie_alert_alias.toString();
 	
@@ -3056,6 +3057,7 @@ OpsGenie_Client.prototype = {
 			workNotes: workNotes,
 			teams: client.replaceForbiddenCharacters(assignmentGroup),
 			recipients: assignedToEmail,
+			configurationItem: configurationItem,
 			incidentLink: gs.getProperty('glide.servlet.uri') + incidentLink,
 			sysId: sysId
 		};
