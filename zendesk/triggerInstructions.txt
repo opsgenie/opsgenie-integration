@@ -53,3 +53,30 @@ status: {{ticket.status}} ||
 latest_comment : {{ticket.latest_comment_formatted}} ||
 external_id: {{ticket.external_id}}
 - Click "Create trigger".
+
+----(OPTIONAL)----
+In Zendesk:
+- If you want to acknowledge OpsGenie alerts from some action on Zendesk ticket, please follow the following instructions
+- Click on "add trigger" to add the trigger.
+- Put "OpsGenie Acknowledge" into "Trigger title".
+- Please specify the conditions to describe when you want to acknowledge the OpsGenie alert.
+- Under "Perform these actions:", select "Notifications: Notify target" and pick the URL target you have added earlier for the integration.
+- Paste into "Message" the following template:
+action: acknowledge ||
+id: {{ticket.id}} ||
+status: {{ticket.status}} ||
+latest_comment : {{ticket.latest_comment_formatted}} ||
+external_id: {{ticket.external_id}}
+- Click "Create trigger".
+
+In OpsGenie:
+- Open the Zendesk integration's page.
+- Click on "Advanced"
+- Add an "Acknowledge Alert" action
+- Add a new condition filter as follows
+  - Select "Match all conditions below"
+  - Add "Action Contains acknowledge" as a condition
+- Save the integration.
+
+
+
