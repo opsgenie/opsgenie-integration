@@ -1225,7 +1225,7 @@ OpsGenie_Client.prototype = {
 			var httpStatus = response.getStatusCode();
 
 			var responseLogMessage = "Response status: " + httpStatus + ", body: " + responseBody;
-			if(httpStatus != 200){
+			if(!httpStatus.toString().startsWith("2")){
 				gs.error(responseLogMessage);
 			} else{
 				gs.debug(responseLogMessage);
@@ -1257,7 +1257,7 @@ OpsGenie_Client.prototype = {
 			var httpStatus = response.getStatusCode();
 
 			var responseLogMessage = "Response status: " + httpStatus + ", body: " + responseBody;
-			if(httpStatus != 200){
+			if(!httpStatus.toString().startsWith("2")){
 				gs.error(responseLogMessage);
 			} else{
 				gs.debug(responseLogMessage);
@@ -1286,7 +1286,7 @@ OpsGenie_Client.prototype = {
 			var httpStatus = response.getStatusCode();
 
 			var responseLogMessage = "Response status: " + httpStatus + ", body: " + responseBody;
-			if(httpStatus != 200){
+			if(!httpStatus.toString().startsWith("2")){
 				gs.error(responseLogMessage);
 			} else{
 				gs.debug(responseLogMessage);
@@ -1317,7 +1317,7 @@ OpsGenie_Client.prototype = {
 			var httpStatus = response.getStatusCode();
 
 			var responseLogMessage = "Response status: " + httpStatus + ", body: " + responseBody;
-			if(httpStatus != 200){
+			if(!httpStatus.toString().startsWith("2")){
 				gs.error(responseLogMessage);
 			} else{
 				gs.debug(responseLogMessage);
@@ -1351,7 +1351,7 @@ OpsGenie_Client.prototype = {
 			var httpStatus = response.getStatusCode();
 
 			var responseLogMessage = "Response status: " + httpStatus + ", body: " + responseBody;
-			if(httpStatus != 200){
+			if(!httpStatus.toString().startsWith("2")){
 				gs.error(responseLogMessage);
 			} else{
 				gs.debug(responseLogMessage);
@@ -1458,7 +1458,7 @@ OpsGenie_Client.prototype = {
 			var httpStatus = response.getStatusCode();
 			
 			var responseLogMessage = "Response status: " + httpStatus + ", body: " + responseBody;
-			if(httpStatus != 200) {
+			if(!httpStatus.toString().startsWith("2")) {
 				gs.error(responseLogMessage);
 			} else {
 				gs.debug(responseLogMessage);
@@ -3037,6 +3037,8 @@ OpsGenie_Client.prototype = {
 	var incidentLink = current.getLink(false);
 	var sysId = current.getUniqueValue();
 	var configurationItem = current.cmdb_ci.getDisplayValue().toString();
+	var companyName = current.company.name.toString();
+	var callerName = current.caller_id.name.toString();
 	
 	var alertAlias = current.x_86994_opsgenie_alert_alias.toString();
 	
@@ -3058,6 +3060,8 @@ OpsGenie_Client.prototype = {
 			teams: client.replaceForbiddenCharacters(assignmentGroup),
 			recipients: assignedToEmail,
 			configurationItem: configurationItem,
+			companyName: companyName,
+			callerName: callerName,
 			incidentLink: gs.getProperty('glide.servlet.uri') + incidentLink,
 			sysId: sysId
 		};
