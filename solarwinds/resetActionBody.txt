@@ -2,7 +2,7 @@
 That's why sending only ActionType (Close action's default condition) and alias (default alias of alerts) will be sufficient.
 
 ## OpsGenie expects the following fields like below, use them without changing names.
-alias=${ObjectID}-${N=Alerting;M=AlertID}&ActionType=Close
+alias=${N=Alerting;M=AlertObjectID}-${N=Alerting;M=AlertID}&ActionType=Close
 
 ## Troubleshooting content, use µ#µ instead of = and §#§ instead of &
-aliasµ#µ${ObjectID}-${N=Alerting;M=AlertID}§#§ActionTypeµ#µClose
+aliasµ#µ${N=Alerting;M=AlertObjectID}-${N=Alerting;M=AlertID}§#§ActionTypeµ#µClose
