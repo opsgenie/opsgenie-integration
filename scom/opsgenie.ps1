@@ -1,109 +1,55 @@
 ﻿Param (
-
-[String]$ApiKey = "Your_API_Key",
-
-[String]$AlertID,
-
-[String]$AlertName,
-
-[String]$AlertDesc,
-
-[String]$ResolutionState,
-
-[String]$ResolutionStateLastModified,
-
-[String]$Priority,
-
-[String]$Owner,
-
-[String]$RepeatCount,
-
-[String]$Severity,
-
-[String]$Category,
-
-[String]$CreatedByMonitor,
-
-[String]$ManagedEntitySource,
-
-[String]$WorkflowId,
-
-[String]$LastModified,
-
-[String]$TimeRaised,
-
-[String]$TicketId,
-
-[String]$DataItemCreateTimeLocal,
-
-[String]$ManagedEntityPath,
-
-[String]$ManagedEntity,
-
-[String]$TimeAddedLocal,
-
-[String]$MPElement = "NotPresent",
-
-[String]$Custom1,
-
-[String]$Custom2,
-
-[String]$Custom3,
-
-[String]$Custom4,
-
-[String]$Custom5,
-
-[String]$Custom6,
-
-[String]$Custom7,
-
-[String]$Custom8,
-
-[String]$Custom9,
-
-[String]$Custom10
-
+    [String]$ApiKey,
+    [String]$AlertID,
+    [String]$ResolutionStateLastModified,
+    [String]$CreatedByMonitor,
+    [String]$ManagedEntitySource,
+    [String]$WorkflowId,
+    [String]$DataItemCreateTimeLocal,
+    [String]$ManagedEntityPath,
+    [String]$ManagedEntity,
+    [String]$MPElement = "NotPresent"
 )
 
-for ($i=0; $i -lt $args.Count; $i++){
-       [String]$restOfAlertDesc += $($args[$i])
-}
+Import-Module "C:\Program Files\Microsoft System Center 2012 R2\Operations Manager\Powershell\OperationsManager\OperationsManager.psm1"
+
+$alert = Get-SCOMAlert -Id $AlertID
+$resolutionStateRaw = Get-SCOMAlert -Id $AlertID | select -expand ResolutionState
+
 
 $params = @{
-alertId=$AlertID;
-alertName=$AlertName;
-alertDescription=$AlertDesc + $restOfAlertDesc;
-resolutionState=$ResolutionState;
-resolutionStateLastModified=$ResolutionStateLastModified;
-priority=$Priority;
-owner=$Owner;
-repeatCount=$RepeatCount;
-severity=$Severity;
-category=$Category;
-createdByMonitor=$CreatedByMonitor;
-managedEntitySource=$ManagedEntitySource;
-workflowId=$WorkflowId;
-lastModified=$LastModified;
-timeRaised=$TimeRaised;
-ticketId=$TicketId;
-dataItemCreateTime=$DataItemCreateTimeLocal;
-managedEntityPath=$ManagedEntityPath;
-managedEntityGUID=$ManagedEntity;
-timeAdded=$TimeAddedLocal;
-mpElement=$MPElement;
-customField1=$Custom1;
-customField2=$Custom2;
-customField3=$Custom3;
-customField4=$Custom4;
-customField5=$Custom5;
-customField6=$Custom6;
-customField7=$Custom7;
-customField8=$Custom8;
-customField9=$Custom9;
-customField10=$Custom10;
+    alertId                     = $AlertID
+    alertName                   = if($alert.Name) {$alert.Name.ToString()} else {"Not Present"}
+    alertDescription            = if($alert.Description) {$alert.Description.ToString()} else {"Not Present"}
+    resolutionState             = if($resolutionStateRaw -eq "0") {"New"} elseif($resolutionStateRaw -eq "255") {"Closed"} else {"Not Present"}
+    resolutionStateLastModified = if($alert.TimeResolutionStateLastModified) {$alert.TimeResolutionStateLastModified.ToString()} else {"Not Present"}
+    priority                    = if($alert.Priority) {$alert.Priority.ToString()} else {"Not Present"}
+    owner                       = if($alert.Owner) {$alert.Owner.ToString()} else {"Not Present"}
+    repeatCount                 = if($alert.RepeatCount) {$alert.RepeatCount.ToString()} else {"Not Present"}
+    severity                    = if($alert.Severity) {$alert.Severity.ToString()} else {"Not Present"}
+    category                    = if($alert.Category) {$alert.Category.ToString()} else {"Not Present"}
+    createdByMonitor            = $CreatedByMonitor
+    managedEntitySource         = $ManagedEntitySource
+    workflowId                  = $WorkflowId
+    lastModified                = if($alert.LastModified) {$alert.LastModified.ToString()} else {"Not Present"}
+    timeRaised                  = if($alert.TimeRaised) {$alert.TimeRaised.ToString()} else {"Not Present"}
+    ticketId                    = if($alert.TicketId) {$alert.TicketId.ToString()} else {"Not Present"}
+    dataItemCreateTime          = $DataItemCreateTimeLocal
+    managedEntityPath           = $ManagedEntityPath
+    managedEntityGUID           = $ManagedEntity
+    timeAdded                   = if($alert.TimeAdded) {$alert.TimeAdded.ToString()} else {"Not Present"}
+    mpElement                   = $MPElement
+    customField1                = if($alert.CustomField1) {$alert.CustomField1.ToString()} else {"Not Present"}
+    customField2                = if($alert.CustomField2) {$alert.CustomField2.ToString()} else {"Not Present"}
+    customField3                = if($alert.CustomField3) {$alert.CustomField3.ToString()} else {"Not Present"}
+    customField4                = if($alert.CustomField4) {$alert.CustomField4.ToString()} else {"Not Present"}
+    customField5                = if($alert.CustomField5) {$alert.CustomField5.ToString()} else {"Not Present"}
+    customField6                = if($alert.CustomField6) {$alert.CustomField6.ToString()} else {"Not Present"}
+    customField7                = if($alert.CustomField7) {$alert.CustomField7.ToString()} else {"Not Present"}
+    customField8                = if($alert.CustomField8) {$alert.CustomField8.ToString()} else {"Not Present"}
+    customField9                = if($alert.CustomField9) {$alert.CustomField9.ToString()} else {"Not Present"}
+    customField10               = if($alert.CustomField10) {$alert.CustomField10.ToString()} else {"Not Present"}
 }
-
 
 $json = ConvertTo-Json -InputObject $params
 
@@ -113,14 +59,15 @@ $urlWithoutApiKey = "https://api.opsgenie.com/v1/json/scom?apiKey="
 
 $endpoint = $urlWithoutApiKey + $ApiKey
 
-try{
 
-Invoke-RestMethod -Method Post -ContentType "application/json" -Body $json -Uri $endpoint | Out-File $postFile
+try {
+    write-output "Connection to OpsGenie Status" | Out-File $postFile -Append
+    Invoke-RestMethod -Method Post -ContentType "application/json" -Body $json -Uri $endpoint | Out-File $postFile -Append
 
 }
 
-catch{
+catch {
 
-out-file -InputObject "Exception Type: $($_.Exception.GetType().FullName) Exception Message: $($_.Exception.Message)" -FilePath $postFile
+    out-file -InputObject "Exception Type: $($_.Exception.GetType().FullName) Exception Message: $($_.Exception.Message)" -FilePath $postFile -Append
 
 }
