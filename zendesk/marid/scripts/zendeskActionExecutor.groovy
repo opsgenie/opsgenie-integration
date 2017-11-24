@@ -15,7 +15,7 @@ try {
     if (zendeskUrl == null || "".equals(zendeskUrl)) {
         zendeskUrl = "https://" + _conf("subdomain", true) + ".zendesk.com"
     }
-    String ticketID = params.ticketID
+    String ticketID = params.ticketId
     Map contentTypeHeader = [:]
     contentTypeHeader[HttpHeaders.CONTENT_TYPE] = "application/json"
     contentTypeHeader[HttpHeaders.ACCEPT_LANGUAGE] = "application/json"
@@ -42,7 +42,7 @@ try {
         comment.put("body", params.body)
         comment.put("public", false)
         ticket.put("comment", comment)
-        ticket.put("external_id", params.external_id)
+        ticket.put("external_id", params.externalId)
         ticket.put("subject", params.subject)
         ticket.put("tags", params.tags)
         contentParams.put("ticket", ticket)
