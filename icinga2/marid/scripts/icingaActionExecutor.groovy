@@ -71,8 +71,8 @@ if (alertFromOpsgenie.size() > 0) {
 
                 if (expireAcknowledgementAfter != null) {
                     expireAcknowledgementAfter = Long.valueOf(expireAcknowledgementAfter)
-                    if (!expireAcknowledgementAfter) {
-                        def timestamp = TimeUnit.NANOSECONDS.toSeconds(System.nanoTime() + TimeUnit.MINUTES.toNanos(expireAcknowledgementAfter))
+                    if (expireAcknowledgementAfter) {
+                        def timestamp = TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis()) + TimeUnit.MINUTES.toSeconds(expireAcknowledgementAfter)
                         contentMap.put("expiry", timestamp)
                     }
                 }
