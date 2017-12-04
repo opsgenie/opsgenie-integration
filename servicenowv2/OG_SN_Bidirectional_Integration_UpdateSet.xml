@@ -1449,7 +1449,7 @@ OpsGenie_Client.prototype = {
 			rest.setRequestHeader("Authorization", "GenieKey " + this.apiKey);
 			rest.setStringParameter("endPoint", this.endpoint);
             rest.setQueryParameter("id", alertId);
-			rest.setStringParameter("subEndPoint", "");
+	rest.setStringParameter("subEndPoint", "/" + alertId);
 			rest.setRequestHeader("Content-Type", "application/json");
 			
 			gs.debug("Sending GetAlert request to " + rest.getEndpoint());
