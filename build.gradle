@@ -487,6 +487,7 @@ apply from: 'bmcRemedy/bmcRemedy.gradle'
 apply from: 'opsview/opsview.gradle'
 apply from: 'librenms/librenms.gradle'
 apply from: 'prtg/prtg.gradle'
+apply from: 'bmcFootPrintsV12/bmcFootPrintsV12.gradle'
 
 
 task packageIntegrations(dependsOn: [
@@ -515,7 +516,8 @@ task packageIntegrations(dependsOn: [
                                 'packageOpsview',
                                 'packageVCSA',
                                 'packageLibreNMS',
-                                'packagePrtg'
+                                'packagePrtg',
+                                'packageBMCFootPrintsV12'
 ])
 
 task packageAll(dependsOn: ['packageIntegrations', 'packageLamp'])
