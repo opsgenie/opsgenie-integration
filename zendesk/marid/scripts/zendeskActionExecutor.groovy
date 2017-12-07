@@ -84,7 +84,7 @@ try {
         addTicketIDtoAlert(params, responseBody)
     } else {
         def put = ((OpsGenieHttpClient) HTTP_CLIENT).preparePutMethod(resultUri, contentParams, [:])
-         putActionsToZendesk(put)  
+        putActionsToZendesk(put)
     }
 }
 catch (Exception e) {
@@ -96,14 +96,14 @@ finally {
 
 void putActionsToZendesk(def httpMethod) {
 
-    httpMethod.setHeader("Content-Type", "application/json")  
-    response = ((OpsGenieHttpClient) HTTP_CLIENT).executeHttpMethod(httpMethod)  
+    httpMethod.setHeader("Content-Type", "application/json")
+    response = ((OpsGenieHttpClient) HTTP_CLIENT).executeHttpMethod(httpMethod)
     if (response.getStatusCode() < 299) {
-        logger.info("${LOG_PREFIX} Successfully executed at Zendesk.");  
-        logger.debug("${LOG_PREFIX} Zendesk response: ${response.statusCode} ${response.getContentAsString()}")  
+        logger.info("${LOG_PREFIX} Successfully executed at Zendesk.")
+        logger.debug("${LOG_PREFIX} Zendesk response: ${response.statusCode} ${response.getContentAsString()}")
     } else {
-        logger.warn("${LOG_PREFIX} Could not execute at Zendesk; response: ${response.statusCode} ${response.getContentAsString()}")  
-    }  
+        logger.warn("${LOG_PREFIX} Could not execute at Zendesk; response: ${response.statusCode} ${response.getContentAsString()}")
+    }
 
 }
 
