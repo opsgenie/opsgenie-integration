@@ -1,0 +1,28 @@
+#################################### BMCFOOTPRINTS CONFIGURATION ###################################
+bmcFootPrints2opsgenie.logger=warning
+logPath=/var/log/opsgenie/bmcFootPrints2opsgenie.log
+# If your OS is Windows then you can set logPath=C:\opsgenie-integration\bmcFootPrints2opsgenie.log
+bmcFootPrints.url=YOUR BMC FOOTPRINTS SERVER URL
+# Example: bmcFootPrints.url=http://localhost
+bmcFootPrints.username=YOUR BMC FOOTPRINTS USER'S USERNAME
+bmcFootPrints.password=YOUR BMC FOOTPRINTS USER'S PASSWORD
+bmcFootPrints.incidentWorkspaceId=YOUR BMC FOOTPRINTS INCIDENT WORKSPACE ID
+bmcFootPrints.problemWorkspaceId=YOUR BMC FOOTPRINTS PROBLEM WORKSPACE ID
+# If you map create alert action to create incident action in the integration settings page in OpsGenie, and do not provide the incident workspace ID, OpsGenie will not create incidents in BMC FootPrints v11.
+# If you map create alert action to create problem action in the integration settings page in OpsGenie, and do not provide the problem workspace ID, OpsGenie will not create problems in BMC FootPrints v11.
+# If you want to create only incidents or only problems from OpsGenie alerts, enter only the workspace ID of your incident or problem workspace.
+
+####################################### PROXY CONFIGURATION FOR BMC FOOTPRINTS ############################################
+bmcFootPrints2opsgenie.http.proxy.enabled=false
+bmcFootPrints2opsgenie.http.proxy.port=11111
+bmcFootPrints2opsgenie.http.proxy.host=localhost
+bmcFootPrints2opsgenie.http.proxy.protocol=http
+#bmcFootPrints2opsgenie.http.proxy.username=admin
+#bmcFootPrints2opsgenie.http.proxy.password=changeme
+
+######################################## BMC FOOTPRINTS INTEGRATION - ALERT ACTION CONFIGURATION ######################
+mappedActions.createIncident.script=bmcFootPrintsActionExecutor.groovy
+mappedActions.createProblem.script=bmcFootPrintsActionExecutor.groovy
+mappedActions.updateDescription.script=bmcFootPrintsActionExecutor.groovy
+mappedActions.updatePriority.script=bmcFootPrintsActionExecutor.groovy
+mappedActions.resolveIssue.script=bmcFootPrintsActionExecutor.groovy

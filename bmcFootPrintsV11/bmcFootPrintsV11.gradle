@@ -1,0 +1,70 @@
+task prepareBMCFootPrintsV11(dependsOn: 'generateIntegration') << {
+    def destination = "${project.buildDir}/bmcFootPrintsV11"
+    copy {
+        from "${project.buildDir}/opsgenie-integration"
+        into "${destination}/opsgenie-integration"
+    }
+
+    copy {
+        from "${project.projectDir}/bmcFootPrintsV11/marid"
+        into "${destination}/opsgenie-integration/marid"
+    }
+
+    copy {
+        from "${project.projectDir}/bmcFootPrintsV11/bmcFootPrintsV11/bmcFootPrints2opsgenie"
+        into "${destination}/bmcFootPrintsV11"
+    }
+
+    copy {
+        from "${project.projectDir}/bmcFootPrintsV11/bmcFootPrintsV11/bmcFootPrints2opsgenie.go"
+        into "${destination}/bmcFootPrintsV11"
+    }
+
+    mergeConfFile("${project.buildDir}/opsgenie-integration/conf/opsgenie-integration.conf",
+            "${projectDir}/bmcFootPrintsV11/common/opsgenie-integration.conf.part",
+            "${destination}/opsgenie-integration/conf/opsgenie-integration.conf")
+}
+
+task packageBMCFootPrintsV11Zip(dependsOn: 'prepareBMCFootPrintsV11', type: Zip) {
+    doFirst {
+        delete "${project.buildDir}/bmcFootPrintsV11/bmcFootPrintsV11/bmcFootPrints2opsgenie"
+
+        copy {
+            from "${project.buildDir}/bmcFootPrintsV11/bmcFootPrintsV11"
+            into "${project.buildDir}/bmcFootPrintsV11/opsgenie-integration/bmcFootPrintsV11"
+        }
+
+        delete "${project.buildDir}/bmcFootPrintsV11/bmcFootPrintsV11"
+    }
+
+    copy {
+        from "${project.projectDir}/bmcFootPrintsV11/bmcFootPrintsV11/bmcFootPrints2opsgenie.exe"
+        into "${project.buildDir}/bmcFootPrintsV11/bmcFootPrintsV11"
+    }
+
+    from "${project.buildDir}/bmcFootPrintsV11"
+    baseName = 'opsgenie-bmcFootPrints-v11'
+    version = project.ext.versions.getProperty('bmcFootPrintsV11') + project.ext.versionSuffix
+}
+
+task packageBMCFootPrintsV11OS(dependsOn: ['generateIntegrationForNative', 'prepareBMCFootPrintsV11']) << {
+    copyNativeFiles('bmcFootPrintsV11')
+
+    mergeConfFile("${project.buildDir}/native/ogAfter.sh",
+            "${project.projectDir}/bmcFootPrintsV11/native/ogAfter.sh",
+            "${project.buildDir}/os_client/bmcFootPrintsV11/ogAfter.sh")
+
+    def fileMapping = [
+            "${project.projectDir}/bmcFootPrintsV11/bmcFootPrintsV11/bmcFootPrints2opsgenie"   : "usr/bin",
+            "${project.projectDir}/bmcFootPrintsV11/bmcFootPrintsV11/bmcFootPrints2opsgenie.go": "etc/opsgenie"
+    ]
+
+    buildRpm('bmcFootPrintsV11', 'opsgenie-bmcFootPrints-v11', 'OpsGenie - BMC FootPrints V11 integrations files including Marid and BMC FootPrints V11 scripts',
+            fileMapping, [:])
+
+    buildDeb('bmcFootPrintsV11', 'opsgenie-bmcFootPrints-v11', 'OpsGenie - BMC FootPrints V11 integrations files including Marid and BMC FootPrints V11 scripts',
+            fileMapping, [:])
+
+}
+
+task packageBMCFootPrintsV11(dependsOn: ['packageBMCFootPrintsV11OS', 'packageBMCFootPrintsV11Zip'])
