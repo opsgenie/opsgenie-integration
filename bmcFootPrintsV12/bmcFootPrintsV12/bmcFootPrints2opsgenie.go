@@ -159,6 +159,7 @@ func main() {
 	var itemDetails TicketDetailsResult = getTicketDetails(itemDefinitionId, itemId)
 	resolution := getCustomField(itemDetails.CustomFields, "Resolution")
 	parameters["ticketNumber"] = itemDetails.TicketNumber
+	parameters["opsgenieAlertAlias"] = getCustomField(itemDetails.CustomFields, "OpsGenie Alert Alias")
 
 	if len(resolution) > 0 {
 		parameters["action"] = "Close"

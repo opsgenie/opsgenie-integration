@@ -19,6 +19,7 @@ try {
     def description = params.description
     def priority = params.priority
     def ticketType = params.ticketType
+    def alertAlias = params.alertAlias
 
     if (!url) {
         url = _conf("url", true)
@@ -57,7 +58,7 @@ try {
             return
         }
 
-        def itemId = createTicket(itemDefinitionId, shortDescription, description, priority, ticketType)
+        def itemId = createTicket(itemDefinitionId, shortDescription, description, priority, alertAlias, ticketType)
 
         if (!itemId) {
             logger.error(LOG_PREFIX + "Cannot obtain item ID for item definition ID '${itemDefinitionId}' from BMC FootPrints v12.")
@@ -139,7 +140,7 @@ String getItemDefinitionId(String workspaceId, String itemType) {
     }?._definitionId
 }
 
-String createTicket(String itemDefinitionId, String shortDescription, String description, String priority, String ticketType) {
+String createTicket(String itemDefinitionId, String shortDescription, String description, String priority, String alertAlias, String ticketType) {
     logger.debug(LOG_PREFIX + "Will send createTicket request to BMC FootPrints v12 Web Service API: "
             + client.getServiceURL() + ".")
 
@@ -155,6 +156,12 @@ String createTicket(String itemDefinitionId, String shortDescription, String des
                 "createTicketRequest" {
                     _ticketDefinitionId(itemDefinitionId)
                     _ticketFields {
+                        itemFields {
+                            fieldName("OpsGenie Alert Alias")
+                            fieldValue {
+                                value(alertAlias)
+                            }
+                        }
                         itemFields {
                             fieldName("Description")
                             fieldValue {
