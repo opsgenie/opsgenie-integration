@@ -1,0 +1,146 @@
+trigger opsgenieTrigger on BMCServiceDesk__Incident__c (after insert, after update) {
+string endpoint = 'https://api.opsgenie.com/v1/json/bmcremedyforce';
+string apiKey='CUSTOMER_GENERATED_OPS_GENIE_API_KEY';
+
+BMCServiceDesk__Incident__c obj = Trigger.new[0];
+
+string id=obj.Id;
+string ownerid=obj.OwnerId;
+string name=obj.Name;
+Datetime createddate=obj.CreatedDate;
+string categoryid=obj.BMCServiceDesk__Category_ID__c;
+string clientname=obj.BMCServiceDesk__Client_Name__c;
+string impactid=obj.BMCServiceDesk__Impact_Id__c;
+string priorityid=obj.BMCServiceDesk__Priority_ID__c;
+Datetime statuschangeDate=obj.BMCServiceDesk__StatusChangeDate__c;
+string statusid=obj.BMCServiceDesk__Status_ID__c;
+string urgencyid=obj.BMCServiceDesk__Urgency_ID__c;
+string clientemail=obj.BMCServiceDesk__clientEmail__c;
+string clientfirstname=obj.BMCServiceDesk__clientFirstName__c;
+string clientid=obj.BMCServiceDesk__clientId__c;
+string clientlastname=obj.BMCServiceDesk__clientLastName__c;
+Datetime duedatetime=obj.BMCServiceDesk__dueDateTime__c;
+string incidentdescription=obj.BMCServiceDesk__incidentDescription__c;
+string incidentresolution=obj.BMCServiceDesk__incidentResolution__c;
+Datetime opendatetime=obj.BMCServiceDesk__openDateTime__c;
+string shortdescription=obj.BMCServiceDesk__shortDescription__c;
+Datetime systemmodstamp =obj.SystemModstamp;
+Datetime lastactivitydate=obj.LastActivityDate;
+string approvalstatus=obj.BMCServiceDesk__ACApprovalStatus__c;
+string severity=obj.BMCServiceDesk__ACSeverity__c;
+Decimal actualoutagetimehour=obj.BMCServiceDesk__Actual_Outage_Time_Hours__c;
+string additionalemail=obj.BMCServiceDesk__Additional_email_information__c;
+Boolean alltaskclosecontroller=obj.BMCServiceDesk__AllTaskCloseController__c;
+Boolean approved=obj.BMCServiceDesk__Approved__c;
+string clientaccount=obj.BMCServiceDesk__Client_Account__c;
+string clientmanager=obj.BMCServiceDesk__Client_Manager__c;
+string clientphone=obj.BMCServiceDesk__Client_Phone__c;
+string clienttype=obj.BMCServiceDesk__Client_Type__c;
+string clockstatus=obj.BMCServiceDesk__Clock_Status__c;
+string closedby=obj.BMCServiceDesk__Closed_By__c;
+string closurecategory=obj.BMCServiceDesk__ClosureCategory__c;
+string duedateprogress=obj.BMCServiceDesk__Due_Date_Progress__c;
+string emailserviceaddress=obj.BMCServiceDesk__EmailServiceAddress__c;
+string eventid=obj.BMCServiceDesk__Event_ID__c;
+string incidenttype=obj.BMCServiceDesk__IncidentType__c;
+Boolean isnewrecord=obj.BMCServiceDesk__Is_New_Record__c;
+string newincident=obj.BMCServiceDesk__New_Incident__c;
+string preferredcontactmethod=obj.BMCServiceDesk__PreferredContactMethod__c;
+Decimal totalworktime=obj.BMCServiceDesk__TotalWorkTime__c;
+string type=obj.BMCServiceDesk__Type__c;
+Decimal updatecount=obj.BMCServiceDesk__UpdateCount__c;
+Datetime closedatetime=obj.BMCServiceDesk__closeDateTime__c;
+Boolean closetasks=obj.BMCServiceDesk__closeTasks__c;
+Datetime completeddate=obj.BMCServiceDesk__completedDate__c;
+string contacttype=obj.BMCServiceDesk__contactType__c;
+Decimal maximumduration=obj.BMCServiceDesk__maximumDuration__c;
+string note=obj.BMCServiceDesk__note__c;
+Datetime outagefrom=obj.BMCServiceDesk__outageFrom__c;
+Datetime outageto=obj.BMCServiceDesk__outageTo__c;
+string queuename=obj.BMCServiceDesk__queueName__c;
+Datetime recommendedfixdatetime=obj.BMCServiceDesk__recommendedFixDateTime__c;
+Datetime respondeddatetime=obj.BMCServiceDesk__respondedDateTime__c;
+Datetime responsedatetime=obj.BMCServiceDesk__responseDateTime__c;
+Boolean state=obj.BMCServiceDesk__state__c;
+Decimal timespent=obj.BMCServiceDesk__timeSpent__c;
+Decimal totalduration=obj.BMCServiceDesk__Total_Duration__c;
+Boolean incorrectcategory=obj.BMCServiceDesk__Incorrect_category__c;
+string alternatcontactname=obj.Alternate_Contact_Name__c;
+string alternatcontactnumber=obj.Alternate_Contact_Number__c;
+string externalticketref=obj.External_Ticket_Ref__c;
+string affectedapplication=obj.Affected_Application__c;
+string affectedhardware=obj.Affected_Hardware__c;
+Decimal timetoclose=obj.BMCServiceDesk__RF_TimeToClose__c;
+
+
+string payload= '{'+
+'\"id\" :' + opsgenieClass.getPayloadStringByHandlingNull(id)+ ',' +
+'\"ownerId\" :' + opsgenieClass.getPayloadStringByHandlingNull(ownerid )+ ',' +
+'\"name\" :' + opsgenieClass.getPayloadStringByHandlingNull(name)+ ',' +
+'\"createdDate\" :' + opsgenieClass.getPayloadStringByHandlingNull(createddate)+ ',' +
+'\"categoryID\" :' + opsgenieClass.getPayloadStringByHandlingNull(categoryid)+ ',' +
+'\"clientName\" :' + opsgenieClass.getPayloadStringByHandlingNull(clientname)+ ',' +
+'\"impactId\" :' + opsgenieClass.getPayloadStringByHandlingNull(impactid)+ ',' +
+'\"priorityId\" :' + opsgenieClass.getPayloadStringByHandlingNull(priorityid)+ ',' +
+'\"statusChangeDate\" :' + opsgenieClass.getPayloadStringByHandlingNull(statuschangedate)+ ',' +
+'\"statusId\" :' + opsgenieClass.getPayloadStringByHandlingNull(statusid)+ ',' +
+'\"urgencyId\" :' + opsgenieClass.getPayloadStringByHandlingNull(urgencyid)+ ',' +
+'\"clientEmail\" :' + opsgenieClass.getPayloadStringByHandlingNull(clientemail)+ ',' +
+'\"clientFirstName\" :' + opsgenieClass.getPayloadStringByHandlingNull(clientfirstname)+ ',' +
+'\"clientId\" :' + opsgenieClass.getPayloadStringByHandlingNull(clientid)+ ',' +
+'\"clientLastName\" :' + opsgenieClass.getPayloadStringByHandlingNull(clientlastname)+ ',' +
+'\"dueDateTime\" :' + opsgenieClass.getPayloadStringByHandlingNull(duedatetime)+ ',' +
+'\"incidentDescription\" :' + opsgenieClass.getPayloadStringByHandlingNull(incidentdescription)+ ',' +
+'\"incidentResolution\" :' + opsgenieClass.getPayloadStringByHandlingNull(incidentresolution)+ ',' +
+'\"openDateTime\" :' + opsgenieClass.getPayloadStringByHandlingNull(opendatetime)+ ',' +
+'\"shortDescription\" :' + opsgenieClass.getPayloadStringByHandlingNull(shortdescription)+ ',' +
+'\"systemModStamp\" :' + opsgenieClass.getPayloadStringByHandlingNull(systemmodstamp)+ ',' +
+'\"lastActivityDate\" :' + opsgenieClass.getPayloadStringByHandlingNull(lastactivitydate)+ ',' +
+'\"approvalStatus\" :' + opsgenieClass.getPayloadStringByHandlingNull(approvalstatus)+ ',' +
+'\"severity\" :' + opsgenieClass.getPayloadStringByHandlingNull(severity)+ ',' +
+'\"actualOutageTimeHour\" :' + opsgenieClass.getPayloadStringByHandlingNull(actualoutagetimehour)+ ',' +
+'\"additionalEmail\" :' + opsgenieClass.getPayloadStringByHandlingNull(additionalemail)+ ',' +
+'\"allTaskCloseController\" :' +opsgenieClass.getPayloadStringByHandlingNull(alltaskclosecontroller)+ ',' +
+'\"approved\" :' + opsgenieClass.getPayloadStringByHandlingNull(approved) + ',' +
+'\"clientAccount\" :' + opsgenieClass.getPayloadStringByHandlingNull(clientaccount)+ ',' +
+'\"clientManager\" :' + opsgenieClass.getPayloadStringByHandlingNull(clientmanager)+ ',' +
+'\"clientPhone\" :' + opsgenieClass.getPayloadStringByHandlingNull(clientphone)+ ',' +
+'\"clientType\" :' + opsgenieClass.getPayloadStringByHandlingNull(clienttype)+ ',' +
+'\"clockStatus\" :' + opsgenieClass.getPayloadStringByHandlingNull(clockstatus)+ ',' +
+'\"closedBy\" :' + opsgenieClass.getPayloadStringByHandlingNull(closedby)+ ',' +
+'\"closureCategory\" :' + opsgenieClass.getPayloadStringByHandlingNull(closurecategory)+ ',' +
+'\"dueDateProgress\" :' + opsgenieClass.getPayloadStringByHandlingNull(duedateprogress)+ ',' +
+'\"emailServiceAddress\" :' + opsgenieClass.getPayloadStringByHandlingNull(emailserviceaddress)+ ',' +
+'\"eventId\" :' + opsgenieClass.getPayloadStringByHandlingNull(eventid)+ ',' +
+'\"incidentType\" :' + opsgenieClass.getPayloadStringByHandlingNull(incidenttype)+ ',' +
+'\"isNewRecord\" :' +opsgenieClass.getPayloadStringByHandlingNull(isnewrecord)+ ',' +
+'\"newIncident\" :' + opsgenieClass.getPayloadStringByHandlingNull(newincident)+ ',' +
+'\"preferredContactMethod\" :' + opsgenieClass.getPayloadStringByHandlingNull(preferredcontactmethod)+ ',' +
+'\"totalWorkRime\" :' + opsgenieClass.getPayloadStringByHandlingNull(totalworktime)+ ',' +
+'\"type\" :' + opsgenieClass.getPayloadStringByHandlingNull(type)+ ',' +
+'\"updateCount\" :' + opsgenieClass.getPayloadStringByHandlingNull(updatecount)+ ',' +
+'\"closeDateTime\" :' + opsgenieClass.getPayloadStringByHandlingNull(closedatetime)+ ',' +
+'\"closeTasks\" :' + opsgenieClass.getPayloadStringByHandlingNull(closetasks)+ ',' +
+'\"completedDate\" :' + opsgenieClass.getPayloadStringByHandlingNull(completeddate)+ ',' +
+'\"contactType\" :' + opsgenieClass.getPayloadStringByHandlingNull(contacttype)+ ',' +
+'\"maximumDuration\" :' + opsgenieClass.getPayloadStringByHandlingNull(maximumduration)+ ',' +
+'\"note\" :' + opsgenieClass.getPayloadStringByHandlingNull(note)+ ',' +
+'\"outageFrom\" :' + opsgenieClass.getPayloadStringByHandlingNull(outagefrom)+ ',' +
+'\"outageTo\" :' + opsgenieClass.getPayloadStringByHandlingNull(outageto)+ ',' +
+'\"queueName\" :' + opsgenieClass.getPayloadStringByHandlingNull(queuename)+ ',' +
+'\"recommendedFixDateTime\" :' + opsgenieClass.getPayloadStringByHandlingNull(recommendedfixdatetime)+ ',' +
+'\"respondedDateTime\" :' + opsgenieClass.getPayloadStringByHandlingNull(respondeddatetime)+ ',' +
+'\"responsedDateTime\" :' + opsgenieClass.getPayloadStringByHandlingNull(responsedatetime)+ ',' +
+'\"state\" :' + opsgenieClass.getPayloadStringByHandlingNull(state)+ ',' +
+'\"timeSpent\" :' + opsgenieClass.getPayloadStringByHandlingNull(timespent)+ ',' +
+'\"totalDuration\" :' + opsgenieClass.getPayloadStringByHandlingNull(totalduration)+ ',' +
+'\"inCorrectCategory\" :' + opsgenieClass.getPayloadStringByHandlingNull(incorrectcategory)+ ',' +
+'\"alternatContactName\" :' + opsgenieClass.getPayloadStringByHandlingNull(alternatcontactname)+ ',' +
+'\"alternatContactNumber\" :' + opsgenieClass.getPayloadStringByHandlingNull(alternatcontactnumber)+ ',' +
+'\"externalTicketRef\" :' + opsgenieClass.getPayloadStringByHandlingNull(externalticketref)+ ',' +
+'\"affectedApplication\" :' + opsgenieClass.getPayloadStringByHandlingNull(affectedapplication)+ ',' +
+'\"affectedHardware\" :' + opsgenieClass.getPayloadStringByHandlingNull(affectedhardware)+ ',' +
+'\"timeToClose\" :' + opsgenieClass.getPayloadStringByHandlingNull(timetoclose)+
+'}';
+opsgenieClass.xRESTCall(endpoint+'?apiKey='+apiKey,payload);
+}
