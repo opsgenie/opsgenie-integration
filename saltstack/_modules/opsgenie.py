@@ -18,11 +18,15 @@ Module for sending data to OpsGenie
                 action_type: Create
 """
 
-import salt.exceptions
-import requests
 import json
 import logging
+import requests
+import salt.exceptions
 
+'''
+    If you are using opsgenie from another domain
+    you should update the line below
+'''
 API_ENDPOINT = "https://api.opsgenie.com/v1/json/saltstack?apiKey="
 
 log = logging.getLogger(__name__)

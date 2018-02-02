@@ -2,11 +2,8 @@
 # OpsGenie
 
 import json
-import urllib
-import urllib2
 import os
-
-opsGenieAPIURL = "https://api.opsgenie.com/v1/json/checkmk"
+import urllib2
 
 
 def main():
@@ -15,7 +12,7 @@ def main():
                     if var.startswith("NOTIFY_")])
 
     if "PARAMETER_1" in context:
-        opsgenie_api_key = context["PARAMETER_1"]
+        opsgenie_api_url = context["PARAMETER_1"]
 
         if "PARAMETER_1" in context.keys():
             del context["PARAMETER_1"]
@@ -24,7 +21,7 @@ def main():
     else:
         return "No API Key Specified."
 
-    req = urllib2.Request(opsGenieAPIURL + "?" + urllib.urlencode({"apiKey": opsgenie_api_key}))
+    req = urllib2.Request(url=opsgenie_api_url)
     req.add_header('Content-Type', 'application/json')
 
     try:
