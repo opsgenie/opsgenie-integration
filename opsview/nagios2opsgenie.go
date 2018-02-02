@@ -21,7 +21,12 @@ var TOTAL_TIME = 60
 var configParameters = map[string]string {
     "logLevel" : "warning",
     "logPath" : "/var/log/opsgenie/nagios2opsgenie.log",
-    "opsgenieApiUrl" : "https://api.opsgenie.com"}
+	/*
+	if you are using opsgenie from another domain e.g. eu, sandbox etc.
+	you should update the line below
+	*/
+	"opsgenieApiUrl" : "https://api.opsgenie.com",
+}
 var parameters = make(map[string]string)
 var levels = map [string]log.Level{"info":log.Info,"debug":log.Debug,"warning":log.Warning,"error":log.Error}
 var logger log.Logger
