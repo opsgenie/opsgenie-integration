@@ -151,11 +151,12 @@ def attach(boolean isServiceAlert) {
         String fileDate = new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss").format(new Date());
         String fileName = "details_${fileDate}.zip";
         response = opsgenie.attach([alertId: alert.alertId, stream: new ByteArrayInputStream(bout.toByteArray()), fileName: fileName])
-        if (response.success) {
+        if (200 <= response.getStatusCode && response.getStatusCode() < 400) {
             logger.info("Successfully attached details ${fileName}");
         } else {
             logger.error("Could not attach details ${fileName}");
         }
+        logger.warn(response.result)
     }
     catch (e) {
         logger.error("Could not attach details. Reason: ${e}", e)

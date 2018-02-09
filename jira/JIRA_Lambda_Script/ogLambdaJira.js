@@ -29,7 +29,12 @@ var jiraDefaultProjectKey = 'DEF';
 // Config end
 
 // These values are not expected to be changed.
+
+
+//if you are using opsgenie from another domain e.g. eu, sandbox etc.
+//you should update the line below
 var ogHost = 'api.opsgenie.com';
+
 var ogProtocol = 'https';
 var ogPort = 443;
 

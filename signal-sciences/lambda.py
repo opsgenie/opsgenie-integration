@@ -1,9 +1,15 @@
 import json
+
 import requests
 
 ############ OpsGenie Configuration ##############
 opsGenieAPIKey = ""
 opsGenieAPIURL = "https://api.opsgenie.com"
+'''
+    If you are using opsgenie from eu region comment the line above e.g. eu, sandbox
+    and uncomment the line below.
+'''
+# opsGenieAPIURL = "https://api.eu.opsgenie.com"
 opsGenieAlertEndPoint = "/v1/json/alert"
 SIGSCI_EMAIL = ""
 SIGSCI_PASSWORD = ""

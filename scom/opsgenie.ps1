@@ -1,5 +1,5 @@
 ﻿Param (
-    [String]$ApiKey,
+    [String]$Url = "https://api.opsgenie.com/v1/json/scom?apiKey=YOUR_API_KEY",
     [String]$AlertID,
     [String]$ResolutionStateLastModified,
     [String]$CreatedByMonitor,
@@ -55,14 +55,9 @@ $json = ConvertTo-Json -InputObject $params
 
 $postFile = "C:\scripts\opsgenie\postResult.txt"
 
-$urlWithoutApiKey = "https://api.opsgenie.com/v1/json/scom?apiKey="
-
-$endpoint = $urlWithoutApiKey + $ApiKey
-
-
 try {
     write-output "Connection to OpsGenie Status" | Out-File $postFile -Append
-    Invoke-RestMethod -Method Post -ContentType "application/json" -Body $json -Uri $endpoint | Out-File $postFile -Append
+    Invoke-RestMethod -Method Post -ContentType "application/json" -Body $json -Uri $Url | Out-File $postFile -Append
 
 }
 
