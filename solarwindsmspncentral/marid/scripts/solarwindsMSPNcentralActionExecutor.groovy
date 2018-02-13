@@ -1,3 +1,5 @@
+import wslite.soap.*
+
 LOG_PREFIX = "[${mappedAction}]:";
 logger.warn("${LOG_PREFIX} Will execute [${mappedAction}] for alertId ${params.alertId}");
 
