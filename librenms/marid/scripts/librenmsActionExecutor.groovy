@@ -25,6 +25,12 @@ try {
     }
 
     String rule = params.rule
+    String deviceId = params.deviceId
+    String timestamp = params.timestamp
+
+    logger.debug("Rule from OpsGenie Alert Details: " + rule)
+    logger.debug("Device ID from OpsGenie Alert Details: " + deviceId)
+    logger.debug("Timestamp from OpsGenie Alert Details: " + timestamp)
 
     def listRulesEndPoint = url + "/api/v0/rules"
 
@@ -68,9 +74,36 @@ try {
             if (listAlertsResponse.getStatusCode() < 400) {
                 def listAlertsResponseMap = JsonUtils.parse(listAlertsResponse.getContentAsString())
                 def alerts = listAlertsResponseMap.get("alerts")
+                def alertId = null
 
-                def alertId = alerts.findResult { it ->
-                    it.get("rule_id") == ruleId ? it.get("id") : null
+                if (alerts) {
+                    alerts = alerts.findAll { it ->
+                        (it.get("rule_id") == ruleId &&
+                                it.get("device_id") == deviceId)
+                    }
+
+                    if (alerts) {
+                        if (alerts.size() > 1) {
+                            def timestampFilteredAlerts = alerts.findAll { it ->
+                                it.get("timestamp") == timestamp
+                            }
+
+                            if (timestampFilteredAlerts && timestampFilteredAlerts.size() > 0) {
+                                alertId = timestampFilteredAlerts.get(0).get("id")
+                                logger.debug("Found alert that matches the timestamp from OpsGenie alert, using that alert's alert ID.")
+                            } else {
+                                alertId = alerts.get(0).get("id")
+                                logger.debug("Timestamp did not match the timestamp retrieved from the OpsGenie alert, using the alert ID of the first alert matches with the rule and the device ID.")
+                            }
+                        } else {
+                            alertId = alerts.get(0).get("id")
+                            logger.debug("Found only one alert from the LibreNMS API response, using the alert ID of that alert.")
+                        }
+                    } else {
+                        logger.error("${LOG_PREFIX} Could not find any LibreNMS alerts that matches the alert from OpsGenie.")
+                    }
+                } else {
+                    logger.error("${LOG_PREFIX} Could not obtain alerts list from the list alerts response from LibreNMS API or found no matching alerts.")
                 }
 
                 logger.debug("Alert Id from LibreNMS: " + alertId)
