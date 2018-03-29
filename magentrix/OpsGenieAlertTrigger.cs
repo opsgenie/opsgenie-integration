@@ -1,4 +1,4 @@
-public class OGCreateAlert : ActiveTrigger<Force__Case>
+public class OpsGenieAlertTrigger : ActiveTrigger<Force__Case>
 {
 	public override void Execute(TransactionContext<Force__Case> trigger)
 	{
