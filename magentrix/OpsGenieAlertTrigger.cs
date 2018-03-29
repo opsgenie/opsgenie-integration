@@ -61,18 +61,18 @@ public class OpsGenieAlertTrigger : ActiveTrigger<Force__Case>
                 client.Headers.Add("Content-Type","application/json");
 
                 var postData = "{";
-                postData += "\"caseId\": \"" + escapeQuotes(caseId) + "\",";
-                postData += "\"caseDescription\": \"" + escapeQuotes(caseDescription) + "\",";
-                postData += "\"severity\": \"" + escapeQuotes(severity) + "\",";
-                postData += "\"caseNumber\": \"" + escapeQuotes(caseNumber) + "\",";
-                postData += "\"description\": \"" + escapeQuotes(description) + "\",";
-                postData += "\"priority\": \"" + escapeQuotes(priority) + "\",";
-                postData += "\"subject\": \"" + escapeQuotes(subject) + "\",";
-                postData += "\"caseType\": \"" + escapeQuotes(caseType) + "\",";
-                postData += "\"ownerEmail\": \"" + escapeQuotes(ownerEmail) + "\",";
-                postData += "\"caseStatus\": \"" + escapeQuotes(caseStatusValue) + "\",";
-                postData += "\"accountName\": \"" + escapeQuotes(accountName) + "\",";
-                postData += "\"assetName\": \"" + escapeQuotes(assetName) + "\"";
+                postData += "\"caseId\": \"" + sanitizePayload(caseId) + "\",";
+                postData += "\"caseDescription\": \"" + sanitizePayload(caseDescription) + "\",";
+                postData += "\"severity\": \"" + sanitizePayload(severity) + "\",";
+                postData += "\"caseNumber\": \"" + sanitizePayload(caseNumber) + "\",";
+                postData += "\"description\": \"" + sanitizePayload(description) + "\",";
+                postData += "\"priority\": \"" + sanitizePayload(priority) + "\",";
+                postData += "\"subject\": \"" + sanitizePayload(subject) + "\",";
+                postData += "\"caseType\": \"" + sanitizePayload(caseType) + "\",";
+                postData += "\"ownerEmail\": \"" + sanitizePayload(ownerEmail) + "\",";
+                postData += "\"caseStatus\": \"" + sanitizePayload(caseStatusValue) + "\",";
+                postData += "\"accountName\": \"" + sanitizePayload(accountName) + "\",";
+                postData += "\"assetName\": \"" + sanitizePayload(assetName) + "\"";
                 postData += "}";
 
                 client.UploadString(OG_URL, postData);
@@ -80,13 +80,17 @@ public class OpsGenieAlertTrigger : ActiveTrigger<Force__Case>
         }
 	}
 	
-    private String escapeQuotes(String str)
+    private String sanitizePayload(String str)
     {
         if (str == null)
         {
             return null;
         }
 
-        return str.Replace("\"", "\\\"");
+        str = str.Replace("\"", "\\\"");
+        str = str.Replace("\r\n", " ");
+        str = str.Replace("\n", " ");
+        
+        return str;
     }
 }
