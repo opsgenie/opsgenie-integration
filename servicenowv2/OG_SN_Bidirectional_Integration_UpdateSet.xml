@@ -202,9 +202,11 @@
 	
 	var alertAlias = body.alias;
 	var groupName = body.group;
-	
+
 	var inc = new GlideRecord('incident');
 	inc.addQuery("x_86994_opsgenie_alert_alias", alertAlias);
+    inc.addQuery("state", "!=", 6);
+    inc.addQuery("state", "!=", 7);
 	inc.query();
 	
 	if (inc.next()) {
@@ -215,7 +217,7 @@
 
 		if (group.next()) {
 			inc.assignment_group = group.sys_id.toString();
-
+            inc.setWorkflow(false);
 			inc.update();
 			gs.info("[Assign Incident To Group] Processing finished.");
 		} else {
@@ -447,15 +449,17 @@
 	var closeNote = body.workNotes;
 	
 	var inc = new GlideRecord('incident');
-	
+
 	inc.addQuery("x_86994_opsgenie_alert_alias", alertAlias);
+    inc.addQuery("state", "!=", 6);
+    inc.addQuery("state", "!=", 7);
 	inc.query();
 	
 	if (inc.next()) {
 		inc.close_notes = closeNote;
 		inc.close_code = "Solved (Permanently)";
 		inc.state = 7;
-		
+        inc.setWorkflow(false);
 		inc.update();
 		gs.info("[Close Incident] Processing finished.");
 	} else {
@@ -1042,17 +1046,17 @@ OpsGenie_Configuration.prototype = Object.extendsObject(global.AbstractAjaxProce
 	var closeNote = body.workNotes;
 	
 	var inc = new GlideRecord('incident');
-	
+
 	inc.addQuery("x_86994_opsgenie_alert_alias", alertAlias);
+    inc.addQuery("state", "!=", 6);
+    inc.addQuery("state", "!=", 7);
 	inc.query();
 	
 	if (inc.next()) {
 		inc.close_notes = closeNote;
 		inc.close_code = "Solved (Permanently)";
 		inc.state = 6;
-		
-		gs.info(inc);
-		
+        inc.setWorkflow(false);
 		inc.update();
 		gs.info("[Resolve Incident] Processing finished.");
 	} else {
@@ -2463,8 +2467,10 @@ OpsGenie_Client.prototype = {
 	var assignedTo = body.assignedTo;
 	
 	var inc = new GlideRecord('incident');
-	
+
 	inc.addQuery("x_86994_opsgenie_alert_alias", alertAlias);
+    inc.addQuery("state", "!=", 6);
+    inc.addQuery("state", "!=", 7);
 	inc.query();
 	
 	if (inc.next()) {
@@ -2475,7 +2481,7 @@ OpsGenie_Client.prototype = {
 
 		if (user.next()) {
 			inc.assigned_to = user.sys_id.toString();
-
+            inc.setWorkflow(false);
 			inc.update();
 			gs.info("[Assign User To Incident] Processing finished.");
 		} else {
@@ -3116,26 +3122,24 @@ OpsGenie_Client.prototype = {
 <comments/>
 <name>sys_ws_operation_38f88335db38320030237d9ebf9619ca</name>
 <payload>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;record_update table="sys_ws_operation"&gt;&lt;sys_ws_operation action="INSERT_OR_UPDATE"&gt;&lt;active&gt;true&lt;/active&gt;&lt;consumes&gt;application/json,application/xml,text/xml&lt;/consumes&gt;&lt;consumes_customized&gt;false&lt;/consumes_customized&gt;&lt;default_operation_uri/&gt;&lt;enforce_acl/&gt;&lt;http_method&gt;POST&lt;/http_method&gt;&lt;name&gt;addWorkNotes&lt;/name&gt;&lt;operation_script&gt;&lt;![CDATA[(function process(/*RESTAPIRequest*/ request, /*RESTAPIResponse*/ response) {
-	var body = request.body.data;
-	
-	gs.info("[Add Note To Incident] Processing message: {alias=" + body.alias + ", note=" + body.workNotes + "}");
-	
-	var alertAlias = body.alias;
-	var note = body.workNotes;
-	
-	var inc = new GlideRecord('incident');
-	
-	inc.addQuery("x_86994_opsgenie_alert_alias", alertAlias);
-	inc.query();
-	
-	if (inc.next()) {
-		inc.work_notes = note;
-		
-		inc.update();
-		gs.info("[Add Note To Incident] Processing finished.");
-	} else {
-		gs.error('[Add Note To Incident] Unable to find incident with x_86994_opsgenie_alert_alias : ' + alertAlias);
-	}
+    var body = request.body.data;
+
+    gs.info("[Add Note To Incident] Processing message: {alias=" + body.alias + ", note=" + body.workNotes + "}");
+
+    var alertAlias = body.alias;
+    var note = body.workNotes;
+
+    var inc = new GlideRecord('incident');
+    inc.addQuery("x_86994_opsgenie_alert_alias", alertAlias);
+    inc.query();
+
+    if (inc.next()) {
+        inc.work_notes = note;
+        inc.update();
+        gs.info("[Add Note To Incident] Processing finished.");
+    } else {
+        gs.error('[Add Note To Incident] Unable to find incident with x_86994_opsgenie_alert_alias : ' + alertAlias);
+    }
 })(request, response);]]&gt;&lt;/operation_script&gt;&lt;operation_uri&gt;/api/x_86994_opsgenie/opsgenie2sn/addWorkNotes&lt;/operation_uri&gt;&lt;produces&gt;application/json,application/xml,text/xml&lt;/produces&gt;&lt;produces_customized&gt;false&lt;/produces_customized&gt;&lt;relative_path&gt;/addWorkNotes&lt;/relative_path&gt;&lt;request_example/&gt;&lt;requires_acl_authorization&gt;false&lt;/requires_acl_authorization&gt;&lt;requires_authentication&gt;false&lt;/requires_authentication&gt;&lt;short_description/&gt;&lt;sys_class_name&gt;sys_ws_operation&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2017-02-08 14:03:52&lt;/sys_created_on&gt;&lt;sys_customer_update&gt;true&lt;/sys_customer_update&gt;&lt;sys_id&gt;38f88335db38320030237d9ebf9619ca&lt;/sys_id&gt;&lt;sys_mod_count&gt;3&lt;/sys_mod_count&gt;&lt;sys_name&gt;addWorkNotes&lt;/sys_name&gt;&lt;sys_package display_value="OpsGenie" source="x_86994_opsgenie"&gt;98838612db00320030237d9ebf9619ae&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_replace_on_upgrade&gt;false&lt;/sys_replace_on_upgrade&gt;&lt;sys_scope display_value="OpsGenie"&gt;98838612db00320030237d9ebf9619ae&lt;/sys_scope&gt;&lt;sys_update_name&gt;sys_ws_operation_38f88335db38320030237d9ebf9619ca&lt;/sys_update_name&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2017-02-21 07:41:04&lt;/sys_updated_on&gt;&lt;web_service_definition display_value="opsgenie2sn"&gt;c08571f8dbd4320030237d9ebf961972&lt;/web_service_definition&gt;&lt;web_service_version/&gt;&lt;/sys_ws_operation&gt;&lt;/record_update&gt;</payload>
 <remote_update_set display_value="OpsGenie">c8e56bc04f200300e6937d218110c79f</remote_update_set>
 <replace_on_upgrade>false</replace_on_upgrade>
