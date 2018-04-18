@@ -1,0 +1,35 @@
+configurations {
+    cherwell
+}
+task prepareCherwell(dependsOn: 'generateIntegration') << {
+    def destination = "${project.buildDir}/cherwell"
+    copy {
+        from "${project.buildDir}/opsgenie-integration"
+        into "${destination}/OpsGenie/CherwellIntegration/opsgenie-integration"
+    }
+
+    copy {
+        from "${project.projectDir}/cherwell/marid"
+        into "${destination}/OpsGenie/CherwellIntegration/opsgenie-integration/marid"
+    }
+    copy {
+        from "${project.projectDir}/cherwell/cherwell"
+        into "${destination}/OpsGenie/CherwellIntegration/"
+    }
+
+    mergeConfFile("${project.buildDir}/opsgenie-integration/conf/opsgenie-integration.conf",
+            "${project.projectDir}/cherwell/common/conf/opsgenie-integration.conf.part",
+            "${destination}/OpsGenie/CherwellIntegration/opsgenie-integration/conf/opsgenie-integration.conf")
+}
+
+task packageCherwellZip(dependsOn: 'prepareCherwell', type: Zip) {
+    from "${project.buildDir}/cherwell"
+    baseName = 'opsgenie-cherwell'
+    version = project.ext.versions.getProperty('cherwell') + project.ext.versionSuffix
+}
+
+task packageCherwellOS(dependsOn: ['generateIntegrationForNative', 'prepareCherwell']) << {
+    copyNativeFiles('cherwell')
+}
+
+task packageCherwell(dependsOn: ['packageCherwellZip', 'packageCherwellOS'])

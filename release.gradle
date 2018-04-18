@@ -51,7 +51,8 @@ def getMaridBasedPackageNames() {
             "librenms",
             "prtg",
             "bmcFootPrintsV12",
-            "bmcFootPrintsV11"
+            "bmcFootPrintsV11",
+            "cherwell"
             ]
 }
 
@@ -89,6 +90,7 @@ def generateDownloadsProperties() {
                     .replace('[[opsview]]', project.ext.versions.getProperty('opsview'))
                     .replace('[[bmcFootPrintsV12]]', project.ext.versions.getProperty('bmcFootPrintsV12'))
                     .replace('[[bmcFootPrintsV11]]', project.ext.versions.getProperty('bmcFootPrintsV11'))
+                    .replace('[[cherwell]]', project.ext.versions.getProperty('cherwell'))
         }
         into "${buildDir}/distributions"
         rename "downloads.template.properties", "downloads.properties"

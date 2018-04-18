@@ -489,6 +489,7 @@ apply from: 'librenms/librenms.gradle'
 apply from: 'prtg/prtg.gradle'
 apply from: 'bmcFootPrintsV12/bmcFootPrintsV12.gradle'
 apply from: 'bmcFootPrintsV11/bmcFootPrintsV11.gradle'
+apply from: 'cherwell/cherwell.gradle'
 
 
 task packageIntegrations(dependsOn: [
@@ -519,7 +520,8 @@ task packageIntegrations(dependsOn: [
                                 'packageLibreNMS',
                                 'packagePrtg',
                                 'packageBMCFootPrintsV12',
-                                'packageBMCFootPrintsV11'
+                                'packageBMCFootPrintsV11',
+                                'packageCherwell'
 ])
 
 task packageAll(dependsOn: ['packageIntegrations', 'packageLamp'])

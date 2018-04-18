@@ -1,0 +1,12 @@
+####################################### CHERWELL CONFIGURATION #######################################
+cherwell.apiUrl=
+cherwell.username=
+cherwell.password=
+cherwell.clientId=
+
+######################################## CHERWELL INTEGRATION - ALERT ACTION CONFIGURATION ######################
+mappedActions.addJournal.script=cherwellActionExecutor.groovy
+mappedActions.createIncident.script=cherwellActionExecutor.groovy
+mappedActions.resolveIncident.script=cherwellActionExecutor.groovy
+mappedActions.inProgressIncident.script=cherwellActionExecutor.groovy
+##############################################################################################################
