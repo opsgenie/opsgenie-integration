@@ -43,6 +43,7 @@ def getMaridBasedPackageNames() {
             "xmpp",
             "solarwinds",
             "solarwindsmspncentral",
+            "solarwindswebhelpdesk",
             "webex",
             "dynatraceappmon",
             "jira",
@@ -75,6 +76,7 @@ def generateDownloadsProperties() {
                     .replace('[[icinga2]]', project.ext.versions.getProperty('icinga2'))
                     .replace('[[solarwinds]]', project.ext.versions.getProperty('solarwinds'))
                     .replace('[[solarwindsmspncentral]]', project.ext.versions.getProperty('solarwindsmspncentral'))
+                    .replace('[[solarwindswebhelpdesk]]', project.ext.versions.getProperty('solarwindswebhelpdesk'))
                     .replace('[[oem]]', project.ext.versions.getProperty('oem'))
                     .replace('[[vcenter]]', project.ext.versions.getProperty('vcenter'))
                     .replace('[[xmpp]]', project.ext.versions.getProperty('xmpp'))
