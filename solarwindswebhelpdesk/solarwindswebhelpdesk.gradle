@@ -1,0 +1,42 @@
+configurations {
+    solarwindswebhelpdesk
+}
+dependencies {
+    solarwindswebhelpdesk 'com.github.groovy-wslite:groovy-wslite:1.1.2'
+}
+task prepareSolarwindswebhelpdesk(dependsOn: 'generateIntegration') << {
+    def destination = "${project.buildDir}/solarwindswebhelpdesk"
+    copy {
+        from "${project.buildDir}/opsgenie-integration"
+        into "${destination}"
+    }
+
+    copy {
+        from "${project.projectDir}/solarwindswebhelpdesk/marid"
+        into "${destination}/marid"
+    }
+
+    mergeConfFile("${project.buildDir}/opsgenie-integration/conf/opsgenie-integration.conf",
+            "${project.projectDir}/solarwindswebhelpdesk/common/conf/opsgenie-integration.conf.part",
+            "${destination}/marid/conf/marid.conf")
+
+    delete "${destination}/conf"
+}
+
+task packageSolarwindswebhelpdeskZip(dependsOn: 'prepareSolarwindswebhelpdesk', type: Zip) {
+    from "${project.buildDir}/solarwindswebhelpdesk"
+    baseName = 'opsgenie-solarwindswebhelpdesk'
+    version = project.ext.versions.getProperty('solarwindswebhelpdesk') + project.ext.versionSuffix
+}
+
+task packageSolarwindswebhelpdeskOs(dependsOn: ['generateIntegrationForNative', 'prepareSolarwindswebhelpdesk']) << {
+    copyNativeFiles('solarwindswebhelpdesk')
+
+    buildRpm('solarwindswebhelpdesk', 'opsgenie-solarwindswebhelpdesk', 'OpsGenie - SolarwindsWebHelpDesk integration files including marid',
+            [:], [:])
+
+    buildDeb('solarwindswebhelpdesk', 'opsgenie-solarwindswebhelpdesk', 'OpsGenie - SolarwindsWebHelpDesk integration files including marid',
+            [:], [:])
+}
+
+task packageSolarwindswebhelpdesk(dependsOn: ['packageSolarwindswebhelpdeskZip', 'packageSolarwindswebhelpdeskOs'])

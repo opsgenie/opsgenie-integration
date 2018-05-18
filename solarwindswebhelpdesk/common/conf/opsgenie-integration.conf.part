@@ -1,0 +1,8 @@
+######################################## SOLARWINDS CONFIGURATION #######################################
+solarwindswebhelpdesk.serverURL=
+solarwindswebhelpdesk.apiToken=
+######################################## SOLARWINDS INTEGRATION - ACTION MAPPING CONFIGURATION ######################
+actions.Acknowledge.script=solarwindsWebHelpDeskActionExecutor.groovy
+actions.AddNote.script=solarwindsWebHelpDeskActionExecutor.groovy
+actions.Close.script=solarwindsWebHelpDeskActionExecutor.groovy
+##############################################################################################################
