@@ -1,0 +1,79 @@
+trigger opsgenieTrigger on Case (after insert, after update) {
+	string endpoint = <OPSGENIE_API_URL>;
+	Case obj = Trigger.new[0];
+
+  string id=obj.Id;
+	string ownerId=obj.OwnerId;
+    boolean isDeleted = obj.IsDeleted;
+    string caseNumber = obj.CaseNumber;
+    string contactId = obj.ContactId;
+    string accountId = obj.AccountId;
+    string assetId = obj.AssetId;
+    string parentId = obj.ParentId;
+    string suppliedName = obj.SuppliedName;
+    string suppliedEmail = obj.SuppliedEmail;
+    string suppliedCompany = obj.SuppliedCompany;
+    string suppliedPhone = obj.SuppliedPhone;
+    string typeOfCase = obj.Type;
+    string status = obj.Status;
+    string reason = obj.Reason;
+    string origin = obj.Origin;
+    string subject = obj.Subject;
+    string description = obj.Description;
+    boolean isClosed = obj.IsClosed;
+    string priority = obj.Priority;
+    datetime closedDate = obj.ClosedDate;
+    boolean isEscalated = obj.IsEscalated;
+    boolean isClosedOnCreate = obj.IsClosedOnCreate;
+    datetime createdDate = obj.CreatedDate;
+    string createdById = obj.CreatedById;
+    datetime lastModifiedDate = obj.LastModifiedDate;
+    string lastModifiedById = obj.LastModifiedById;
+    datetime systemModstamp = obj.SystemModstamp;
+    string contactPhone = obj.ContactPhone;
+    string contactMobile = obj.ContactMobile;
+    string contactFax = obj.ContactFax;
+    string engineeringReqNumber = obj.EngineeringReqNumber__c;
+    string product = obj.Product__c;
+    string potentialLiability = obj.PotentialLiability__c;
+
+   string payload= '{'+
+'\"id\" :' + opsgenieClass.getPayloadStringByHandlingNull(id)+ ',' +
+'\"ownerId\" :' + opsgenieClass.getPayloadStringByHandlingNull(ownerId )+ ',' +
+'\"isDeleted\" :' + opsgenieClass.getPayloadStringByHandlingNull(isDeleted)+ ',' +
+'\"caseNumber\" :' + opsgenieClass.getPayloadStringByHandlingNull(caseNumber)+ ',' +
+'\"contactId\" :' + opsgenieClass.getPayloadStringByHandlingNull(contactId)+ ',' +
+'\"accountId\" :' + opsgenieClass.getPayloadStringByHandlingNull(accountId)+ ',' +
+'\"assetId\" :' + opsgenieClass.getPayloadStringByHandlingNull(assetId)+ ',' +
+'\"priority\" :' + opsgenieClass.getPayloadStringByHandlingNull(priority)+ ',' +
+'\"parentId\" :' + opsgenieClass.getPayloadStringByHandlingNull(parentId)+ ',' +
+'\"suppliedName\" :' + opsgenieClass.getPayloadStringByHandlingNull(suppliedName)+ ',' +
+'\"suppliedEmail\" :' + opsgenieClass.getPayloadStringByHandlingNull(suppliedEmail)+ ',' +
+'\"suppliedCompany\" :' + opsgenieClass.getPayloadStringByHandlingNull(suppliedCompany)+ ',' +
+'\"suppliedPhone\" :' + opsgenieClass.getPayloadStringByHandlingNull(suppliedPhone)+ ',' +
+'\"typeOfCase\" :' + opsgenieClass.getPayloadStringByHandlingNull(typeOfCase)+ ',' +
+'\"status\" :' + opsgenieClass.getPayloadStringByHandlingNull(status)+ ',' +
+'\"reason\" :' + opsgenieClass.getPayloadStringByHandlingNull(reason)+ ',' +
+'\"origin\" :' + opsgenieClass.getPayloadStringByHandlingNull(origin)+ ',' +
+'\"subject\" :' + opsgenieClass.getPayloadStringByHandlingNull(subject)+ ',' +
+'\"description\" :' + opsgenieClass.getPayloadStringByHandlingNull(description)+ ',' +
+'\"isClosed\" :' + opsgenieClass.getPayloadStringByHandlingNull(isClosed)+ ',' +
+'\"closedDate\" :' + opsgenieClass.getPayloadStringByHandlingNull(closedDate)+ ',' +
+'\"isEscalated\" :' + opsgenieClass.getPayloadStringByHandlingNull(isEscalated)+ ',' +
+'\"isClosedOnCreate\" :' + opsgenieClass.getPayloadStringByHandlingNull(isClosedOnCreate)+ ',' +
+'\"createdDate\" :' + opsgenieClass.getPayloadStringByHandlingNull(createdDate)+ ',' +
+'\"createdById\" :' + opsgenieClass.getPayloadStringByHandlingNull(createdById)+ ',' +
+'\"lastModifiedDate\" :' + opsgenieClass.getPayloadStringByHandlingNull(lastModifiedDate)+ ',' +
+'\"systemModstamp\" :' +opsgenieClass.getPayloadStringByHandlingNull(systemModstamp)+ ',' +
+'\"contactPhone\" :' + opsgenieClass.getPayloadStringByHandlingNull(contactPhone) + ',' +
+'\"contactMobile\" :' + opsgenieClass.getPayloadStringByHandlingNull(contactMobile)+ ',' +
+'\"contactFax\" :' + opsgenieClass.getPayloadStringByHandlingNull(contactFax)+ ',' +
+'\"engineeringReqNumber\" :' + opsgenieClass.getPayloadStringByHandlingNull(engineeringReqNumber)+ ',' +
+'\"product\" :' + opsgenieClass.getPayloadStringByHandlingNull(product)+ ',' +
+'\"potentialLiability\" :' + opsgenieClass.getPayloadStringByHandlingNull(potentialLiability)+
+'}';
+
+  opsgenieClass.xRESTCall(endpoint ,payload);
+
+
+}

@@ -1,0 +1,25 @@
+global class opsgenieClass {
+  @future(callout=true)
+  WebService static void xRESTCall(String endpoint, String payload){
+    HttpRequest req = new HttpRequest();
+    req.setEndpoint(endpoint);
+    req.setMethod('POST');
+    req.setBody(payload);
+    req.setHeader( 'Content-Type', 'application/json' );
+    Http http = new Http();
+    HTTPResponse res = http.send(req);
+    System.debug(' Response: ' + res.getBody());
+  }
+  global static string getPayloadStringByHandlingNull(String value){
+  return value==null?null:'"'+value+'"';
+  }
+  global static string getPayloadStringByHandlingNull(DateTime value){
+  return value==null?null:'"'+value+'"';
+  }
+  global static string getPayloadStringByHandlingNull(Decimal value){
+  return value==null?null:'"'+value+'"';
+  }
+  global static string getPayloadStringByHandlingNull(Boolean value){
+  return value==null?null:'"'+value+'"';
+  }
+}
