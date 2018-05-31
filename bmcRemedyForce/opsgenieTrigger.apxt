@@ -71,7 +71,16 @@ string externalticketref=obj.External_Ticket_Ref__c;
 string affectedapplication=obj.Affected_Application__c;
 string affectedhardware=obj.Affected_Hardware__c;
 Decimal timetoclose=obj.BMCServiceDesk__RF_TimeToClose__c;
-
+string customField1='';
+string customField2='';
+string customField3='';
+string customField4='';
+string customField5='';
+string customField6='';
+string customField7='';
+string customField8='';
+string customField9='';
+string customField10='';
 
 string payload= '{'+
 '\"id\" :' + opsgenieClass.getPayloadStringByHandlingNull(id)+ ',' +
@@ -140,7 +149,17 @@ string payload= '{'+
 '\"externalTicketRef\" :' + opsgenieClass.getPayloadStringByHandlingNull(externalticketref)+ ',' +
 '\"affectedApplication\" :' + opsgenieClass.getPayloadStringByHandlingNull(affectedapplication)+ ',' +
 '\"affectedHardware\" :' + opsgenieClass.getPayloadStringByHandlingNull(affectedhardware)+ ',' +
-'\"timeToClose\" :' + opsgenieClass.getPayloadStringByHandlingNull(timetoclose)+
+'\"timeToClose\" :' + opsgenieClass.getPayloadStringByHandlingNull(timetoclose) +',' +
+'\"customField1\" :' + opsgenieClass.getPayloadStringByHandlingNull(customField1) +',' +
+'\"customField2\" :' + opsgenieClass.getPayloadStringByHandlingNull(customField2) +',' +
+'\"customField3\" :' + opsgenieClass.getPayloadStringByHandlingNull(customField3) +',' +
+'\"customField4\" :' + opsgenieClass.getPayloadStringByHandlingNull(customField4) +',' +
+'\"customField5\" :' + opsgenieClass.getPayloadStringByHandlingNull(customField5) +',' +
+'\"customField6\" :' + opsgenieClass.getPayloadStringByHandlingNull(customField6) +',' +
+'\"customField7\" :' + opsgenieClass.getPayloadStringByHandlingNull(customField7) +',' +
+'\"customField8\" :' + opsgenieClass.getPayloadStringByHandlingNull(customField8) +',' +
+'\"customField9\" :' + opsgenieClass.getPayloadStringByHandlingNull(customField9) +',' +
+'\"customField10\" :' + opsgenieClass.getPayloadStringByHandlingNull(customField10) +
 '}';
 opsgenieClass.xRESTCall(endpoint+'?apiKey='+apiKey,payload);
 }
