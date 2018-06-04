@@ -1,0 +1,10 @@
+<setup>
+    <block title="Setup OpsGenie Incident Management for Splunk ITSI" endpoint="admin/alert_actions"
+           entity="opsgenie_itsi">
+        <text>OpsGenie Configuration Settings</text>
+        <input field="param.opsgenie_url">
+            <label>OpsGenie API URL (required)</label>
+            <type>text</type>
+        </input>
+    </block>
+</setup>

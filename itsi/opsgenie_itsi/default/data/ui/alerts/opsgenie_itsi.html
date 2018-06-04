@@ -1,0 +1,31 @@
+<form class="form-horizontal form-complex">
+    <div class="control-group">
+        <label class="control-label" for="action.opsgenie_itsi.param.opsgenie_url">
+            OpsGenie API URL
+            <span class="required">*</span>
+        </label>
+        <div class="controls">
+            <input type="text"
+                   name="action.opsgenie_itsi.param.opsgenie_url" id="opsgenie_url"/>
+            <span class="help-block">
+                Copy the URL shown on the Splunk ITSI Integration page in OpsGenie and enter it here.
+            </span>
+        </div>
+    </div>
+
+    <div class="control-group">
+        <label class="control-label" for="action.opsgenie_itsi.param.priority">
+            Priority
+            <span class="required">*</span>
+        </label>
+        <div class="controls">
+            <select name="action.opsgenie_itsi.param.priority" id="opsgenie_itsi_priority">
+                <option value="P1">P1</option>
+                <option value="P2">P2</option>
+                <option value="P3">P3</option>
+                <option value="P4">P4</option>
+                <option value="P5">P5</option>
+            </select>
+        </div>
+    </div>
+</form>
