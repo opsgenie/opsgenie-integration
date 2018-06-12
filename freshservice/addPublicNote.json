@@ -1,0 +1,8 @@
+{
+  "freshdesk_webhook": {
+    "ticket_id": "{{ticket.id}}",
+    "tags": "{{ticket.tags}}",
+    "ticket_latest_public_comment": "{{ticket.latest_public_comment}}",
+    "triggered_event": "ticket_action:note_type"
+  }
+}
