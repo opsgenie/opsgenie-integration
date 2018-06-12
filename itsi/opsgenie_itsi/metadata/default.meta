@@ -1,0 +1,6 @@
+[]
+access = read : [ * ], write : [ * ]
+export = system
+
+[app]
+access = read : [ admin ], write : [ admin ]

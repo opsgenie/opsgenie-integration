@@ -1,0 +1,10 @@
+<dashboard script="setup.js" isVisible="false">
+    <label></label>
+    <row>
+        <panel>
+            <html>
+                Please wait while we redirect you to the setup screen...
+            </html>
+        </panel>
+    </row>
+</dashboard>
