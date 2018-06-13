@@ -25,23 +25,34 @@ task prepareBMCFootPrintsV11(dependsOn: 'generateIntegration') << {
             "${destination}/opsgenie-integration/conf/opsgenie-integration.conf")
 }
 
-task packageBMCFootPrintsV11Zip(dependsOn: 'prepareBMCFootPrintsV11', type: Zip) {
-    doFirst {
-        delete "${project.buildDir}/bmcFootPrintsV11/bmcFootPrintsV11/bmcFootPrints2opsgenie"
+task prepareBMCFootPrintsV11Zip(dependsOn: 'generateIntegration') << {
+    def destination = "${project.buildDir}/bmcFootPrintsV11"
+    delete "${project.buildDir}/bmcFootPrintsV11/bmcFootPrintsV11"
+    copy {
+        from "${project.buildDir}/opsgenie-integration"
+        into "${destination}/opsgenie-integration"
+    }
 
-        copy {
-            from "${project.buildDir}/bmcFootPrintsV11/bmcFootPrintsV11"
-            into "${project.buildDir}/bmcFootPrintsV11/opsgenie-integration/bmcFootPrintsV11"
-        }
+    copy {
+        from "${project.projectDir}/bmcFootPrintsV11/marid"
+        into "${destination}/opsgenie-integration/marid"
+    }
 
-        delete "${project.buildDir}/bmcFootPrintsV11/bmcFootPrintsV11"
+    copy {
+        from "${project.projectDir}/bmcFootPrintsV11/bmcFootPrintsV11/bmcFootPrints2opsgenie.go"
+        into "${destination}/opsgenie-integration/bmcFootPrintsV11"
     }
 
     copy {
         from "${project.projectDir}/bmcFootPrintsV11/bmcFootPrintsV11/bmcFootPrints2opsgenie.exe"
-        into "${project.buildDir}/bmcFootPrintsV11/bmcFootPrintsV11"
+        into "${destination}/opsgenie-integration/bmcFootPrintsV11"
     }
+    mergeConfFile("${project.buildDir}/opsgenie-integration/conf/opsgenie-integration.conf",
+            "${projectDir}/bmcFootPrintsV11/common/opsgenie-integration.conf.part",
+            "${destination}/opsgenie-integration/conf/opsgenie-integration.conf")
+}
 
+task packageBMCFootPrintsV11Zip(dependsOn: 'prepareBMCFootPrintsV11Zip', type: Zip) {
     from "${project.buildDir}/bmcFootPrintsV11"
     baseName = 'opsgenie-bmcFootPrints-v11'
     version = project.ext.versions.getProperty('bmcFootPrintsV11') + project.ext.versionSuffix
