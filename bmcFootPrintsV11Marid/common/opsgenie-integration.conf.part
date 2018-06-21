@@ -1,0 +1,6 @@
+######################################## BMC FOOTPRINTS INTEGRATION - ALERT ACTION CONFIGURATION ######################
+mappedActions.createIncident.script=bmcFootPrintsActionExecutor.groovy
+mappedActions.createProblem.script=bmcFootPrintsActionExecutor.groovy
+mappedActions.updateDescription.script=bmcFootPrintsActionExecutor.groovy
+mappedActions.updatePriority.script=bmcFootPrintsActionExecutor.groovy
+mappedActions.resolveIssue.script=bmcFootPrintsActionExecutor.groovy

@@ -1,0 +1,37 @@
+task prepareBmcRemedyIncoming() << {
+    def destination = "${project.buildDir}/bmcRemedy"
+    copy {
+        from "${project.buildDir}/opsgenie-integration"
+        into "${destination}/opsgenie-integration"
+    }
+
+    copy {
+        from "${project.projectDir}/bmcRemedyIncoming/bmcRemedy/bmcFootPrints2opsgenie.go"
+        into "${destination}/bmcRemedy"
+    }
+    copy {
+        from "${project.projectDir}/bmcRemedyIncoming/bmcRemedy/OpsGenieFilter.def"
+        into "${destination}/bmcRemedy"
+    }
+    copy {
+        from "${project.projectDir}/bmcRemedyIncoming/bmcRemedy/bmcFootPrints2opsgenie"
+        into "${destination}/bmcRemedy"
+    }
+    copy {
+        from "${project.projectDir}/bmcRemedyIncoming/bmcRemedy/bmcFootPrints2opsgenie.exe"
+        into "${destination}/bmcRemedy"
+    }
+
+    copy {
+        from "${project.projectDir}/bmcRemedyIncoming/common/opsgenie-integration.conf"
+        into "${destination}/bmcRemedy/opsgenie-integration/conf"
+    }
+}
+task packageBmcRemedyIncomingZip(dependsOn: 'prepareBmcRemedyIncoming', type: Zip) {
+    from "${project.buildDir}/bmcRemedy"
+    baseName = 'opsgenie-bmcRemedy'
+    version = project.ext.versions.getProperty('bmcRemedy') + project.ext.versionSuffix
+
+
+}
+task packageBmcRemedyIncoming(dependsOn: ['packageBmcRemedyIncomingZip'])

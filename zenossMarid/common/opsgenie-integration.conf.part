@@ -1,0 +1,7 @@
+########################################ZENOSS INTEGRATION - ALERT ACTION CONFIGURATION ######################
+actions.Acknowledge.script=zenossActionExecutor.groovy
+actions.Close.script=zenossActionExecutor.groovy
+
+zenoss.command_url=http://localhost:8080/zport/dmd/evconsole_router
+zenoss.username=Admin
+zenoss.password=zenoss

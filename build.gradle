@@ -464,14 +464,26 @@ apply from: 'sdk.gradle'
 
 //apply scripts
 apply from: 'nagios/nagios.gradle'
+apply from: 'nagiosIncoming/nagiosIncoming.gradle'
+apply from: 'nagiosMarid/nagiosMarid.gradle'
 apply from: 'nagiosxi/nagiosxi.gradle'
+apply from: 'nagiosxiIncoming/nagiosxiIncoming.gradle'
+apply from: 'nagiosxiMarid/nagiosxiMarid.gradle'
 apply from: 'netcool/netcool.gradle'
 apply from: 'zabbix/zabbix.gradle'
+apply from: 'zabbixMarid/zabbixMarid.gradle'
+apply from: 'zabbixIncoming/zabbixIncoming.gradle'
 apply from: 'redmine/redmine.gradle'
 apply from: 'zenoss/zenoss.gradle'
+apply from: 'zenossIncoming/zenossIncoming.gradle'
+apply from: 'zenossMarid/zenossMarid.gradle'
 apply from: 'icinga/icinga.gradle'
+apply from: 'icingaIncoming/icingaIncoming.gradle'
+apply from: 'icingaMarid/icingaMarid.gradle'
 apply from: 'zendesk/zendesk.gradle'
 apply from: 'icinga2/icinga2.gradle'
+apply from: 'icinga2Incoming/icinga2Incoming.gradle'
+apply from: 'icinga2Marid/icinga2Marid.gradle'
 apply from: 'solarwinds/solarwinds.gradle'
 apply from: 'solarwindsmspncentral/solarwindsmspncentral.gradle'
 apply from: 'solarwindswebhelpdesk/solarwindswebhelpdesk.gradle'
@@ -485,11 +497,17 @@ apply from: 'jira/jira.gradle'
 apply from: 'dynatraceappmon/dynatraceappmon.gradle'
 apply from: 'op5/op5.gradle'
 apply from: 'bmcRemedy/bmcRemedy.gradle'
+apply from: 'bmcRemedyIncoming/bmcRemedyIncoming.gradle'
+apply from: 'bmcRemedyMarid/bmcRemedyMarid.gradle'
 apply from: 'opsview/opsview.gradle'
 apply from: 'librenms/librenms.gradle'
 apply from: 'prtg/prtg.gradle'
 apply from: 'bmcFootPrintsV12/bmcFootPrintsV12.gradle'
+apply from: 'bmcFootPrintsV12Incoming/bmcFootPrintsV12Incoming.gradle'
+apply from: 'bmcFootPrintsV12Marid/bmcFootPrintsV12Marid.gradle'
 apply from: 'bmcFootPrintsV11/bmcFootPrintsV11.gradle'
+apply from: 'bmcFootPrintsV11Incoming/bmcFootPrintsV11Incoming.gradle'
+apply from: 'bmcFootPrintsV11Marid/bmcFootPrintsV11Marid.gradle'
 apply from: 'cherwell/cherwell.gradle'
 apply from: 'activeDirectory/activeDirectory.gradle'
 
@@ -499,14 +517,26 @@ task packageIntegrations(dependsOn: [
 //                              'packageSplunk',
 //                              'packageOpennms',
                                 'packageNagios',
+                                'packageNagiosIncoming',
+                                'packageNagiosMarid',
                                 'packageNagiosxi',
+                                'packageNagiosxiIncoming',
+                                'packageNagiosxiMarid',
                                 'packageNetcool',
                                 'packageZabbix',
+                                'packageZabbixIncoming',
+                                'packageZabbixMarid',
                                 'packageRedmine',
                                 'packageZenoss',
+                                'packageZenossIncoming',
+                                'packageZenossMarid',
                                 'packageIcinga',
+                                'packageIcingaIncoming',
+                                'packageIcingaMarid',
                                 'packageZendesk',
                                 'packageIcinga2',
+                                'packageIcinga2Incoming',
+                                'packageIcinga2Marid',
                                 'packageSolarwinds',
                                 'packageSolarwindsMSPNcentral',
                                 'packageSolarwindswebhelpdesk',
@@ -518,12 +548,18 @@ task packageIntegrations(dependsOn: [
                                 'packageDynatraceAppMon',
                                 'packageOP5',
                                 'packageBMCRemedy',
+                                'packageBMCRemedyIncoming',
+                                'packageBMCRemedyMarid',
                                 'packageOpsview',
                                 'packageVCSA',
                                 'packageLibreNMS',
                                 'packagePrtg',
                                 'packageBMCFootPrintsV12',
+                                'packageBMCFootPrintsV12Incoming',
+                                'packageBMCFootPrintsV12Marid',
                                 'packageBMCFootPrintsV11',
+                                'packageBMCFootPrintsV11Incoming',
+                                'packageBMCFootPrintsV11Marid',
                                 'packageCherwell'
 ])
 

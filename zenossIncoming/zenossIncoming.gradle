@@ -1,0 +1,170 @@
+task prepareZenossIncoming() << {
+    def destination = "${project.buildDir}/zenoss"
+    copy {
+        from "${project.buildDir}/opsgenie-integration"
+        into "${destination}/opsgenie-integration"
+    }
+
+    copy {
+        from "${project.projectDir}/zenossIncoming/zenoss/zenoss2opsgenie.go"
+        into "${destination}/zenoss"
+    }
+
+    copy {
+        from "${project.projectDir}/zenossIncoming/zenoss/zenoss2opsgenie"
+        into "${destination}/zenoss"
+    }
+    copy {
+        from "${project.projectDir}/zenossIncoming/zenoss/zenoss2opsgenie.exe"
+        into "${destination}/zenoss"
+    }
+
+    copy {
+        from "${project.projectDir}/zenossIncoming/common/opsgenie-integration.conf"
+        into "${destination}/zenoss/opsgenie-integration/conf"
+    }
+}
+task packageZenossIncomingZip(dependsOn: 'prepareZenossIncoming', type: Zip) {
+    from "${project.buildDir}/zenoss"
+    baseName = 'opsgenie-zenoss'
+    version = project.ext.versions.getProperty('zenoss') + project.ext.versionSuffix
+
+
+}
+
+def buildRpmForZenossIncoming(String sourceDir, String name, String descrpt, Map fileMappingInput, Map configFilesInput) {
+    def taskName = "generateRpm${sourceDir}Incoming"
+
+    def configFiles = [:]
+    configFiles.putAll(configFilesInput)
+    def fileMapping = [:]
+    fileMapping.putAll(fileMappingInput)
+
+    task "${taskName}"(type: Rpm) {
+        def packageVersion = project.ext.versions.getProperty(sourceDir) + project.ext.versionSuffix
+
+        packageName = name
+        description = descrpt
+        summary = descrpt
+        packageDescription = descrpt + ". Please see doc for details: https://www.opsgenie.com/docs/"
+        version = packageVersion.replace("-", ".");
+        os = LINUX
+        user = 'root'
+
+        release = '1.all'
+        packager = "ifountain"
+        vendor = "opsgenie"
+        url = "https://www.opsgenie.com"
+        license = "Apache License 2.0"
+        buildHost = "repo.opsgenie.com"
+        packageGroup = "System Administration Tools"
+
+
+        configFiles.put("${project.buildDir}/${sourceDir}/opsgenie-integration/conf/opsgenie-integration.conf", 'etc/opsgenie/conf')
+
+        for (def source : configFiles.keySet()) {
+            def dest = configFiles.get(source)
+            logger.info("config " + source + " - " + dest)
+            from(source) {
+                fileType CONFIG | NOREPLACE
+                into(dest)
+            }
+        }
+
+        for(def source : fileMapping.keySet()) {
+            def dest = fileMapping.get(source)
+            logger.info(source + " - " + dest)
+            from(source) {
+                into(dest)
+            }
+        }
+
+        postInstall file("${project.projectDir}/zenossIncoming/native/ogAfter.sh")
+    }
+
+    tasks[taskName].execute()
+}
+
+def buildDebForZenossIncoming(String sourceDir, String name, String descrpt, Map fileMappingInput, Map configFilesInput) {
+
+    def packageVersion = project.ext.versions.getProperty(sourceDir) + project.ext.versionSuffix
+    packageVersion = packageVersion.replace("-", ".")
+
+    def taskName = "prepareDeb${sourceDir}Incoming"
+    def dataDir = "${project.buildDir}/debian_tmp/${sourceDir}/data"
+    def controlDir = "${project.buildDir}/debian_tmp/${sourceDir}/control"
+
+    def controlTarget = "${project.buildDir}/deb/control"
+    def debVersion = version.toString().replace("-", ".")
+
+    //CONTROL
+    copy {
+        from "${project.projectDir}/zenossIncoming/native/conffiles_deb"
+        into controlDir
+        rename "conffiles_deb", "conffiles"
+    }
+
+    copy {
+        from "${project.projectDir}/zenossIncoming/native/control_deb"
+        filter {
+            it.replace('[description]', "'OpsGenie client files'")
+                    .replace('[version]', debVersion)
+                    .replace('[package-name]', "opsgenie-oem")
+        }
+        into controlDir
+        rename "control_deb", "control"
+    }
+
+    def configFiles = [:]
+    configFiles.putAll(configFilesInput)
+    def fileMapping = [:]
+    fileMapping.putAll(fileMappingInput)
+
+    task "${taskName}" << {
+
+        fileMapping.put("${project.buildDir}/${sourceDir}/opsgenie-integration/conf/opsgenie-integration.conf", 'etc/opsgenie/conf')
+
+        fileMapping.put("${project.buildDir}/${sourceDir}/opsgenie-integration/conf", 'etc/opsgenie/conf')
+
+        for(def source : fileMapping.keySet()) {
+            def dest = fileMapping.get(source)
+            logger.info(source + " - " + dest)
+            copy {
+                from(source)
+                into("${dataDir}/${dest}")
+            }
+        }
+
+        copy {
+            from "${project.projectDir}/zenossIncoming/native/ogAfter.sh"
+            into controlDir
+            rename "ogAfter.sh", "postinst"
+        }
+
+        ant {
+            taskdef(name: 'deb', classname: 'org.vafer.jdeb.ant.DebAntTask', classpath: configurations.debian.asPath)
+        }
+        ant.deb(destfile: "${project.buildDir}/distributions/${name}_${packageVersion}_all.deb", control: controlDir) {
+            ant.data(src: dataDir, type: 'directory', dst: '/')
+        }
+
+        delete "${project.buildDir}/distributions/${name}_${packageVersion}_all.changes"
+    }
+
+    tasks[taskName].execute()
+}
+
+task packageZenossIncomingOS(dependsOn: 'prepareZenossIncoming') << {
+
+    def fileMapping = [
+            "${project.projectDir}/zenossIncoming/zenoss/zenoss2opsgenie"   : "etc/opsgenie",
+            "${project.projectDir}/zenossIncoming/zenoss/zenoss2opsgenie.go": "etc/opsgenie"
+    ]
+
+    buildRpmForZenossIncoming('zenoss', 'opsgenie-zenoss', 'OpsGenie - zenoss integration files',
+            fileMapping, [:])
+
+    buildDebForZenossIncoming('zenoss', 'opsgenie-zenoss', 'OpsGenie - zenoss integration files', fileMapping, [:])
+
+}
+task packageZenossIncoming(dependsOn: ['packageZenossIncomingZip', 'packageZenossIncomingOS'])

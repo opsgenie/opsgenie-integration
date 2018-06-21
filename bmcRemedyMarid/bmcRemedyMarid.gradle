@@ -1,0 +1,24 @@
+task prepareBmcRemedyMarid(dependsOn: 'generateIntegration') << {
+    def destination = "${project.buildDir}/bmcRemedyMarid"
+    copy {
+        from "${project.buildDir}/opsgenie-integration"
+        into "${destination}/opsgenie-integration"
+    }
+
+    copy {
+        from "${project.projectDir}/bmcRemedyMarid/marid"
+        into "${destination}/opsgenie-integration/marid"
+    }
+
+    mergeConfFile("${project.buildDir}/opsgenie-integration/conf/opsgenie-integration.conf",
+            "${project.projectDir}/bmcRemedyMarid/common/opsgenie-integration.conf.part",
+            "${destination}/opsgenie-integration/conf/opsgenie-integration.conf")
+}
+
+task packageBmcRemedyMaridZip(dependsOn: 'prepareBmcRemedyMarid', type: Zip) {
+    from "${project.buildDir}/bmcRemedyMarid"
+    baseName = 'opsgenie-bmcRemedy'
+    version = project.ext.versions.getProperty('bmcRemedy') + project.ext.versionSuffix
+}
+
+task packageBmcRemedyMarid(dependsOn: ['packageBmcRemedyMaridZip'])

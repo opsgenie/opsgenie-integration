@@ -1,0 +1,6 @@
+########################################ZABBIX INTEGRATION - ALERT ACTION CONFIGURATION ######################
+actions.Acknowledge.script=zabbixActionExecutor.groovy
+
+zabbix.command_url=http://localhost/zabbix/api_jsonrpc.php
+zabbix.user=Admin
+zabbix.password=zabbix

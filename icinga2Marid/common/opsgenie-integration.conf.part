@@ -1,0 +1,26 @@
+
+######################################## ICINGA CONFIGURATION #######################################
+icinga.alert_histogram_image_url=http://localhost/icinga/cgi-bin/histogram.cgi
+icinga.trends_image_url=http://localhost/icinga/cgi-bin/trends.cgi
+icinga.command_url=http://localhost/icinga/cgi-bin/cmd.cgi
+icinga.user=icingaadmin
+icinga.password=icingaadmin
+icinga.http.timeout=30000
+
+########################################ICINGA INTEGRATION - ALERT ACTION CONFIGURATION ######################
+actions.Acknowledge.script=icingaActionExecutor.groovy
+actions.AddNote.script=icingaActionExecutor.groovy
+actions.TakeOwnership.script=icingaActionExecutor.groovy
+actions.AssignOwnership.script=icingaActionExecutor.groovy
+actions.Create.script=icingaActionExecutor.groovy
+actions.UnAcknowledge.script=icingaActionExecutor.groovy
+
+#You can configure more than one Icinga Server like the following (used in marid)
+#In order to use feature you should also set icinga_server:server1
+#icinga.server1.alert_histogram_image_url=http://icingaHost:port/icinga/cgi-bin/histogram.cgi
+#icinga.server1.trends_image_url=http://icingaHost:port/icinga/cgi-bin/trends.cgi
+#icinga.server1.command_url=http://icingaHost:port/icinga/cgi-bin/cmd.cgi
+#icinga.server1.user=icingaadmin
+#icinga.server1.password=icingaadmin
+#icinga.server1.http.timeout=30000
+#icinga.server1.http.timeout=30000

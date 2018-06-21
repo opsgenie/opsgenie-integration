@@ -1,0 +1,11 @@
+Package: [package-name]
+Version: [version]
+Architecture: all
+Description: [description]
+Depends: 
+Vendor: OpsGenie
+License: 'Apache 2.0'
+Section: default
+Priority: extra
+Homepage: http://www.opsgenie.com
+Maintainer: OpsGenie
