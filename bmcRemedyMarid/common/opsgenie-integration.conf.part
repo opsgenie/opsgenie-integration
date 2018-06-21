@@ -1,0 +1,5 @@
+######################################## BMC REMEDY INTEGRATION - ALERT ACTION CONFIGURATION ######################
+mappedActions.addWorkInfo.script=bmcRemedyActionExecutor.groovy
+mappedActions.createIncident.script=bmcRemedyActionExecutor.groovy
+mappedActions.closeIncident.script=bmcRemedyActionExecutor.groovy
+##############################################################################################################

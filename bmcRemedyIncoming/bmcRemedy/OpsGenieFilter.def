@@ -1,0 +1,26 @@
+char-set: UTF-8
+#
+#  File exported Fri Aug 18 12:32:18 UTC 2017
+#
+begin filter
+   name           : HPD:Help Desk OpsGenie Integration
+   timestamp      : 1503059514
+   owner          : appadmin
+   last-changed   : admin
+   filter-op      : 6
+   enable         : 1
+   filter-order   : 500
+   wk-conn-type   : 1
+   schema-name    : HPD:Help Desk
+   export-version : 12
+   action {
+      command     : C:\OpsGenie\BMCRemedyIntegration\bmcRemedy2opsgenie.exe --incident-id "$1000000161$" --co
+      command     : mpany "$1000000001$" --customer "$303530000$" --contact-first-name "$1000005783$" --contact-last-name "$1000005782$" --contact-company "$1000000082$" --c
+      command     : ontact-sensitivity "$1000000027$" --contact-client-type "$1000000022$" --notes "$1000000151$" --template "$303558600$" --summary "$1000000000$" --service
+      command     :  "$303544300$" --CI "$303544200$" --target-date "$1000005261$" --impact "$1000000163$" --urgency "$1000000162$" --priority "$1000000164$" --incident-type
+      command     :  "$1000000099$" --reported-source "$1000000215$" --assigned-group "$1000000217$" --assignee "$1000000218$" --vendor-group "$1000003663$" --vendor-ticket-
+      command     : number "$1000000652$" --status "$7$" --status-reason "$1000000881$" --resolution "$1000000156$"
+   }
+   object-prop    : 3\90016\4\1\1\90015\2\4\90002\4\26\Remedy Incident Management\
+   errhandler-opt : 0
+end

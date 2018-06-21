@@ -1,0 +1,26 @@
+
+######################################## NAGIOS CONFIGURATION #######################################
+nagios.alert_histogram_image_url=http://localhost/nagios/cgi-bin/histogram.cgi
+nagios.trends_image_url=http://localhost/nagios/cgi-bin/trends.cgi
+nagios.command_url=http://localhost/nagios/cgi-bin/cmd.cgi
+nagios.user=nagiosadmin
+nagios.password=admin
+nagios.http.timeout=30000
+
+########################################NAGIOS INTEGRATION - ALERT ACTION CONFIGURATION ######################
+actions.Acknowledge.script=nagiosActionExecutor.groovy
+actions.AddNote.script=nagiosActionExecutor.groovy
+actions.TakeOwnership.script=nagiosActionExecutor.groovy
+actions.AssignOwnership.script=nagiosActionExecutor.groovy
+actions.Create.script=nagiosActionExecutor.groovy
+actions.UnAcknowledge.script=nagiosActionExecutor.groovy
+
+#You can configure more than one Nagios Server like the following (used in marid)
+#In order to use feature you should also set nagios_server:server1
+#nagios.server1.alert_histogram_image_url=http://nagiosHost:port/nagios/cgi-bin/histogram.cgi
+#nagios.server1.trends_image_url=http://nagiosHost:port/nagios/cgi-bin/trends.cgi
+#nagios.server1.command_url=http://nagiosHost:port/nagios/cgi-bin/cmd.cgi
+#nagios.server1.user=nagiosadmin
+#nagios.server1.password=admin
+#nagios.server1.http.timeout=30000
+

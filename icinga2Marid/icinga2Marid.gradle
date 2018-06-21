@@ -1,0 +1,236 @@
+task prepareIcinga2Marid(dependsOn: 'generateIntegration') << {
+    def destination = "${project.buildDir}/icinga2Marid"
+    copy {
+        from "${project.buildDir}/opsgenie-integration"
+        into "${destination}/opsgenie-integration"
+    }
+
+    copy {
+        from "${project.projectDir}/icinga2Marid/marid"
+        into "${destination}/opsgenie-integration/marid"
+    }
+
+    mergeConfFile("${project.buildDir}/opsgenie-integration/conf/opsgenie-integration.conf",
+            "${project.projectDir}/icingaMarid/common/opsgenie-integration.conf.part",
+            "${destination}/opsgenie-integration/conf/opsgenie-integration.conf")
+}
+
+def buildRpmIcinga2Marid(String sourceDir, String name, String descrpt, Map fileMappingInput, Map configFilesInput) {
+    def taskName = "generateRpm${sourceDir}Marid"
+
+    def configFiles = [:]
+    configFiles.putAll(configFilesInput)
+    def fileMapping = [:]
+    fileMapping.putAll(fileMappingInput)
+
+    task "${taskName}"(type: Rpm) {
+
+        def nativeSource = "${project.buildDir}/os_client/${sourceDir}";
+
+        def packageVersion = project.ext.versions.getProperty(sourceDir) + project.ext.versionSuffix
+
+        packageName = name
+        description = descrpt
+        summary = descrpt
+        packageDescription = descrpt + ". Please see doc for details: https://www.opsgenie.com/docs/"
+        version = packageVersion.replace("-", ".");
+        os = LINUX
+        user = 'root'
+
+        release = '1.all'
+        packager = "ifountain"
+        vendor = "opsgenie"
+        url = "https://www.opsgenie.com"
+        license = "Apache License 2.0"
+        buildHost = "repo.opsgenie.com"
+        packageGroup = "System Administration Tools"
+
+
+        configFiles.put("${project.buildDir}/${sourceDir}/opsgenie-integration/conf/opsgenie-integration.conf", 'etc/opsgenie/conf')
+        configFiles.put("${project.buildDir}/${sourceDir}/opsgenie-integration/marid/conf/log.properties", 'etc/opsgenie/marid')
+
+        // The code block below is added not to replace default Marid scripts if the user had customized those scripts.
+        // The package will replace integration-only Marid scripts (like marid2opsgenie.groovy, nagiosActionExecutor.groovy), but won't touch
+        // to default Marid scripts (like UnAcknowledge.groovy) if the user had customized it.
+        // If the user didn't touch the Marid script and we updated it in the new package, it will be got updated.
+
+        def confFilesToBeDeleted = []
+
+        File maridScriptsDir = new File("${project.buildDir}/${sourceDir}/opsgenie-integration/marid/scripts")
+        def maridScripts = maridScriptsDir.listFiles()
+
+        for(def maridScript : maridScripts) {
+            configFiles.put(maridScript.getAbsolutePath(), 'var/opsgenie/marid/scripts')
+        }
+
+        File intScriptsDir = new File("${projectDir}/${sourceDir}/marid/scripts")
+        def intScripts = intScriptsDir.listFiles()
+
+        for(def confFile : configFiles.keySet()) {
+            File fConfFile = new File(confFile.toString())
+
+            for(def intScript : intScripts) {
+                if (fConfFile.getName().equals(intScript.getName())) {
+                    if (!confFilesToBeDeleted.contains(confFile)) {
+                        confFilesToBeDeleted.add(confFile);
+                    }
+                }
+            }
+        }
+
+        for(def confFile : confFilesToBeDeleted) {
+            configFiles.remove(confFile)
+        }
+
+        // #################################################################################################################################
+
+        fileMapping.put("${project.buildDir}/${sourceDir}/opsgenie-integration/marid/scripts", 'var/opsgenie/marid/scripts')
+        fileMapping.put("${project.buildDir}/${sourceDir}/opsgenie-integration/marid/conf/.keystore", 'etc/opsgenie/marid')
+        fileMapping.put("${project.buildDir}/${sourceDir}/opsgenie-integration/marid/lib", 'var/lib/opsgenie/marid')
+
+        for (def source : configFiles.keySet()) {
+            def dest = configFiles.get(source)
+            logger.info("config " + source + " - " + dest)
+            from(source) {
+                fileType CONFIG | NOREPLACE
+                into(dest)
+            }
+        }
+
+        for(def source : fileMapping.keySet()) {
+            def dest = fileMapping.get(source)
+            logger.info(source + " - " + dest)
+            from(source) {
+                into(dest)
+            }
+        }
+
+        from("${nativeSource}/profile"){
+            into("etc/opsgenie")
+        }
+
+        from("${nativeSource}/marid_rpm"){
+            into("etc/init.d")
+            rename 'marid_rpm', 'marid'
+        }
+
+        preInstall file("${nativeSource}/ogBefore.sh")
+        postInstall file("${nativeSource}/ogAfter.sh")
+    }
+
+    tasks[taskName].execute()
+}
+
+def buildDebIcinga2Marid(String sourceDir, String name, String descrpt, Map fileMappingInput, Map configFilesInput) {
+
+    def packageVersion = project.ext.versions.getProperty(sourceDir) + project.ext.versionSuffix
+    packageVersion = packageVersion.replace("-", ".")
+
+    def taskName = "prepareDeb${sourceDir}Marid"
+    def dataDir = "${project.buildDir}/debian_tmp/${sourceDir}/data"
+    def controlDir = "${project.buildDir}/debian_tmp/${sourceDir}/control"
+
+    def configFiles = [:]
+    configFiles.putAll(configFilesInput)
+    def fileMapping = [:]
+    fileMapping.putAll(fileMappingInput)
+
+    task "${taskName}" << {
+
+        def nativeSource = "${project.buildDir}/os_client/${sourceDir}";
+
+        fileMapping.put("${project.buildDir}/${sourceDir}/opsgenie-integration/conf/opsgenie-integration.conf", 'etc/opsgenie/conf')
+
+        fileMapping.put("${project.buildDir}/${sourceDir}/opsgenie-integration/marid/scripts", 'var/opsgenie/marid/scripts')
+        fileMapping.put("${project.buildDir}/${sourceDir}/opsgenie-integration/marid/conf", 'etc/opsgenie/marid')
+        fileMapping.put("${project.buildDir}/${sourceDir}/opsgenie-integration/marid/lib", 'var/lib/opsgenie/marid')
+        fileMapping.put("${project.buildDir}/${sourceDir}/opsgenie-integration/conf", 'etc/opsgenie/conf')
+
+        for(def source : fileMapping.keySet()) {
+            def dest = fileMapping.get(source)
+            logger.info(source + " - " + dest)
+            copy {
+                from(source)
+                into("${dataDir}/${dest}")
+            }
+        }
+
+        copy {
+            from("${buildDir}/os_client/${sourceDir}/conffiles_deb")
+            into("${controlDir}")
+            rename "conffiles_deb", 'conffiles'
+        }
+
+        //conf files
+        StringBuilder appender = new StringBuilder()
+        for (def source : configFiles.keySet()) {
+            def dest = configFiles.get(source)
+            logger.info(source + " - " + dest)
+            copy {
+                from(source)
+                into("${dataDir}/${dest}")
+            }
+
+            appender.append("/${dest}/${source.tokenize('/')[-1]}\n")
+        }
+
+        def conffiles = new File("${controlDir}/conffiles")
+        conffiles.append("\n" + appender.toString())
+
+        copy {
+            from("${nativeSource}/profile")
+            into("${dataDir}/etc/opsgenie")
+        }
+
+        copy {
+            from("${nativeSource}/marid_deb")
+            into("${dataDir}/etc/init.d")
+            rename 'marid_deb', 'marid'
+        }
+
+        copy {
+            from "${nativeSource}/control_deb"
+            filter {
+                it.replace('[description]', descrpt)
+                        .replace('[version]', packageVersion)
+                        .replace('[package-name]', "${name}")
+            }
+            into controlDir
+            rename "control_deb", "control"
+        }
+
+        copy {
+            from "${nativeSource}/ogBefore.sh"
+            into controlDir
+            rename "ogBefore.sh", "preinst"
+        }
+
+        copy {
+            from "${nativeSource}/ogAfter.sh"
+            into controlDir
+            rename "ogAfter.sh", "postinst"
+        }
+
+        ant {
+            taskdef(name: 'deb', classname: 'org.vafer.jdeb.ant.DebAntTask', classpath: configurations.debian.asPath)
+        }
+        ant.deb(destfile: "${project.buildDir}/distributions/${name}_${packageVersion}_all.deb", control: controlDir) {
+            ant.data(src: dataDir, type: 'directory', dst: '/')
+        }
+
+        delete "${project.buildDir}/distributions/${name}_${packageVersion}_all.changes"
+    }
+
+    tasks[taskName].execute()
+}
+task packageIcinga2MaridOS(dependsOn: ['generateIntegrationForNative', 'prepareIcingaMarid']) << {
+    copyNativeFiles('icinga2')
+
+
+
+    buildRpmIcinga2Marid("icinga2", "opsgenie-icinga", "OpsGenie - icinga2 integrations files including marid script", [:], [:])
+    buildDebIcinga2Marid("icinga2", "opsgenie-icinga", "OpsGenie - icinga2 integrations files including marid and Icinga2 scripts", [:], [:])
+}
+
+
+task packageIcinga2Marid(dependsOn: ['packageIcinga2MaridOS'])
