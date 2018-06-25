@@ -3045,7 +3045,8 @@ OpsGenie_Client.prototype = {
 	var configurationItem = current.cmdb_ci.getDisplayValue().toString();
 	var companyName = current.company.name.toString();
 	var callerName = current.caller_id.name.toString();
-	
+	var sysDomain = current.sys_domain.toString();
+
 	var alertAlias = current.x_86994_opsgenie_alert_alias.toString();
 	
 	if (alertAlias == null || alertAlias == "") {
@@ -3068,6 +3069,7 @@ OpsGenie_Client.prototype = {
 			configurationItem: configurationItem,
 			companyName: companyName,
 			callerName: callerName,
+			sysDomain:sysDomain,
 			incidentLink: gs.getProperty('glide.servlet.uri') + incidentLink,
 			sysId: sysId
 		};
