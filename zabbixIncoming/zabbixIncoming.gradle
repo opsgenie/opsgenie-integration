@@ -30,7 +30,7 @@ task prepareZabbixIncoming() << {
 }
 task packageZabbixIncomingZip(dependsOn: 'prepareZabbixIncoming', type: Zip) {
     from "${project.buildDir}/zabbix"
-    baseName = 'opsgenie-zabbix'
+    baseName = 'opsgenie-zabbixIncoming'
     version = project.ext.versions.getProperty('zabbix') + project.ext.versionSuffix
 
 
@@ -114,7 +114,7 @@ def buildDebForZabbixIncoming(String sourceDir, String name, String descrpt, Map
         filter {
             it.replace('[description]', "'OpsGenie client files'")
                     .replace('[version]', debVersion)
-                    .replace('[package-name]', "opsgenie-oem")
+                    .replace('[package-name]', "opsgenie-zabbixIncoming")
         }
         into controlDir
         rename "control_deb", "control"
@@ -172,10 +172,10 @@ task packageZabbixIncomingOS(dependsOn: 'prepareZabbixIncoming') << {
             "${project.projectDir}/zabbixIncoming/zabbix/zabbix2opsgenie.go": "etc/opsgenie"
     ]
 
-    buildRpmForZabbixIncoming('zabbix', 'opsgenie-zabbix', 'OpsGenie - Zabbix integration files',
+    buildRpmForZabbixIncoming('zabbix', 'opsgenie-zabbixIncoming', 'OpsGenie - Zabbix integration files',
             fileMapping, [:])
 
-    buildDebForZabbixIncoming('zabbix', 'opsgenie-zabbix', 'OpsGenie - Zabbix integration files', fileMapping, [:])
+    buildDebForZabbixIncoming('zabbix', 'opsgenie-zabbixIncoming', 'OpsGenie - Zabbix integration files', fileMapping, [:])
 
 }
 task packageZabbixIncoming(dependsOn: ['packageZabbixIncomingZip', 'packageZabbixIncomingOS'])

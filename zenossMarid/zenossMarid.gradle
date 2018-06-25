@@ -235,8 +235,8 @@ task packageZenossMaridOS(dependsOn: ['generateIntegrationForNative', 'prepareZe
 
 
 
-    buildRpmZenossMarid("zenoss", "opsgenie-zenoss", "OpsGenie - Zenoss integrations files including marid script", [:], [:])
-    buildDebZenossMarid("zenoss", "opsgenie-zenoss", "OpsGenie - Zenoss integrations files including marid and Icinga2 scripts", [:], [:])
+    buildRpmZenossMarid("zenoss", "opsgenie-zenossMarid", "OpsGenie - Zenoss integrations files including marid script", [:], [:])
+    buildDebZenossMarid("zenoss", "opsgenie-zenossMarid", "OpsGenie - Zenoss integrations files including marid and Icinga2 scripts", [:], [:])
 }
 
 

@@ -30,7 +30,7 @@ task prepareNagiosXIIncoming() << {
 }
 task packageNagiosXIIncomingZip(dependsOn: 'prepareNagiosXIIncoming', type: Zip) {
     from "${project.buildDir}/nagiosxi"
-    baseName = 'opsgenie-nagiosxi'
+    baseName = 'opsgenie-nagiosxiIncoming'
     version = project.ext.versions.getProperty('nagiosxi') + project.ext.versionSuffix
 
 
@@ -113,7 +113,7 @@ def buildDebForNagiosXIIncoming(String sourceDir, String name, String descrpt, M
         filter {
             it.replace('[description]', "'OpsGenie client files'")
                     .replace('[version]', debVersion)
-                    .replace('[package-name]', "opsgenie-oem")
+                    .replace('[package-name]', "opsgenie-nagiosxiIncoming")
         }
         into controlDir
         rename "control_deb", "control"
@@ -165,10 +165,10 @@ task packageNagiosXIIncomingOS(dependsOn: 'prepareNagiosXIIncoming') << {
             "${project.projectDir}/nagiosxiIncoming/nagiosxi/nagios2opsgenie.go": "etc/opsgenie"
     ]
 
-    buildRpmForNagiosXIIncoming('nagiosxi', 'opsgenie-nagios', 'OpsGenie - nagios integration files',
+    buildRpmForNagiosXIIncoming('nagiosxi', 'opsgenie-nagiosxiIncoming', 'OpsGenie - nagios integration files',
             fileMapping, [:])
 
-    buildDebForNagiosXIIncoming('nagiosxi', 'opsgenie-nagios', 'OpsGenie - nagios integration files', fileMapping, [:])
+    buildDebForNagiosXIIncoming('nagiosxi', 'opsgenie-nagiosxiIncoming', 'OpsGenie - nagios integration files', fileMapping, [:])
 
 }
 task packageNagiosXIIncoming(dependsOn: ['packageNagiosXIIncomingZip', 'packageNagiosXIIncomingOS'])

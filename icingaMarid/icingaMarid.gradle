@@ -228,8 +228,8 @@ task packageIcingaMaridOS(dependsOn: ['generateIntegrationForNative', 'prepareIc
 
 
 
-    buildRpmIcingaMarid("icinga", "opsgenie-icinga", "OpsGenie - icinga integrations files including marid script", [:], [:])
-    buildDebIcingaMarid("icinga", "opsgenie-icinga", "OpsGenie - icinga integrations files including marid and Icinga2 scripts", [:], [:])
+    buildRpmIcingaMarid("icinga", "opsgenie-icingaMarid", "OpsGenie - icinga integrations files including marid script", [:], [:])
+    buildDebIcingaMarid("icinga", "opsgenie-icingaMarid", "OpsGenie - icinga integrations files including marid and Icinga2 scripts", [:], [:])
 }
 
 

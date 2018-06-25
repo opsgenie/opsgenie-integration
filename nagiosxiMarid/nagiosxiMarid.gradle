@@ -17,7 +17,7 @@ task prepareNagiosXIMarid(dependsOn: 'generateIntegration') << {
 
 task packageNagiosXIMaridZip(dependsOn: 'prepareNagiosXIMarid', type: Zip) {
     from "${project.buildDir}/nagiosxiMarid"
-    baseName = 'opsgenie-nagios'
+    baseName = 'opsgenie-nagiosxiMarid'
     version = project.ext.versions.getProperty('nagiosxi') + project.ext.versionSuffix
 }
 def buildRpmNagiosxiMarid(String sourceDir, String name, String descrpt, Map fileMappingInput, Map configFilesInput) {
@@ -234,8 +234,8 @@ task packageNagiosXIMaridOS(dependsOn: ['generateIntegrationForNative', 'prepare
 
 
 
-    buildRpmNagiosxiMarid("nagiosxi", "opsgenie-nagios", "OpsGenie - nagios integrations files including marid script", [:], [:])
-    buildDebNagiosxiMarid("nagiosxi", "opsgenie-nagios", "OpsGenie - nagios integrations files including marid and NAgiosXI scripts", [:], [:])
+    buildRpmNagiosxiMarid("nagiosxi", "opsgenie-nagiosxiMarid", "OpsGenie - nagios integrations files including marid script", [:], [:])
+    buildDebNagiosxiMarid("nagiosxi", "opsgenie-nagiosxiMarid", "OpsGenie - nagios integrations files including marid and NAgiosXI scripts", [:], [:])
 }
 
 

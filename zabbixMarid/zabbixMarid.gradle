@@ -17,7 +17,7 @@ task prepareZabbixMarid(dependsOn: 'generateIntegration') << {
 
 task packageZabbixMaridZip(dependsOn: 'prepareZabbixMarid', type: Zip) {
     from "${project.buildDir}/zabbixMarid"
-    baseName = 'opsgenie-zabbix'
+    baseName = 'opsgenie-zabbixMarid'
     version = project.ext.versions.getProperty('zabbix') + project.ext.versionSuffix
 }
 
@@ -235,8 +235,8 @@ task packageZabbixMaridOS(dependsOn: ['generateIntegrationForNative', 'prepareZa
 
 
 
-    buildRpmZabbixMarid("zabbix", "opsgenie-zabbix", "OpsGenie - Zabbix integrations files including marid script", [:], [:])
-    buildDebZabbixMarid("zabbix", "opsgenie-zabbix", "OpsGenie - Zabbix integrations files including marid and Icinga2 scripts", [:], [:])
+    buildRpmZabbixMarid("zabbix", "opsgenie-zabbixMarid", "OpsGenie - Zabbix integrations files including marid script", [:], [:])
+    buildDebZabbixMarid("zabbix", "opsgenie-zabbixMarid", "OpsGenie - Zabbix integrations files including marid and Icinga2 scripts", [:], [:])
 }
 
 

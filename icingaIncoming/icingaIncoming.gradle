@@ -106,7 +106,7 @@ def buildDebForIcingaIncoming(String sourceDir, String name, String descrpt, Map
         filter {
             it.replace('[description]', "'OpsGenie client files'")
                     .replace('[version]', debVersion)
-                    .replace('[package-name]', "opsgenie-oem")
+                    .replace('[package-name]', "opsgenie-icingaIncoming")
         }
         into controlDir
         rename "control_deb", "control"
@@ -158,10 +158,10 @@ task packageIcingaIncomingOS(dependsOn: 'prepareIcingaIncoming') << {
             "${project.projectDir}/icingaIncoming/icinga/icinga2opsgenie.go": "etc/opsgenie"
     ]
 
-    buildRpmForIcingaIncoming('icinga', 'opsgenie-icinga', 'OpsGenie - icinga integration files',
+    buildRpmForIcingaIncoming('icinga', 'opsgenie-icingaIncoming', 'OpsGenie - icinga integration files',
             fileMapping, [:])
 
-    buildDebForIcingaIncoming('icinga', 'opsgenie-icinga', 'OpsGenie - icinga integration files', fileMapping, [:])
+    buildDebForIcingaIncoming('icinga', 'opsgenie-icingaIncoming', 'OpsGenie - icinga integration files', fileMapping, [:])
 
 }
 task packageIcingaIncoming(dependsOn: ['packageIcingaIncomingOS'])

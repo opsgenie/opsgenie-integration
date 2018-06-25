@@ -17,7 +17,7 @@ task prepareBmcFootPrintsV11Marid(dependsOn: 'generateIntegration') << {
 
 task packageBmcFootPrintsV11MaridZip(dependsOn: 'prepareBmcFootPrintsV11Marid', type: Zip) {
     from "${project.buildDir}/bmcFootPrintsV11Marid"
-    baseName = 'opsgenie-bmcFootPrintsV11'
+    baseName = 'opsgenie-bmcFootPrintsV11Marid'
     version = project.ext.versions.getProperty('bmcFootPrintsV11') + project.ext.versionSuffix
 }
 
@@ -235,8 +235,8 @@ task packageBmcFootPrintsV11MaridOS(dependsOn: ['generateIntegrationForNative', 
 
 
 
-    buildRpmBmcFootPrintsV11Marid("bmcFootPrintsV11", "opsgenie-bmcFootPrintsV11", "OpsGenie - bmcFootPrintsV11 integrations files including marid script", [:], [:])
-    buildDebBmcFootPrintsV11Marid("bmcFootPrintsV11", "opsgenie-bmcFootPrintsV11", "OpsGenie - bmcFootPrintsV11 integrations files including marid and bmcFootPrintsV11 scripts", [:], [:])
+    buildRpmBmcFootPrintsV11Marid("bmcFootPrintsV11", "opsgenie-bmcFootPrintsV11Marid", "OpsGenie - bmcFootPrintsV11 integrations files including marid script", [:], [:])
+    buildDebBmcFootPrintsV11Marid("bmcFootPrintsV11", "opsgenie-bmcFootPrintsV11Marid", "OpsGenie - bmcFootPrintsV11 integrations files including marid and bmcFootPrintsV11 scripts", [:], [:])
 }
 
 

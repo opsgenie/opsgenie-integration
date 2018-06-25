@@ -17,7 +17,7 @@ task prepareNagiosMarid(dependsOn: 'generateIntegration') << {
 
 task packageNagiosMaridZip(dependsOn: 'prepareNagiosMarid', type: Zip) {
     from "${project.buildDir}/nagiosMarid"
-    baseName = 'opsgenie-nagios'
+    baseName = 'opsgenie-nagiosMarid'
     version = project.ext.versions.getProperty('nagios') + project.ext.versionSuffix
 }
 
@@ -234,8 +234,8 @@ task packageNagiosMaridOS(dependsOn: ['generateIntegrationForNative', 'prepareNa
     copyNativeFiles('nagios')
 
 
-    buildRpmNagiosMarid("nagios", "opsgenie-nagios", "OpsGenie - nagios integrations files including marid script", [:], [:])
-    buildDebNagiosMarid("nagios", "opsgenie-nagios", "OpsGenie - nagios integrations files including marid and Nagios scripts", [:], [:])
+    buildRpmNagiosMarid("nagios", "opsgenie-nagiosMarid", "OpsGenie - nagios integrations files including marid script", [:], [:])
+    buildDebNagiosMarid("nagios", "opsgenie-nagiosMarid", "OpsGenie - nagios integrations files including marid and Nagios scripts", [:], [:])
 }
 
 

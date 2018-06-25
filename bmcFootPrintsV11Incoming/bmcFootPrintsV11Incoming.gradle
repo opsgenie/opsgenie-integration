@@ -25,7 +25,7 @@ task prepareBmcFootPrintsV11Incoming() << {
 }
 task packageBmcFootPrintsV11IncomingZip(dependsOn: 'prepareBmcFootPrintsV11Incoming', type: Zip) {
     from "${project.buildDir}/bmcFootPrintsV11"
-    baseName = 'opsgenie-bmcFootPrintsV11'
+    baseName = 'opsgenie-bmcFootPrintsV11Incoming'
     version = project.ext.versions.getProperty('bmcFootPrintsV11') + project.ext.versionSuffix
 
 
@@ -160,10 +160,10 @@ task packageBmcFootPrintsV11IncomingOS(dependsOn: 'prepareBmcFootPrintsV11Incomi
             "${project.projectDir}/bmcFootPrintsV11Incoming/bmcFootPrintsV11/bmcFootPrints2opsgenie.go": "etc/opsgenie"
     ]
 
-    buildRpmForBmcFootPrintsV11Incoming('bmcFootPrintsV11', 'opsgenie-bmcFootPrintsV11', 'OpsGenie - bmcFootPrintsV11 integration files',
+    buildRpmForBmcFootPrintsV11Incoming('bmcFootPrintsV11', 'opsgenie-bmcFootPrintsV11Incoming', 'OpsGenie - bmcFootPrintsV11 integration files',
             fileMapping, [:])
 
-    buildDebForBmcFootPrintsV11Incoming('bmcFootPrintsV11', 'opsgenie-bmcFootPrintsV11', 'OpsGenie - bmcFootPrintsV11 integration files', fileMapping, [:])
+    buildDebForBmcFootPrintsV11Incoming('bmcFootPrintsV11', 'opsgenie-bmcFootPrintsV11Incoming', 'OpsGenie - bmcFootPrintsV11 integration files', fileMapping, [:])
 
 }
 task packageBmcFootPrintsV11Incoming(dependsOn: ['packageBmcFootPrintsV11IncomingZip', 'packageBmcFootPrintsV11IncomingOS'])
