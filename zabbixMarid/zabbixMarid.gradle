@@ -17,8 +17,8 @@ task prepareZabbixMarid(dependsOn: 'generateIntegration') << {
 
 task packageZabbixMaridZip(dependsOn: 'prepareZabbixMarid', type: Zip) {
     from "${project.buildDir}/zabbixMarid"
-    baseName = 'opsgenie-zabbix'
-    version = project.ext.versions.getProperty('zabbix') + project.ext.versionSuffix
+    baseName = 'opsgenie-zabbixMarid'
+    version = project.ext.versions.getProperty('zabbixMarid') + project.ext.versionSuffix
 }
 
 def buildRpmZabbixMarid(String sourceDir, String name, String descrpt, Map fileMappingInput, Map configFilesInput) {
@@ -33,7 +33,7 @@ def buildRpmZabbixMarid(String sourceDir, String name, String descrpt, Map fileM
 
         def nativeSource = "${project.buildDir}/os_client/${sourceDir}";
 
-        def packageVersion = project.ext.versions.getProperty(sourceDir) + project.ext.versionSuffix
+        def packageVersion = project.ext.versions.getProperty('zabbixMarid') + project.ext.versionSuffix
 
         packageName = name
         description = descrpt
@@ -129,7 +129,7 @@ def buildRpmZabbixMarid(String sourceDir, String name, String descrpt, Map fileM
 
 def buildDebZabbixMarid(String sourceDir, String name, String descrpt, Map fileMappingInput, Map configFilesInput) {
 
-    def packageVersion = project.ext.versions.getProperty(sourceDir) + project.ext.versionSuffix
+    def packageVersion = project.ext.versions.getProperty('zabbixMarid') + project.ext.versionSuffix
     packageVersion = packageVersion.replace("-", ".")
 
     def taskName = "prepareDeb${sourceDir}Marid"
@@ -235,8 +235,8 @@ task packageZabbixMaridOS(dependsOn: ['generateIntegrationForNative', 'prepareZa
 
 
 
-    buildRpmZabbixMarid("zabbix", "opsgenie-zabbix", "OpsGenie - Zabbix integrations files including marid script", [:], [:])
-    buildDebZabbixMarid("zabbix", "opsgenie-zabbix", "OpsGenie - Zabbix integrations files including marid and Icinga2 scripts", [:], [:])
+    buildRpmZabbixMarid("zabbix", "opsgenie-zabbixMarid", "OpsGenie - Zabbix integrations files including marid script", [:], [:])
+    buildDebZabbixMarid("zabbix", "opsgenie-zabbixMarid", "OpsGenie - Zabbix integrations files including marid and Icinga2 scripts", [:], [:])
 }
 
 

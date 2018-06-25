@@ -17,8 +17,8 @@ task prepareNagiosXIMarid(dependsOn: 'generateIntegration') << {
 
 task packageNagiosXIMaridZip(dependsOn: 'prepareNagiosXIMarid', type: Zip) {
     from "${project.buildDir}/nagiosxiMarid"
-    baseName = 'opsgenie-nagios'
-    version = project.ext.versions.getProperty('nagiosxi') + project.ext.versionSuffix
+    baseName = 'opsgenie-nagiosxiMarid'
+    version = project.ext.versions.getProperty('nagiosxiMarid') + project.ext.versionSuffix
 }
 def buildRpmNagiosxiMarid(String sourceDir, String name, String descrpt, Map fileMappingInput, Map configFilesInput) {
     def taskName = "generateRpm${sourceDir}Marid"
@@ -32,7 +32,7 @@ def buildRpmNagiosxiMarid(String sourceDir, String name, String descrpt, Map fil
 
         def nativeSource = "${project.buildDir}/os_client/${sourceDir}";
 
-        def packageVersion = project.ext.versions.getProperty(sourceDir) + project.ext.versionSuffix
+        def packageVersion = project.ext.versions.getProperty('nagiosxiMarid') + project.ext.versionSuffix
 
         packageName = name
         description = descrpt
@@ -128,7 +128,7 @@ def buildRpmNagiosxiMarid(String sourceDir, String name, String descrpt, Map fil
 
 def buildDebNagiosxiMarid(String sourceDir, String name, String descrpt, Map fileMappingInput, Map configFilesInput) {
 
-    def packageVersion = project.ext.versions.getProperty(sourceDir) + project.ext.versionSuffix
+    def packageVersion = project.ext.versions.getProperty('nagiosxiMarid') + project.ext.versionSuffix
     packageVersion = packageVersion.replace("-", ".")
 
     def taskName = "prepareDeb${sourceDir}Marid"
@@ -234,8 +234,8 @@ task packageNagiosXIMaridOS(dependsOn: ['generateIntegrationForNative', 'prepare
 
 
 
-    buildRpmNagiosxiMarid("nagiosxi", "opsgenie-nagios", "OpsGenie - nagios integrations files including marid script", [:], [:])
-    buildDebNagiosxiMarid("nagiosxi", "opsgenie-nagios", "OpsGenie - nagios integrations files including marid and NAgiosXI scripts", [:], [:])
+    buildRpmNagiosxiMarid("nagiosxi", "opsgenie-nagiosxiMarid", "OpsGenie - nagios integrations files including marid script", [:], [:])
+    buildDebNagiosxiMarid("nagiosxi", "opsgenie-nagiosxiMarid", "OpsGenie - nagios integrations files including marid and NAgiosXI scripts", [:], [:])
 }
 
 

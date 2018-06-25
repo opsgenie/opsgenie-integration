@@ -18,7 +18,7 @@ task prepareZenossMarid(dependsOn: 'generateIntegration') << {
 task packageZenossMaridZip(dependsOn: 'prepareZenossMarid', type: Zip) {
     from "${project.buildDir}/zenossMarid"
     baseName = 'opsgenie-zenoss'
-    version = project.ext.versions.getProperty('zenoss') + project.ext.versionSuffix
+    version = project.ext.versions.getProperty('zenossMarid') + project.ext.versionSuffix
 }
 
 def buildRpmZenossMarid(String sourceDir, String name, String descrpt, Map fileMappingInput, Map configFilesInput) {
@@ -33,7 +33,7 @@ def buildRpmZenossMarid(String sourceDir, String name, String descrpt, Map fileM
 
         def nativeSource = "${project.buildDir}/os_client/${sourceDir}";
 
-        def packageVersion = project.ext.versions.getProperty(sourceDir) + project.ext.versionSuffix
+        def packageVersion = project.ext.versions.getProperty('zenossMarid') + project.ext.versionSuffix
 
         packageName = name
         description = descrpt
@@ -129,7 +129,7 @@ def buildRpmZenossMarid(String sourceDir, String name, String descrpt, Map fileM
 
 def buildDebZenossMarid(String sourceDir, String name, String descrpt, Map fileMappingInput, Map configFilesInput) {
 
-    def packageVersion = project.ext.versions.getProperty(sourceDir) + project.ext.versionSuffix
+    def packageVersion = project.ext.versions.getProperty('zenossMarid') + project.ext.versionSuffix
     packageVersion = packageVersion.replace("-", ".")
 
     def taskName = "prepareDeb${sourceDir}Marid"
@@ -235,8 +235,8 @@ task packageZenossMaridOS(dependsOn: ['generateIntegrationForNative', 'prepareZe
 
 
 
-    buildRpmZenossMarid("zenoss", "opsgenie-zenoss", "OpsGenie - Zenoss integrations files including marid script", [:], [:])
-    buildDebZenossMarid("zenoss", "opsgenie-zenoss", "OpsGenie - Zenoss integrations files including marid and Icinga2 scripts", [:], [:])
+    buildRpmZenossMarid("zenoss", "opsgenie-zenossMarid", "OpsGenie - Zenoss integrations files including marid script", [:], [:])
+    buildDebZenossMarid("zenoss", "opsgenie-zenossMarid", "OpsGenie - Zenoss integrations files including marid and Icinga2 scripts", [:], [:])
 }
 
 

@@ -29,8 +29,8 @@ task prepareBmcRemedyIncoming() << {
 }
 task packageBmcRemedyIncomingZip(dependsOn: 'prepareBmcRemedyIncoming', type: Zip) {
     from "${project.buildDir}/bmcRemedy"
-    baseName = 'opsgenie-bmcRemedy'
-    version = project.ext.versions.getProperty('bmcRemedy') + project.ext.versionSuffix
+    baseName = 'opsgenie-bmcRemedyIncoming'
+    version = project.ext.versions.getProperty('bmcRemedyIncoming') + project.ext.versionSuffix
 
 
 }

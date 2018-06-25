@@ -30,8 +30,8 @@ task prepareNagiosIncoming() << {
 }
 task packageNagiosIncomingZip(dependsOn: 'prepareNagiosIncoming', type: Zip) {
     from "${project.buildDir}/nagios"
-    baseName = 'opsgenie-nagios'
-    version = project.ext.versions.getProperty('nagios') + project.ext.versionSuffix
+    baseName = 'opsgenie-nagiosIncoming'
+    version = project.ext.versions.getProperty('nagiosIncoming') + project.ext.versionSuffix
 
 
 }
@@ -45,7 +45,7 @@ def buildRpmForNagiosIncoming(String sourceDir, String name, String descrpt, Map
     fileMapping.putAll(fileMappingInput)
 
     task "${taskName}"(type: Rpm) {
-        def packageVersion = project.ext.versions.getProperty(sourceDir) + project.ext.versionSuffix
+        def packageVersion = project.ext.versions.getProperty('nagiosIncoming') + project.ext.versionSuffix
 
         packageName = name
         description = descrpt
@@ -91,7 +91,7 @@ def buildRpmForNagiosIncoming(String sourceDir, String name, String descrpt, Map
 
 def buildDebForNagiosIncoming(String sourceDir, String name, String descrpt, Map fileMappingInput, Map configFilesInput) {
 
-    def packageVersion = project.ext.versions.getProperty(sourceDir) + project.ext.versionSuffix
+    def packageVersion = project.ext.versions.getProperty('nagiosIncoming') + project.ext.versionSuffix
     packageVersion = packageVersion.replace("-", ".")
 
     def taskName = "prepareDeb${sourceDir}Incoming"
@@ -113,7 +113,7 @@ def buildDebForNagiosIncoming(String sourceDir, String name, String descrpt, Map
         filter {
             it.replace('[description]', "'OpsGenie client files'")
                     .replace('[version]', debVersion)
-                    .replace('[package-name]', "opsgenie-oem")
+                    .replace('[package-name]', "opsgenie-nagios")
         }
         into controlDir
         rename "control_deb", "control"
@@ -165,10 +165,10 @@ task packageNagiosIncomingOS(dependsOn: 'prepareNagiosIncoming') << {
             "${project.projectDir}/nagiosIncoming/nagios/nagios2opsgenie.go": "etc/opsgenie"
     ]
 
-    buildRpmForNagiosIncoming('nagios', 'opsgenie-nagios', 'OpsGenie - nagios integration files',
+    buildRpmForNagiosIncoming('nagios', 'opsgenie-nagiosIncoming', 'OpsGenie - nagios integration files',
             fileMapping, [:])
 
-    buildDebForNagiosIncoming('nagios', 'opsgenie-nagios', 'OpsGenie - nagios integration files', fileMapping, [:])
+    buildDebForNagiosIncoming('nagios', 'opsgenie-nagiosIncoming', 'OpsGenie - nagios integration files', fileMapping, [:])
 
 }
 task packageNagiosIncoming(dependsOn: ['packageNagiosIncomingZip', 'packageNagiosIncomingOS'])

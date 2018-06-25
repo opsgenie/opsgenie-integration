@@ -37,7 +37,7 @@ def buildRpmForIcinga2Incoming(String sourceDir, String name, String descrpt, Ma
     fileMapping.putAll(fileMappingInput)
 
     task "${taskName}"(type: Rpm) {
-        def packageVersion =  project.ext.versions.getProperty('icinga2') + project.ext.versionSuffix
+        def packageVersion =  project.ext.versions.getProperty('icinga2Incoming') + project.ext.versionSuffix
 
         packageName = name
         description = descrpt
@@ -83,7 +83,7 @@ def buildRpmForIcinga2Incoming(String sourceDir, String name, String descrpt, Ma
 
 def buildDebForIcinga2Incoming(String sourceDir, String name, String descrpt, Map fileMappingInput, Map configFilesInput) {
 
-    def packageVersion = project.ext.versions.getProperty('icinga2') + project.ext.versionSuffix
+    def packageVersion = project.ext.versions.getProperty('icinga2Incoming') + project.ext.versionSuffix
     packageVersion = packageVersion.replace("-", ".")
 
     def taskName = "prepareDeb${sourceDir}Incoming"
@@ -105,7 +105,7 @@ def buildDebForIcinga2Incoming(String sourceDir, String name, String descrpt, Ma
         filter {
             it.replace('[description]', "'OpsGenie client files'")
                     .replace('[version]', debVersion)
-                    .replace('[package-name]', "opsgenie-oem")
+                    .replace('[package-name]', "opsgenie-icinga2Incoming")
         }
         into controlDir
         rename "control_deb", "control"
@@ -157,10 +157,10 @@ task packageIcinga2IncomingOS(dependsOn: 'prepareIcinga2Incoming') << {
             "${project.projectDir}/icinga2Incoming/icinga2/icinga2opsgenie.go": "etc/opsgenie"
     ]
 
-    buildRpmForIcinga2Incoming('icinga2', 'opsgenie-icinga2', 'OpsGenie - icinga2 integration files',
+    buildRpmForIcinga2Incoming('icinga2', 'opsgenie-icinga2Incoming', 'OpsGenie - icinga2 integration files',
             fileMapping, [:])
 
-    buildDebForIcinga2Incoming('icinga2', 'opsgenie-icinga2', 'OpsGenie - icinga2 integration files', fileMapping, [:])
+    buildDebForIcinga2Incoming('icinga2', 'opsgenie-icinga2Incoming', 'OpsGenie - icinga2 integration files', fileMapping, [:])
 
 }
 task packageIcinga2Incoming(dependsOn: ['packageIcinga2IncomingOS'])

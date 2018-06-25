@@ -26,8 +26,8 @@ task prepareZenossIncoming() << {
 }
 task packageZenossIncomingZip(dependsOn: 'prepareZenossIncoming', type: Zip) {
     from "${project.buildDir}/zenoss"
-    baseName = 'opsgenie-zenoss'
-    version = project.ext.versions.getProperty('zenoss') + project.ext.versionSuffix
+    baseName = 'opsgenie-zenossIncoming'
+    version = project.ext.versions.getProperty('zenossIncoming') + project.ext.versionSuffix
 
 
 }
@@ -41,7 +41,7 @@ def buildRpmForZenossIncoming(String sourceDir, String name, String descrpt, Map
     fileMapping.putAll(fileMappingInput)
 
     task "${taskName}"(type: Rpm) {
-        def packageVersion = project.ext.versions.getProperty(sourceDir) + project.ext.versionSuffix
+        def packageVersion = project.ext.versions.getProperty('zenossIncoming') + project.ext.versionSuffix
 
         packageName = name
         description = descrpt
@@ -87,7 +87,7 @@ def buildRpmForZenossIncoming(String sourceDir, String name, String descrpt, Map
 
 def buildDebForZenossIncoming(String sourceDir, String name, String descrpt, Map fileMappingInput, Map configFilesInput) {
 
-    def packageVersion = project.ext.versions.getProperty(sourceDir) + project.ext.versionSuffix
+    def packageVersion = project.ext.versions.getProperty('zenossIncoming') + project.ext.versionSuffix
     packageVersion = packageVersion.replace("-", ".")
 
     def taskName = "prepareDeb${sourceDir}Incoming"
@@ -109,7 +109,7 @@ def buildDebForZenossIncoming(String sourceDir, String name, String descrpt, Map
         filter {
             it.replace('[description]', "'OpsGenie client files'")
                     .replace('[version]', debVersion)
-                    .replace('[package-name]', "opsgenie-oem")
+                    .replace('[package-name]', "opsgenie-zenossIncoming")
         }
         into controlDir
         rename "control_deb", "control"
@@ -161,10 +161,10 @@ task packageZenossIncomingOS(dependsOn: 'prepareZenossIncoming') << {
             "${project.projectDir}/zenossIncoming/zenoss/zenoss2opsgenie.go": "etc/opsgenie"
     ]
 
-    buildRpmForZenossIncoming('zenoss', 'opsgenie-zenoss', 'OpsGenie - zenoss integration files',
+    buildRpmForZenossIncoming('zenoss', 'opsgenie-zenossIncoming', 'OpsGenie - zenoss integration files',
             fileMapping, [:])
 
-    buildDebForZenossIncoming('zenoss', 'opsgenie-zenoss', 'OpsGenie - zenoss integration files', fileMapping, [:])
+    buildDebForZenossIncoming('zenoss', 'opsgenie-zenossIncoming', 'OpsGenie - zenoss integration files', fileMapping, [:])
 
 }
 task packageZenossIncoming(dependsOn: ['packageZenossIncomingZip', 'packageZenossIncomingOS'])
