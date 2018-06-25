@@ -1,0 +1,36 @@
+task prepareActiveDirectory() << {
+    def destination = "${project.buildDir}/opsgenie"
+
+    copy {
+        from "${project.projectDir}/activeDirectory/activeDirectory/activeDirectorySync.go"
+        into "${destination}/opsgenieActiveDirectorySync"
+    }
+
+    copy {
+        from "${project.projectDir}/activeDirectory/activeDirectory/activeDirectorySync.exe"
+        into "${destination}/opsgenieActiveDirectorySync"
+    }
+
+    copy {
+        from "${project.projectDir}/activeDirectory/activeDirectory/activeDirectorySync_64.exe"
+        into "${destination}/opsgenieActiveDirectorySync"
+    }
+
+    copy {
+        from "${project.projectDir}/activeDirectory/activeDirectory/activeDirectorySync.ps1"
+        into "${destination}/opsgenieActiveDirectorySync"
+    }
+
+    copy {
+        from "${project.projectDir}/activeDirectory/activeDirectory/activeDirectorySync.conf"
+        into "${destination}/opsgenieActiveDirectorySync"
+    }
+}
+
+task packageActiveDirectoryZip(dependsOn: 'prepareActiveDirectory', type: Zip) {
+    from "${project.buildDir}/opsgenie"
+    baseName = 'opsgenie-activedirectory'
+    version = project.ext.versions.getProperty('activeDirectory') + project.ext.versionSuffix
+}
+
+task packageActiveDirectory(dependsOn: ['packageActiveDirectoryZip'])

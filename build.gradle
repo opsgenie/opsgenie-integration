@@ -491,6 +491,7 @@ apply from: 'prtg/prtg.gradle'
 apply from: 'bmcFootPrintsV12/bmcFootPrintsV12.gradle'
 apply from: 'bmcFootPrintsV11/bmcFootPrintsV11.gradle'
 apply from: 'cherwell/cherwell.gradle'
+apply from: 'activeDirectory/activeDirectory.gradle'
 
 
 task packageIntegrations(dependsOn: [
