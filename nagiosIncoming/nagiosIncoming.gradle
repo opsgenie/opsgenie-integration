@@ -113,7 +113,7 @@ def buildDebForNagiosIncoming(String sourceDir, String name, String descrpt, Map
         filter {
             it.replace('[description]', "'OpsGenie client files'")
                     .replace('[version]', debVersion)
-                    .replace('[package-name]', "opsgenie-nagiosIncoming")
+                    .replace('[package-name]', "opsgenie-nagios")
         }
         into controlDir
         rename "control_deb", "control"
