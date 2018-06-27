@@ -93,6 +93,7 @@ def generateDownloadsProperties() {
                     .replace('[[bmcFootPrintsV12]]', project.ext.versions.getProperty('bmcFootPrintsV12'))
                     .replace('[[bmcFootPrintsV11]]', project.ext.versions.getProperty('bmcFootPrintsV11'))
                     .replace('[[cherwell]]', project.ext.versions.getProperty('cherwell'))
+                    .replace('[[activeDirectory]]', project.ext.versions.getProperty('activeDirectory'))
         }
         into "${buildDir}/distributions"
         rename "downloads.template.properties", "downloads.properties"
