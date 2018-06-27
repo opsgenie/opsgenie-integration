@@ -132,7 +132,13 @@ func main() {
 							logger.Info("Created the user [" + user + "] in OpsGenie successfully.")
 						}
 
-						addMembersToOpsGenieTeam(group, user)
+						err = addMembersToOpsGenieTeam(group, user)
+
+						if err != nil {
+							logger.Error("Error occurred while adding the member [" + user + "] to the team [" + group + "] in OpsGenie. Error: " + err.Error())
+						} else {
+							logger.Info("Added the member[" + user + "] to the team [" + group + "] in OpsGenie successfully.")
+						}
 					}
 
 					if configParameters["applyDeletions"] == "true" {
@@ -656,17 +662,19 @@ func getOpsGenieTeamMembers(teamName string) ([]string, error) {
 		return nil, err
 	}
 
-	var dataMap = responseMap["data"].(map[string]interface{})
+	if _, ok := responseMap["data"]; ok {
+		var dataMap = responseMap["data"].(map[string]interface{})
 
-	if _, ok := dataMap["members"]; ok {
-		var membersList = dataMap["members"].([]interface{})
+		if _, ok := dataMap["members"]; ok {
+			var membersList= dataMap["members"].([]interface{})
 
-		for _, memberMap := range membersList {
-			var userMap = memberMap.(map[string]interface{})["user"].(map[string]interface{})
-			var username = userMap["username"].(string)
+			for _, memberMap := range membersList {
+				var userMap= memberMap.(map[string]interface{})["user"].(map[string]interface{})
+				var username= userMap["username"].(string)
 
-			if len(username) > 0 {
-				ogTeamMembers = append(ogTeamMembers, username)
+				if len(username) > 0 {
+					ogTeamMembers = append(ogTeamMembers, username)
+				}
 			}
 		}
 	}
