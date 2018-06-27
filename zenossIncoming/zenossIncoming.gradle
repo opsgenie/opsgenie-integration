@@ -27,7 +27,7 @@ task prepareZenossIncoming() << {
 task packageZenossIncomingZip(dependsOn: 'prepareZenossIncoming', type: Zip) {
     from "${project.buildDir}/zenoss"
     baseName = 'opsgenie-zenossIncoming'
-    version = project.ext.versions.getProperty('zenoss') + project.ext.versionSuffix
+    version = project.ext.versions.getProperty('zenossIncoming') + project.ext.versionSuffix
 
 
 }
@@ -41,7 +41,7 @@ def buildRpmForZenossIncoming(String sourceDir, String name, String descrpt, Map
     fileMapping.putAll(fileMappingInput)
 
     task "${taskName}"(type: Rpm) {
-        def packageVersion = project.ext.versions.getProperty(sourceDir) + project.ext.versionSuffix
+        def packageVersion = project.ext.versions.getProperty('zenossIncoming') + project.ext.versionSuffix
 
         packageName = name
         description = descrpt
@@ -87,7 +87,7 @@ def buildRpmForZenossIncoming(String sourceDir, String name, String descrpt, Map
 
 def buildDebForZenossIncoming(String sourceDir, String name, String descrpt, Map fileMappingInput, Map configFilesInput) {
 
-    def packageVersion = project.ext.versions.getProperty(sourceDir) + project.ext.versionSuffix
+    def packageVersion = project.ext.versions.getProperty('zenossIncoming') + project.ext.versionSuffix
     packageVersion = packageVersion.replace("-", ".")
 
     def taskName = "prepareDeb${sourceDir}Incoming"

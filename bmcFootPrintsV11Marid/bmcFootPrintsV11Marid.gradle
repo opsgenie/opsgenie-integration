@@ -18,7 +18,7 @@ task prepareBmcFootPrintsV11Marid(dependsOn: 'generateIntegration') << {
 task packageBmcFootPrintsV11MaridZip(dependsOn: 'prepareBmcFootPrintsV11Marid', type: Zip) {
     from "${project.buildDir}/bmcFootPrintsV11Marid"
     baseName = 'opsgenie-bmcFootPrintsV11Marid'
-    version = project.ext.versions.getProperty('bmcFootPrintsV11') + project.ext.versionSuffix
+    version = project.ext.versions.getProperty('bmcFootPrintsV11Marid') + project.ext.versionSuffix
 }
 
 def buildRpmBmcFootPrintsV11Marid(String sourceDir, String name, String descrpt, Map fileMappingInput, Map configFilesInput) {
@@ -33,7 +33,7 @@ def buildRpmBmcFootPrintsV11Marid(String sourceDir, String name, String descrpt,
 
         def nativeSource = "${project.buildDir}/os_client/${sourceDir}";
 
-        def packageVersion = project.ext.versions.getProperty(sourceDir) + project.ext.versionSuffix
+        def packageVersion = project.ext.versions.getProperty('bmcFootPrintsV11Marid') + project.ext.versionSuffix
 
         packageName = name
         description = descrpt
@@ -129,7 +129,7 @@ def buildRpmBmcFootPrintsV11Marid(String sourceDir, String name, String descrpt,
 
 def buildDebBmcFootPrintsV11Marid(String sourceDir, String name, String descrpt, Map fileMappingInput, Map configFilesInput) {
 
-    def packageVersion = project.ext.versions.getProperty(sourceDir) + project.ext.versionSuffix
+    def packageVersion = project.ext.versions.getProperty('bmcFootPrintsV11Marid') + project.ext.versionSuffix
     packageVersion = packageVersion.replace("-", ".")
 
     def taskName = "prepareDeb${sourceDir}Marid"

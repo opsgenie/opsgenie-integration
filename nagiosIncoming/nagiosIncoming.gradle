@@ -31,7 +31,7 @@ task prepareNagiosIncoming() << {
 task packageNagiosIncomingZip(dependsOn: 'prepareNagiosIncoming', type: Zip) {
     from "${project.buildDir}/nagios"
     baseName = 'opsgenie-nagiosIncoming'
-    version = project.ext.versions.getProperty('nagios') + project.ext.versionSuffix
+    version = project.ext.versions.getProperty('nagiosIncoming') + project.ext.versionSuffix
 
 
 }
@@ -45,7 +45,7 @@ def buildRpmForNagiosIncoming(String sourceDir, String name, String descrpt, Map
     fileMapping.putAll(fileMappingInput)
 
     task "${taskName}"(type: Rpm) {
-        def packageVersion = project.ext.versions.getProperty(sourceDir) + project.ext.versionSuffix
+        def packageVersion = project.ext.versions.getProperty('nagiosIncoming') + project.ext.versionSuffix
 
         packageName = name
         description = descrpt
@@ -91,7 +91,7 @@ def buildRpmForNagiosIncoming(String sourceDir, String name, String descrpt, Map
 
 def buildDebForNagiosIncoming(String sourceDir, String name, String descrpt, Map fileMappingInput, Map configFilesInput) {
 
-    def packageVersion = project.ext.versions.getProperty(sourceDir) + project.ext.versionSuffix
+    def packageVersion = project.ext.versions.getProperty('nagiosIncoming') + project.ext.versionSuffix
     packageVersion = packageVersion.replace("-", ".")
 
     def taskName = "prepareDeb${sourceDir}Incoming"

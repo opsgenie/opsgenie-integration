@@ -18,7 +18,7 @@ task prepareNagiosMarid(dependsOn: 'generateIntegration') << {
 task packageNagiosMaridZip(dependsOn: 'prepareNagiosMarid', type: Zip) {
     from "${project.buildDir}/nagiosMarid"
     baseName = 'opsgenie-nagiosMarid'
-    version = project.ext.versions.getProperty('nagios') + project.ext.versionSuffix
+    version = project.ext.versions.getProperty('nagiosMarid') + project.ext.versionSuffix
 }
 
 def buildRpmNagiosMarid(String sourceDir, String name, String descrpt, Map fileMappingInput, Map configFilesInput) {
@@ -33,7 +33,7 @@ def buildRpmNagiosMarid(String sourceDir, String name, String descrpt, Map fileM
 
         def nativeSource = "${project.buildDir}/os_client/${sourceDir}";
 
-        def packageVersion = project.ext.versions.getProperty(sourceDir) + project.ext.versionSuffix
+        def packageVersion = project.ext.versions.getProperty('nagiosMarid') + project.ext.versionSuffix
 
         packageName = name
         description = descrpt
@@ -129,7 +129,7 @@ def buildRpmNagiosMarid(String sourceDir, String name, String descrpt, Map fileM
 
 def buildDebNagiosMarid(String sourceDir, String name, String descrpt, Map fileMappingInput, Map configFilesInput) {
 
-    def packageVersion = project.ext.versions.getProperty(sourceDir) + project.ext.versionSuffix
+    def packageVersion = project.ext.versions.getProperty('nagiosMarid') + project.ext.versionSuffix
     packageVersion = packageVersion.replace("-", ".")
 
     def taskName = "prepareDeb${sourceDir}Marid"

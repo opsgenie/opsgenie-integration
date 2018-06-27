@@ -37,7 +37,7 @@ def buildRpmForIcinga2Incoming(String sourceDir, String name, String descrpt, Ma
     fileMapping.putAll(fileMappingInput)
 
     task "${taskName}"(type: Rpm) {
-        def packageVersion =  project.ext.versions.getProperty('icinga2') + project.ext.versionSuffix
+        def packageVersion =  project.ext.versions.getProperty('icinga2Incoming') + project.ext.versionSuffix
 
         packageName = name
         description = descrpt
@@ -83,7 +83,7 @@ def buildRpmForIcinga2Incoming(String sourceDir, String name, String descrpt, Ma
 
 def buildDebForIcinga2Incoming(String sourceDir, String name, String descrpt, Map fileMappingInput, Map configFilesInput) {
 
-    def packageVersion = project.ext.versions.getProperty('icinga2') + project.ext.versionSuffix
+    def packageVersion = project.ext.versions.getProperty('icinga2Incoming') + project.ext.versionSuffix
     packageVersion = packageVersion.replace("-", ".")
 
     def taskName = "prepareDeb${sourceDir}Incoming"

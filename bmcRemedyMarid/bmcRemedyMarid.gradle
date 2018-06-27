@@ -18,7 +18,7 @@ task prepareBmcRemedyMarid(dependsOn: 'generateIntegration') << {
 task packageBmcRemedyMaridZip(dependsOn: 'prepareBmcRemedyMarid', type: Zip) {
     from "${project.buildDir}/bmcRemedyMarid"
     baseName = 'opsgenie-bmcRemedyMarid'
-    version = project.ext.versions.getProperty('bmcRemedy') + project.ext.versionSuffix
+    version = project.ext.versions.getProperty('bmcRemedyMarid') + project.ext.versionSuffix
 }
 
 task packageBmcRemedyMarid(dependsOn: ['packageBmcRemedyMaridZip'])

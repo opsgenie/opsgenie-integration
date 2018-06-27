@@ -26,7 +26,7 @@ task prepareBmcFootPrintsV12Incoming() << {
 task packageBmcFootPrintsV12IncomingZip(dependsOn: 'prepareBmcFootPrintsV12Incoming', type: Zip) {
     from "${project.buildDir}/bmcFootPrintsV12"
     baseName = 'opsgenie-bmcFootPrintsV12Incoming'
-    version = project.ext.versions.getProperty('bmcFootPrintsV12') + project.ext.versionSuffix
+    version = project.ext.versions.getProperty('bmcFootPrintsV12Incoming') + project.ext.versionSuffix
 
 
 }
@@ -40,7 +40,7 @@ def buildRpmForBmcFootPrintsV12Incoming(String sourceDir, String name, String de
     fileMapping.putAll(fileMappingInput)
 
     task "${taskName}"(type: Rpm) {
-        def packageVersion =  project.ext.versions.getProperty('bmcFootPrintsV12') + project.ext.versionSuffix
+        def packageVersion =  project.ext.versions.getProperty('bmcFootPrintsV12Incoming') + project.ext.versionSuffix
 
         packageName = name
         description = descrpt
@@ -86,7 +86,7 @@ def buildRpmForBmcFootPrintsV12Incoming(String sourceDir, String name, String de
 
 def buildDebForBmcFootPrintsV12Incoming(String sourceDir, String name, String descrpt, Map fileMappingInput, Map configFilesInput) {
 
-    def packageVersion = project.ext.versions.getProperty('bmcFootPrintsV12') + project.ext.versionSuffix
+    def packageVersion = project.ext.versions.getProperty('bmcFootPrintsV12Incoming') + project.ext.versionSuffix
     packageVersion = packageVersion.replace("-", ".")
 
     def taskName = "prepareDeb${sourceDir}Incoming"

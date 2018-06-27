@@ -31,7 +31,7 @@ task prepareZabbixIncoming() << {
 task packageZabbixIncomingZip(dependsOn: 'prepareZabbixIncoming', type: Zip) {
     from "${project.buildDir}/zabbix"
     baseName = 'opsgenie-zabbixIncoming'
-    version = project.ext.versions.getProperty('zabbix') + project.ext.versionSuffix
+    version = project.ext.versions.getProperty('zabbixIncoming') + project.ext.versionSuffix
 
 
 }
@@ -45,7 +45,7 @@ def buildRpmForZabbixIncoming(String sourceDir, String name, String descrpt, Map
     fileMapping.putAll(fileMappingInput)
 
     task "${taskName}"(type: Rpm) {
-        def packageVersion = project.ext.versions.getProperty(sourceDir) + project.ext.versionSuffix
+        def packageVersion = project.ext.versions.getProperty('zabbixIncoming') + project.ext.versionSuffix
 
         packageName = name
         description = descrpt
@@ -92,7 +92,7 @@ def buildRpmForZabbixIncoming(String sourceDir, String name, String descrpt, Map
 
 def buildDebForZabbixIncoming(String sourceDir, String name, String descrpt, Map fileMappingInput, Map configFilesInput) {
 
-    def packageVersion = project.ext.versions.getProperty(sourceDir) + project.ext.versionSuffix
+    def packageVersion = project.ext.versions.getProperty('zabbixIncoming') + project.ext.versionSuffix
     packageVersion = packageVersion.replace("-", ".")
 
     def taskName = "prepareDeb${sourceDir}Incoming"

@@ -27,7 +27,7 @@ def buildRpmIcinga2Marid(String sourceDir, String name, String descrpt, Map file
 
         def nativeSource = "${project.buildDir}/os_client/${sourceDir}";
 
-        def packageVersion = project.ext.versions.getProperty(sourceDir) + project.ext.versionSuffix
+        def packageVersion = project.ext.versions.getProperty('icinga2Marid') + project.ext.versionSuffix
 
         packageName = name
         description = descrpt
@@ -123,7 +123,7 @@ def buildRpmIcinga2Marid(String sourceDir, String name, String descrpt, Map file
 
 def buildDebIcinga2Marid(String sourceDir, String name, String descrpt, Map fileMappingInput, Map configFilesInput) {
 
-    def packageVersion = project.ext.versions.getProperty(sourceDir) + project.ext.versionSuffix
+    def packageVersion = project.ext.versions.getProperty('icinga2Marid') + project.ext.versionSuffix
     packageVersion = packageVersion.replace("-", ".")
 
     def taskName = "prepareDeb${sourceDir}Marid"
@@ -228,8 +228,8 @@ task packageIcinga2MaridOS(dependsOn: ['generateIntegrationForNative', 'prepareI
 
 
 
-    buildRpmIcinga2Marid("icinga2", "opsgenie-icingaMarid", "OpsGenie - icinga2 integrations files including marid script", [:], [:])
-    buildDebIcinga2Marid("icinga2", "opsgenie-icingaMarid", "OpsGenie - icinga2 integrations files including marid and Icinga2 scripts", [:], [:])
+    buildRpmIcinga2Marid("icinga2", "opsgenie-icinga2Marid", "OpsGenie - icinga2 integrations files including marid script", [:], [:])
+    buildDebIcinga2Marid("icinga2", "opsgenie-icinga2Marid", "OpsGenie - icinga2 integrations files including marid and Icinga2 scripts", [:], [:])
 }
 
 
