@@ -25,6 +25,11 @@ task prepareActiveDirectory() << {
         from "${project.projectDir}/activeDirectory/activeDirectory/activeDirectorySync.conf"
         into "${destination}/opsgenieActiveDirectorySync"
     }
+
+    copy {
+        from "${project.projectDir}/activeDirectory/activeDirectory/ReadMe.txt"
+        into "${destination}/opsgenieActiveDirectorySync"
+    }
 }
 
 task packageActiveDirectoryZip(dependsOn: 'prepareActiveDirectory', type: Zip) {
