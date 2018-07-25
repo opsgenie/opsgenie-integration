@@ -16,6 +16,16 @@ public class OpsGenieAlertTrigger : ActiveTrigger<Force__Case>
                 var description = rec.New.Description;
                 var priority = rec.New.Priority;
                 var priorityValue = "";
+                var EscalatedBy = rec.New.Escalated_By__c;
+                var IsEscalated = "FALSE";
+                
+                if(rec.New.IsEscalated == true){
+                    IsEscalated = "TRUE";
+                }
+                
+                if(EscalatedBy == null){
+                    EscalatedBy = "";
+                }
 
                 if (priority != null)
                 {
@@ -72,7 +82,9 @@ public class OpsGenieAlertTrigger : ActiveTrigger<Force__Case>
                 postData += "\"ownerEmail\": \"" + sanitizePayload(ownerEmail) + "\",";
                 postData += "\"caseStatus\": \"" + sanitizePayload(caseStatusValue) + "\",";
                 postData += "\"accountName\": \"" + sanitizePayload(accountName) + "\",";
-                postData += "\"assetName\": \"" + sanitizePayload(assetName) + "\"";
+                postData += "\"assetName\": \"" + sanitizePayload(assetName) + "\",";
+                postData += "\"isEscalated\": \"" + sanitizePayload(IsEscalated) + "\",";
+                postData += "\"escalatedBy\": \"" + sanitizePayload(EscalatedBy) + "\"";
                 postData += "}";
 
                 client.UploadString(OG_URL, postData);
@@ -87,9 +99,10 @@ public class OpsGenieAlertTrigger : ActiveTrigger<Force__Case>
             return null;
         }
 
-        str = str.Replace("\"", "\\\"");
         str = str.Replace("\r\n", " ");
+        str = str.Replace("\r\n\t", " ");
         str = str.Replace("\n", " ");
+        str = str.Replace("\"", "\\\"");
         
         return str;
     }
