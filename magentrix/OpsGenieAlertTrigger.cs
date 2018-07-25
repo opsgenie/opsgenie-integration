@@ -16,15 +16,15 @@ public class OpsGenieAlertTrigger : ActiveTrigger<Force__Case>
                 var description = rec.New.Description;
                 var priority = rec.New.Priority;
                 var priorityValue = "";
-                var EscalatedBy = rec.New.Escalated_By__c;
-                var IsEscalated = "FALSE";
+                var escalatedBy = rec.New.Escalated_By__c;
+                var isEscalated = "FALSE";
                 
                 if(rec.New.IsEscalated == true){
-                    IsEscalated = "TRUE";
+                    isEscalated = "TRUE";
                 }
                 
-                if(EscalatedBy == null){
-                    EscalatedBy = "";
+                if(escalatedBy == null){
+                    escalatedBy = "";
                 }
 
                 if (priority != null)
@@ -83,8 +83,8 @@ public class OpsGenieAlertTrigger : ActiveTrigger<Force__Case>
                 postData += "\"caseStatus\": \"" + sanitizePayload(caseStatusValue) + "\",";
                 postData += "\"accountName\": \"" + sanitizePayload(accountName) + "\",";
                 postData += "\"assetName\": \"" + sanitizePayload(assetName) + "\",";
-                postData += "\"isEscalated\": \"" + sanitizePayload(IsEscalated) + "\",";
-                postData += "\"escalatedBy\": \"" + sanitizePayload(EscalatedBy) + "\"";
+                postData += "\"isEscalated\": \"" + sanitizePayload(isEscalated) + "\",";
+                postData += "\"escalatedBy\": \"" + sanitizePayload(escalatedBy) + "\"";
                 postData += "}";
 
                 client.UploadString(OG_URL, postData);
