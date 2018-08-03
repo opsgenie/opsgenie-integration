@@ -2,7 +2,7 @@
 - Put "OpsGenie Create Alert" into "Trigger name", description is optional.
 - Under "Meet ALL of the following conditions:", add two conditions as specified below:
     - Status Is not Solved
-    - Status Is Created
+    - Ticket Is Created
 - Under "Actions:", click "add action", select "Notify target", and pick the URL target you added earlier for the integration.
 - Paste the following into the "Message" field:
 action: create ||
