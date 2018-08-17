@@ -12,6 +12,8 @@ buildscript {
 import com.amazonaws.*
 import com.amazonaws.auth.AWSCredentials
 import com.amazonaws.auth.BasicAWSCredentials
+import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
+import com.amazonaws.internal.StaticCredentialsProvider;
 import com.amazonaws.services.s3.AmazonS3
 import com.amazonaws.services.s3.AmazonS3Client
 import com.amazonaws.services.s3.model.*
@@ -151,12 +153,19 @@ def getAWSClient() {
     def amazonMaxConnections = Integer.valueOf(props.getProperty('amazonMaxConnections'))
     def amazonMaxErrorRetry = Integer.valueOf(props.getProperty('amazonMaxErrorRetry'))
 
-    AWSCredentials awsCredentials = new BasicAWSCredentials(amazonAccessKey, amazonSecretKey)
+    AWSCredentialsProvider provider;
+    if (amazonAccessKey != null && amazonSecretKey != null) {
+        provider = new StaticCredentialsProvider( new BasicAWSCredentials(amazonAccessKey, amazonSecretKey));
+    } else {
+        provider = new DefaultAWSCredentialsProviderChain();
+    }
+
     ClientConfiguration clientConfiguration = new ClientConfiguration()
     clientConfiguration.setConnectionTimeout(amazonConnectionTimeout);
     clientConfiguration.setMaxConnections(amazonMaxConnections);
     clientConfiguration.setMaxErrorRetry(amazonMaxErrorRetry);
-    AmazonS3 client = new AmazonS3Client(awsCredentials, clientConfiguration)
+
+    AmazonS3 client = new AmazonS3Client(provider, clientConfiguration)
     client.setEndpoint("s3-us-west-2.amazonaws.com")
     return client
 }
