@@ -60,6 +60,17 @@ public class OpsGenieAlertTrigger : ActiveTrigger<Force__Case>
                 if ((rec.New.Account != null) && (!string.IsNullOrEmpty(rec.New.Account.Name))) {
                     accountName = rec.New.Account.Name;
                 }
+
+                var customField1 = "";
+                var customField2 = "";
+                var customField3 = "";
+                var customField4 = "";
+                var customField5 = "";
+                var customField6 = "";
+                var customField7 = "";
+                var customField8 = "";
+                var customField9 = "";
+                var customField10 = "";
                 
                 var assetName = "";
                 
@@ -68,42 +79,36 @@ public class OpsGenieAlertTrigger : ActiveTrigger<Force__Case>
                 }
 
                 System.Net.WebClient client = new System.Net.WebClient();
-                client.Headers.Add("Content-Type","application/json");
+                client.Headers.Add("Content-Type","application/json;charset=UTF-8");
 
-                var postData = "{";
-                postData += "\"caseId\": \"" + sanitizePayload(caseId) + "\",";
-                postData += "\"caseDescription\": \"" + sanitizePayload(caseDescription) + "\",";
-                postData += "\"severity\": \"" + sanitizePayload(severity) + "\",";
-                postData += "\"caseNumber\": \"" + sanitizePayload(caseNumber) + "\",";
-                postData += "\"description\": \"" + sanitizePayload(description) + "\",";
-                postData += "\"priority\": \"" + sanitizePayload(priority) + "\",";
-                postData += "\"subject\": \"" + sanitizePayload(subject) + "\",";
-                postData += "\"caseType\": \"" + sanitizePayload(caseType) + "\",";
-                postData += "\"ownerEmail\": \"" + sanitizePayload(ownerEmail) + "\",";
-                postData += "\"caseStatus\": \"" + sanitizePayload(caseStatusValue) + "\",";
-                postData += "\"accountName\": \"" + sanitizePayload(accountName) + "\",";
-                postData += "\"assetName\": \"" + sanitizePayload(assetName) + "\",";
-                postData += "\"isEscalated\": \"" + sanitizePayload(isEscalated) + "\",";
-                postData += "\"escalatedBy\": \"" + sanitizePayload(escalatedBy) + "\"";
-                postData += "}";
+                var map = new Dictionary<string, object>();
+                map.Add("caseId", caseId);
+                map.Add("caseDescription", caseDescription);
+                map.Add("severity", severity);
+                map.Add("caseNumber", caseNumber);
+                map.Add("description", description);
+                map.Add("priority", priority);
+                map.Add("subject", subject);
+                map.Add("caseType", caseType);
+                map.Add("caseStatus", caseStatusValue);
+                map.Add("accountName", accountName);
+                map.Add("assetName", assetName);
+                map.Add("isEscalated", isEscalated);
+                map.Add("escalatedBy", escalatedBy);
+                map.Add("customField1", customField1);
+                map.Add("customField2", customField2);
+                map.Add("customField3", customField3);
+                map.Add("customField4", customField4);
+                map.Add("customField5", customField5);
+                map.Add("customField6", customField6);
+                map.Add("customField7", customField7);
+                map.Add("customField8", customField8);
+                map.Add("customField9", customField9);
+                map.Add("customField10", customField10);
 
+                var postData = JsonHelper.ToJson(map);
                 client.UploadString(OG_URL, postData);
             }
         }
-	}
-	
-    private String sanitizePayload(String str)
-    {
-        if (str == null)
-        {
-            return null;
-        }
-
-        str = str.Replace("\r\n", " ");
-        str = str.Replace("\r\n\t", " ");
-        str = str.Replace("\n", " ");
-        str = str.Replace("\"", "\\\"");
-        
-        return str;
-    }
+	}	
 }
