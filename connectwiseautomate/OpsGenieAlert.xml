@@ -1,0 +1,37 @@
+﻿<LabTech_Expansion
+		Version="120.428"
+		Name="LabTech Script Expansion"
+		Type="PackedScript">
+	<PackedScript>
+		<NewDataSet>
+			<Table>
+				<ScriptId>375</ScriptId>
+				<FolderId>34</FolderId>
+				<ScriptName>OpsGenie Alert</ScriptName>
+				<ScriptNotes></ScriptNotes>
+				<Permission>0,</Permission>
+				<EditPermission>0,</EditPermission>
+				<ComputerScript>1</ComputerScript>
+				<LocationScript>0</LocationScript>
+				<MaintenanceScript>0</MaintenanceScript>
+				<FunctionScript>1</FunctionScript>
+				<LicenseData>H4sIAAAAAAAEAFWPTQrCMBSE94J3yAEa0gSjoTwC4t9GN1bct8kLZGEa0hTs7aVFoa6GmeEbGLh6g6HHY5MbDY8xoubAZoX7EA7dEDImXQJbODi9o08Tg/qcvG3GgtQYM75aTETwgoiSK8J5VapKbMj+BmyBQG2Sj/mJqfddmLb/g29/GbzVW+kUN9bR1ipHOUdFlRQ7WjbWSCGdUYg/fgaALR+tVx/sr8Vz4QAAAA==</LicenseData>
+				<ScriptData>H4sIAAAAAAAEAM1VUU/bMBB+r5T/EEVFgEYIDXSrtrbrxlZgGxuibC+IBze5Uo/UjmIHVk377/NdnDQJgrdJe8p995199ndf3eEsyniqPzDNxk7HdYcFVgQM/PhLZwzZKYckVm5QEhcsYyvQkNVyJ4mcs0SNWco/w3q0lnnmm9i/g/Ue5KOt8GhqaBgGZaFdV/T8YfbiUox7w6CZaFSd5Dwev+wvBr0oXvjzeLDwez0Y+IN++Mo/YHHUD/uLaABQ7kIL6GpB/W52u5mGtDrHu0jbA9jI5qe5IHwWI1dDdS16LW3CFj5s4aMW7m/wTGZ6fGDOi1+bO5ZCc5ED5qvYct/UF77itKQMLXMmYhCa0WUMW4d1STYqPCNL+Iws4WH/aWGws40aAo1T/Lg7mLyeS5kAEzddyN2R2yWj7BGjdMbF7U23cJUhvSLymrQy98oV0kXUoqOEm6sL41ksKVC7RK7S3Di6KrK4VZbIiBQsy0rcKlvgD6asIdAqyEDliUa2iFr0wxIEkvh9dFAzxEh/rc5JsFW0koJrmZVFFnpOZ9fpOB2+2DFK77q/cU03zzjWLLVO1esgMPruQ74vU3ULgsO+ESK47wU/lRQBFxpuM7qwCh5gvpTyTgXmCAIi/cAVsFzLFdPw1r4CnvvCtbN743T+OB0wk3267z9q6nS6cxmje8yP5x4yfSX9T2Zrd0InqcxjbYS5wiNWv5p/iLPWqNiadZAvPVHydc8gT34oycopyFSusP7AnLUCWaLoXp9/3Q7INgdf9wEp0V0Ci/HZHrnXp0wtNZsncGN1uFqnuGibpWnCiyPTBLbNUiPkxrNn4l7egX8JSp+DXsrY9e3Xu5BKe67/3cyWBuyf2oZVZ/89jqIYiI+PmVGWOj/ua1+OsPmUjr0J5BPP9SbFjCmc0eQw3NoMa4tgbTqUqI8DE5NpOQLa6ZJuSTuh5LTkeCMyrTgvZJ149oSHzce9evOO/rtHvsT2P/8vRL2EDwIIAAA=</ScriptData>
+				<ScriptVersion>1</ScriptVersion>
+				<ScriptGuid>65f81cdf-bd8f-11e8-8527-0adc525fc8ee</ScriptGuid>
+				<ScriptFlags>0</ScriptFlags>
+				<Parameters></Parameters>
+			</Table>
+		</NewDataSet>
+		<ScriptFolder>
+			<NewDataSet>
+				<Table>
+					<FolderID>34</FolderID>
+					<ParentID>0</ParentID>
+					<Name>Software</Name>
+					<GUID>31866f37-8f0a-47b9-b1fd-11bd855f8391</GUID>
+				</Table>
+			</NewDataSet>
+		</ScriptFolder>
+	</PackedScript>
+</LabTech_Expansion>
