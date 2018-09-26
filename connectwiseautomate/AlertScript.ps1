@@ -1,7 +1,7 @@
 # Script Parameters for CW: "@eu" "@apiKey@" "@Status@" "%clientname%" "%computername%" "%locationname%" "@Fieldname@" "@Result@" "%when%" "%ContactName%" "@Monitor@"
 
 param (
-  [boolean]$eu = $False,
+  [string]$eu = "False",
   [string]$apiKey = "apiKey",
   [string]$status = "status",
   [string]$clientname = "client",
@@ -14,7 +14,7 @@ param (
   [string]$monitorName = "monitor"
 )
 
-if($eu) {
+if($eu -eq "True") {
   $uri = "https://api.eu.opsgenie.com/v1/json/integrations/webhooks/connectwiseautomate?apiKey=" + $apiKey;
 }
 else {
@@ -36,3 +36,4 @@ $headers = [Hashtable] @{
   Type = 'application/json'
 };
 $result = Invoke-RestMethod -Method "Post" -Uri $uri -Headers $headers -Body $body -ContentType 'application/json'
+Write-Output $result

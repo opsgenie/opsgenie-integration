@@ -5,10 +5,10 @@
 	<PackedScript>
 		<NewDataSet>
 			<Table>
-				<ScriptId>375</ScriptId>
+				<ScriptId>377</ScriptId>
 				<FolderId>34</FolderId>
 				<ScriptName>OpsGenie Alert</ScriptName>
-				<ScriptNotes></ScriptNotes>
+				<ScriptNotes>Please, paste your API key in Globals and Parameters tab, then save.</ScriptNotes>
 				<Permission>0,</Permission>
 				<EditPermission>0,</EditPermission>
 				<ComputerScript>1</ComputerScript>
@@ -16,7 +16,7 @@
 				<MaintenanceScript>0</MaintenanceScript>
 				<FunctionScript>1</FunctionScript>
 				<LicenseData>H4sIAAAAAAAEAFWPTQrCMBSE94J3yAEa0gSjoTwC4t9GN1bct8kLZGEa0hTs7aVFoa6GmeEbGLh6g6HHY5MbDY8xoubAZoX7EA7dEDImXQJbODi9o08Tg/qcvG3GgtQYM75aTETwgoiSK8J5VapKbMj+BmyBQG2Sj/mJqfddmLb/g29/GbzVW+kUN9bR1ipHOUdFlRQ7WjbWSCGdUYg/fgaALR+tVx/sr8Vz4QAAAA==</LicenseData>
-				<ScriptData>H4sIAAAAAAAEAM1VUU/bMBB+r5T/EEVFgEYIDXSrtrbrxlZgGxuibC+IBze5Uo/UjmIHVk377/NdnDQJgrdJe8p995199ndf3eEsyniqPzDNxk7HdYcFVgQM/PhLZwzZKYckVm5QEhcsYyvQkNVyJ4mcs0SNWco/w3q0lnnmm9i/g/Ue5KOt8GhqaBgGZaFdV/T8YfbiUox7w6CZaFSd5Dwev+wvBr0oXvjzeLDwez0Y+IN++Mo/YHHUD/uLaABQ7kIL6GpB/W52u5mGtDrHu0jbA9jI5qe5IHwWI1dDdS16LW3CFj5s4aMW7m/wTGZ6fGDOi1+bO5ZCc5ED5qvYct/UF77itKQMLXMmYhCa0WUMW4d1STYqPCNL+Iws4WH/aWGws40aAo1T/Lg7mLyeS5kAEzddyN2R2yWj7BGjdMbF7U23cJUhvSLymrQy98oV0kXUoqOEm6sL41ksKVC7RK7S3Di6KrK4VZbIiBQsy0rcKlvgD6asIdAqyEDliUa2iFr0wxIEkvh9dFAzxEh/rc5JsFW0koJrmZVFFnpOZ9fpOB2+2DFK77q/cU03zzjWLLVO1esgMPruQ74vU3ULgsO+ESK47wU/lRQBFxpuM7qwCh5gvpTyTgXmCAIi/cAVsFzLFdPw1r4CnvvCtbN743T+OB0wk3267z9q6nS6cxmje8yP5x4yfSX9T2Zrd0InqcxjbYS5wiNWv5p/iLPWqNiadZAvPVHydc8gT34oycopyFSusP7AnLUCWaLoXp9/3Q7INgdf9wEp0V0Ci/HZHrnXp0wtNZsncGN1uFqnuGibpWnCiyPTBLbNUiPkxrNn4l7egX8JSp+DXsrY9e3Xu5BKe67/3cyWBuyf2oZVZ/89jqIYiI+PmVGWOj/ua1+OsPmUjr0J5BPP9SbFjCmc0eQw3NoMa4tgbTqUqI8DE5NpOQLa6ZJuSTuh5LTkeCMyrTgvZJ149oSHzce9evOO/rtHvsT2P/8vRL2EDwIIAAA=</ScriptData>
+				<ScriptData>H4sIAAAAAAAEAM1WUW/TMBB+r9T/YEWd2MSyrN0KFbSlMOg2YGxaBzxMe3CT62qW2iF2NibEf8d3cdIksL0h8eS7+86+83dfnQ5nYSoS85YbPm63GBvmvibHuu9+mJQjOhUQR5oFBXDGU74CA2kldhirOY/1mCfiA9yPEq4N+JoO9JeQwjZko6lNgGFQpLqdedUv9jSh5Lg7DOqBWtZhJqLxs/5i0A2jhT+PBgu/24WBP+j3nvu7PAr7vf4iHAAUp9AGulxQvZ07bmYgKft4HRrXgLNcfJpJ8o8jxCpelY1ug51ew99r+PsNv7/2Zyo1413bL64udqCkETIDjJe2w071R7EStKUwHXIsI5CG02UsWnWrlKxZeISW3iO09Pb6DxODlZ1VI2ic4MI2MXipTSrk9VUHMjZiHunE264hua4Qza0GrO29Mo1wbjXgMBb26tKqFlNyr5miVklmNV0mOb+RFquQGCzSCr+RtsCfTJFDTiMhBZ3FBtHcasB3S5AI4vpHo3aIoflU9kluI2mlpDAqLZKc67VbW+0WJorFJpLtw3fmXaQZeFvsJ8Y7WSpww9KYRL8IAkv2DmQ7KtHXIAXsWFaC227wTSsZCGngOqXb6+AO5kulbnRg+5EQmjuhgWdGrbiBV+5R8NhT5gb5st361W6BnfPDdf9R0XarM1cRSsn+km4hNRfKf2+PZhPqpFSS0xTGcsE4MitiIszppEQrOkK8EEiBVwWEOImjAEvZIFJKxIkFY04XpI+8elUMVW0gWldBVRTERGcJPMJXfMQuj7heGj6P4crxwNjFfYLbnvAkiUXeNM3gid1sqVxL+Fjeqhvwz0GbEzBLFTHfrd6Z0sZj/mc7XRqxf+RKlrX9NziMfCQ+vm2WW6r8t7pfU2E/K6eZsRSvaXEPTK/+4o69CWQTj3mTfPpkzmimaG6sx7hBbmVuFKgOCgOTaTEcOumcitNJOAzacrCmn3ac5IRPPNfhXv0bUD6N+//dt6Dw3Z+D30mmC+4rCAAA</ScriptData>
 				<ScriptVersion>1</ScriptVersion>
 				<ScriptGuid>65f81cdf-bd8f-11e8-8527-0adc525fc8ee</ScriptGuid>
 				<ScriptFlags>0</ScriptFlags>
