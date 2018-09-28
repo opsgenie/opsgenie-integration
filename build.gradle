@@ -494,6 +494,7 @@ apply from: 'xmpp/xmpp.gradle'
 apply from: 'trackit/trackIt.gradle'
 apply from: 'webex/webex.gradle'
 apply from: 'jira/jira.gradle'
+apply from: 'jiraservicedesk/jiraServiceDesk.gradle'
 apply from: 'dynatraceappmon/dynatraceappmon.gradle'
 apply from: 'op5/op5.gradle'
 apply from: 'bmcRemedy/bmcRemedy.gradle'
@@ -545,6 +546,7 @@ task packageIntegrations(dependsOn: [
                                 'packageXmpp',
                                 'packageWebex',
                                 'packageJira',
+                                'packageJiraServiceDesk',
                                 'packageDynatraceAppMon',
                                 'packageOP5',
                                 'packageBMCRemedy',

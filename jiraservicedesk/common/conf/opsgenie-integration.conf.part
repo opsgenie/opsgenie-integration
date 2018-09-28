@@ -1,0 +1,12 @@
+######################################## JIRA SERVICE DESK CONFIGURATION #######################################
+jiraservicedesk.issueType=
+jiraservicedesk.url=
+jiraservicedesk.username=
+jiraservicedesk.password=
+jiraservicedesk.projectKey=
+
+######################################## JIRA SERVICE DESK INTEGRATION - ALERT ACTION CONFIGURATION ######################
+mappedActions.addCommentToIssue.script=jiraServiceDeskActionExecutor.groovy
+mappedActions.createIssue.script=jiraServiceDeskActionExecutor.groovy
+mappedActions.resolveIssue.script=jiraServiceDeskActionExecutor.groovy
+##############################################################################################################
