@@ -1,0 +1,34 @@
+task prepareJiraServiceDesk(dependsOn: 'generateIntegration') << {
+    def destination = "${project.buildDir}/jiraservicedesk"
+    copy {
+        from "${project.buildDir}/opsgenie-integration"
+        into "${destination}/opsgenie-integration"
+    }
+
+    copy {
+        from "${project.projectDir}/jiraservicedesk/marid"
+        into "${destination}/opsgenie-integration/marid"
+    }
+
+    mergeConfFile("${project.buildDir}/opsgenie-integration/conf/opsgenie-integration.conf",
+            "${project.projectDir}/jiraservicedesk/common/conf/opsgenie-integration.conf.part",
+            "${destination}/opsgenie-integration/conf/opsgenie-integration.conf")
+}
+
+task packageJiraServiceDeskZip(dependsOn: 'prepareJiraServiceDesk', type: Zip) {
+    from "${project.buildDir}/jiraservicedesk"
+    baseName = 'opsgenie-jiraServiceDesk'
+    version = project.ext.versions.getProperty('jiraServiceDesk') + project.ext.versionSuffix
+}
+
+task packageJiraServiceDeskOS(dependsOn: ['generateIntegrationForNative', 'prepareJiraServiceDesk']) << {
+    copyNativeFiles('jiraServiceDesk')
+
+    buildRpm('jiraServiceDesk', 'opsgenie-jiraServiceDesk', 'OpsGenie - Jira Service Desk integration files including marid',
+            [:], [:])
+
+    buildDeb('jiraServiceDesk', 'opsgenie-jiraServiceDesk', 'OpsGenie - Jira Service Desk integration files including marid',
+            [:], [:])
+}
+
+task packageJiraServiceDesk(dependsOn: ['packageJiraServiceDeskZip', 'packageJiraServiceDeskOS'])
