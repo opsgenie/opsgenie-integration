@@ -291,7 +291,7 @@ func parseFlags()map[string]string{
 	var envVars map[string]string = make(map[string]string)
 
 	for _, envVar := range os.Environ() {
-		pair := strings.Split(envVar, "=")
+		pair := strings.SplitN(envVar, "=", 2)
 
 		if pair[0] == "" || pair[1] == "" {
 			continue
