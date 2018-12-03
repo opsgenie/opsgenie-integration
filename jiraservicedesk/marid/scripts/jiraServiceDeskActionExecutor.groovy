@@ -102,7 +102,6 @@ def sendActionsToJiraServiceDesk(String projectKey, Map<String, String> postPara
             logger.info("${LOG_PREFIX} Successfully executed at Jira Service Desk.");
             logger.debug("${LOG_PREFIX} Jira Service Desk response: ${response.getContentAsString()}")
         } else {
-            logger.error("cem " + projectKey)
             logger.error("${LOG_PREFIX} Could not execute at Jira Service Desk; response: ${response.statusCode} ${response.getContentAsString()}");
         }
     }
