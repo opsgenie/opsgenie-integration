@@ -207,9 +207,14 @@ def uploadJavaDocToS3() {
     client.setBucketWebsiteConfiguration(javadocBucket, new BucketWebsiteConfiguration("index.html"))
     FileTree javadoc = fileTree(dir: "${project(':sdk').buildDir}/docs/all")
     javadoc.each { File file ->
-        println("Uploading " + file.getAbsolutePath() + " to bucket [${javadocBucket}/${folderName}]")
-        def fileName = file.getCanonicalPath().replace("${project(':sdk').buildDir}/docs/all/", folderName)
-        PutObjectRequest request = new PutObjectRequest(javadocBucket, fileName, file)
+        println("Uploading " + file.getAbsolutePath() + " to bucket [${javadocBucket}/${folderName}] with path ${directoryPath}")
+        def directoryPath =  ''
+        if (project.hasProperty('testMode')) {
+            println('It is going to be test release')
+            directoryPath += 'test/'
+        }
+        fileName = file.getCanonicalPath().replace("${project(':sdk').buildDir}/docs/all/", folderName)
+        PutObjectRequest request = new PutObjectRequest(javadocBucket, directoryPath + fileName, file)
         request.setCannedAcl(CannedAccessControlList.PublicRead)
         client.putObject(request)
     }
@@ -228,8 +233,14 @@ def uploadMaridPackagesToS3() {
 
     println '[Release] Started to upload client packages'
     packages.each { File file ->
-        println("Uploading " + file.getAbsolutePath() + " to " + "bucket [${downloadsBucket}]")
-        PutObjectRequest request = new PutObjectRequest(downloadsBucket, "repo/${file.getName()}", file)
+        def directoryPath = ''
+        if (project.hasProperty('testMode')) {
+            println('It is going to be test release')
+            directoryPath += 'test/'
+        }
+        directoryPath += 'repo/'
+        println("Uploading " + file.getAbsolutePath() + " to " + "bucket [${downloadsBucket}] with path ${directoryPath}")
+        PutObjectRequest request = new PutObjectRequest(downloadsBucket, directoryPath + "${file.getName()}", file)
         request.setCannedAcl(CannedAccessControlList.PublicRead)
         client.putObject(request)
     }
@@ -246,8 +257,14 @@ def uploadSdkPackageToS3() {
     sdk.include 'opsgenie-java-sdk**'
 
     sdk.each { File file ->
-        println("Uploading " + file.getAbsolutePath() + " to " + "bucket [${downloadsBucket}]")
-        PutObjectRequest request = new PutObjectRequest(downloadsBucket, "repo/${file.getName()}", file)
+        def directoryPath = ''
+        if (project.hasProperty('testMode')) {
+            println('It is going to be test release')
+            directoryPath += 'test/'
+        }
+        directoryPath += 'repo/'
+        println("Uploading " + file.getAbsolutePath() + " to " + "bucket [${downloadsBucket}] with path ${directoryPath}")
+        PutObjectRequest request = new PutObjectRequest(downloadsBucket, directoryPath + "${directoryPath}${file.getName()}", file)
         request.setCannedAcl(CannedAccessControlList.PublicRead)
         client.putObject(request)
     }
@@ -266,8 +283,14 @@ def uploadIntegrationsToS3() {
     integrations.exclude 'opsgenie-java-sdk**'
     println '[Release] Started to upload integration packages'
     integrations.each { File file ->
-        println("Uploading " + file.getAbsolutePath() + " to " + "bucket [${downloadsBucket}]")
-        PutObjectRequest request = new PutObjectRequest(downloadsBucket, "repo/${file.getName()}", file)
+        def directoryPath = ''
+        if (project.hasProperty('testMode')) {
+            println('It is going to be test release')
+            directoryPath += 'test/'
+        }
+        directoryPath += 'repo/'
+        println("Uploading " + file.getAbsolutePath() + " to " + "bucket [${downloadsBucket}] with path ${directoryPath}" )
+        PutObjectRequest request = new PutObjectRequest(downloadsBucket, directoryPath + "${file.getName()}", file)
         request.setCannedAcl(CannedAccessControlList.PublicRead)
         client.putObject(request)
     }
@@ -282,7 +305,12 @@ def uploadDownloadsPropertiesToS3() {
     def file = file("${buildDir}/distributions/downloads.properties")
     println '[Release] Started to upload download.properties'
     logger.info("Uploading " + file.getAbsolutePath())
-    PutObjectRequest request = new PutObjectRequest(downloadsBucket, "${file.getName()}", file)
+    def directoryPath = ''
+    if (project.hasProperty('testMode')) {
+        println('It is going to be test release')
+        directoryPath += 'test/'
+    }
+    PutObjectRequest request = new PutObjectRequest(downloadsBucket, directoryPath + "${file.getName()}", file)
     request.setCannedAcl(CannedAccessControlList.PublicRead)
     client.putObject(request)
     println '[Release] Started to upload download.properties - finished'
@@ -497,7 +525,7 @@ task release(type: GradleBuild ) {
         uploadIntegrationsToS3()
         if (isReleaseForAll() || isReleaseForSdk()) {
             uploadSdkPackageToS3()
-            uploadJavaDocToS3()
+            //uploadJavaDocToS3()
             uploadMaridPackagesToS3()
         } else if (isReleaseForMarid()) {
             uploadMaridPackagesToS3()
