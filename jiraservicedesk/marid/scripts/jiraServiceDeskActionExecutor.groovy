@@ -48,7 +48,7 @@ try {
     def resolution = [:]
 
     String resultUrl = url + "/rest/api/2/issue"
-    if (mappedAction == "addCommentToIssue") {
+    if (mappedAction == "addComment") {
         contentParams.put("body", params.body)
         resultUrl += "/" + issueKey + "/comment"
     } else if (mappedAction == "createIssue") {
