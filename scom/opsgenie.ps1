@@ -11,6 +11,8 @@
     [String]$MPElement = "NotPresent"
 )
 
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+
 Import-Module "C:\Program Files\Microsoft System Center 2012 R2\Operations Manager\Powershell\OperationsManager\OperationsManager.psm1"
 
 $alert = Get-SCOMAlert -Id $AlertID
