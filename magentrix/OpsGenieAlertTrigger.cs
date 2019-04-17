@@ -18,6 +18,7 @@ public class OpsGenieAlertTrigger : ActiveTrigger<Force__Case>
                 var priorityValue = "";
                 var escalatedBy = rec.New.Escalated_By__c;
                 var isEscalated = "FALSE";
+                var caseOrigin = rec.New.Origin;
                 
                 if(rec.New.IsEscalated == true){
                     isEscalated = "TRUE";
@@ -105,6 +106,7 @@ public class OpsGenieAlertTrigger : ActiveTrigger<Force__Case>
                 map.Add("customField8", customField8);
                 map.Add("customField9", customField9);
                 map.Add("customField10", customField10);
+                map.Add("caseOrigin", caseOrigin);
 
                 var postData = JsonHelper.ToJson(map);
                 client.UploadString(OG_URL, postData);
