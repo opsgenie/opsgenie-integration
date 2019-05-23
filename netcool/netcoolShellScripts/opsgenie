@@ -3,9 +3,6 @@
 # Specify the location of the lamp utility
 LAMP_HOME=/usr/bin/lamp
 
-#Specify the alert recipients
-RECIPIENTS=all
-
 ACTIONS="deacknowledge,add to task list, remove from task list"
 SERIAL="$1"
 NODE="$2"
@@ -23,5 +20,5 @@ Sent by the Netcool/OMNIbus Automation system
 EOF
 )
 
-$LAMP_HOME/lamp createAlert --message "$SUMMARY" --recipients "$RECIPIENTS" --entity "$NODE" --description  "$DESCRIPTION" --source NETCOOL --actions "$ACTIONS" \
+$LAMP_HOME/lamp createAlert --message "$SUMMARY" --entity "$NODE" --description  "$DESCRIPTION" --source NETCOOL --actions "$ACTIONS" \
      -D Serial="$SERIAL" -D Node="$NODE" -D Count="$COUNT" -D Severity="$SEVERITY"

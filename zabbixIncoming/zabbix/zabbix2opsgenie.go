@@ -261,8 +261,7 @@ func parseFlags() map[string]string {
 	eventId := flag.String("eventId", "", "EVENT.ID")
 	recoveryEventStatus := flag.String("recoveryEventStatus", "", "EVENT.RECOVERY.STATUS")
 	tags := flag.String("tags", "", "tags")
-	recipients := flag.String("recipients", "", "recipients")
-	teams := flag.String("teams", "", "Teams")
+	responders := flag.String("responders", "", "Responders")
 	logPath := flag.String("logPath", "", "LOGPATH")
 
 	flag.Parse()
@@ -288,22 +287,16 @@ func parseFlags() map[string]string {
 		configParameters["apiKey"] = *apiKey
 	}
 
-	if *recipients != "" {
-		parameters["recipients"] = *recipients
+	if *responders != "" {
+		parameters["responders"] = *responders
 	} else {
-		parameters["recipients"] = configParameters ["recipients"]
+		parameters["responders"] = configParameters ["responders"]
 	}
 
 	if *tags != "" {
 		parameters["tags"] = *tags
 	} else {
 		parameters["tags"] = configParameters ["tags"]
-	}
-
-	if *teams != "" {
-		parameters["teams"] = *teams
-	} else {
-		parameters["teams"] = configParameters ["teams"]
 	}
 
 	if *logPath != "" {

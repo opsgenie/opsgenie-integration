@@ -253,7 +253,7 @@ func http_post()  {
 func parseFlags()map[string]string{
 	apiKey := flag.String("apiKey","","apiKey")
 	tags := flag.String ("tags","","tags")
-	teams := flag.String("teams", "", "teams")
+	responders := flag.String("responders", "", "responders")
 	logPath := flag.String("logPath", "", "LOGPATH")
 
 	flag.Parse()
@@ -268,10 +268,10 @@ func parseFlags()map[string]string{
 		parameters["tags"] = configParameters ["tags"]
 	}
 
-	if *teams != "" {
-		parameters["teams"] = *teams
+	if *responders != "" {
+		parameters["responders"] = *responders
 	} else {
-		parameters["teams"] = configParameters["teams"]
+		parameters["responders"] = configParameters["responders"]
 	}
 
 	if *logPath != "" {

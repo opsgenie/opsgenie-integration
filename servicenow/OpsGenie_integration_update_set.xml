@@ -150,8 +150,7 @@ OpsGenie ServiceNow integration allows you to forward ServiceNow incidents to Op
 			"Severity" : current.severity.getDisplayValue(),
 			"State" : current.state.getDisplayValue(),
 		},
-		recipients : current.assigned_to.email.toString(),
-		teams : current.assignment_group.name.toString()
+		responders : current.assigned_to.email.toString()
 	};
 	client.postToOpsGenie(contentMap);
 })(current, previous);]]&gt;&lt;/script&gt;&lt;sys_class_name&gt;sys_script&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2016-01-08 08:30:40&lt;/sys_created_on&gt;&lt;sys_customer_update&gt;true&lt;/sys_customer_update&gt;&lt;sys_domain&gt;global&lt;/sys_domain&gt;&lt;sys_domain_path/&gt;&lt;sys_id&gt;059e19c64f7c1200ab9d33718110c720&lt;/sys_id&gt;&lt;sys_mod_count&gt;0&lt;/sys_mod_count&gt;&lt;sys_name&gt;OpsGenie Create Alert&lt;/sys_name&gt;&lt;sys_overrides/&gt;&lt;sys_package display_value="Global" source="global"&gt;global&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_replace_on_upgrade&gt;false&lt;/sys_replace_on_upgrade&gt;&lt;sys_scope display_value="Global"&gt;global&lt;/sys_scope&gt;&lt;sys_update_name&gt;sys_script_059e19c64f7c1200ab9d33718110c720&lt;/sys_update_name&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2016-01-08 08:30:40&lt;/sys_updated_on&gt;&lt;template/&gt;&lt;when&gt;after&lt;/when&gt;&lt;/sys_script&gt;&lt;sys_translated_text action="delete_multiple" query="documentkey=059e19c64f7c1200ab9d33718110c720"/&gt;&lt;/record_update&gt;</payload>

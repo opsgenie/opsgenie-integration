@@ -1,5 +1,5 @@
 ## OpsGenie expects the following fields like below, use them without changing names (in both contents)
-## you can send alias, teams, recipients and tags to be used in OpsGenie alerts. Notice that these fields start with lowercase in example content do not change it.d
+## you can send alias, responders and tags to be used in OpsGenie alerts. Notice that these fields start with lowercase in example content do not change it.d
 ActionType=Create&
 alias=${N=Alerting;M=AlertObjectID}-${N=Alerting;M=AlertID}&
 ObjectID=${N=Alerting;M=AlertObjectID}&
@@ -22,11 +22,11 @@ ObjectType=${N=Alerting;M=ObjectType}&
 Severity=${N=Alerting;M=Severity}&
 TimeOfDay=${N=Alerting;M=TimeOfDay}&
 DateTime=${N=Generic;M=DateTime;F=DateTime}&
-teams=<comma_separated_list_of_teams>&
+responders=<comma_separated_list_of_responders>&
 tags=<comma_separated_list_of_tags>
 
 ## Troubleshooting content, use µ#µ instead of = and §#§ instead of &
-## you can send alias, teams, recipients and tags to be used in OpsGenie alerts. Notice that these fields start with lowercase in example content do not change it.
+## you can send alias, responders and tags to be used in OpsGenie alerts. Notice that these fields start with lowercase in example content do not change it.
 
 ActionTypeµ#µCreate§#§
 aliasµ#µ${N=Alerting;M=AlertObjectID}-${N=Alerting;M=AlertID}§#§
@@ -50,5 +50,5 @@ ObjectTypeµ#µ${N=Alerting;M=ObjectType}§#§
 Severityµ#µ${N=Alerting;M=Severity}§#§
 TimeOfDayµ#µ${N=Alerting;M=TimeOfDay}§#§
 DateTimeµ#µ${N=Generic;M=DateTime;F=DateTime}§#§
-teamsµ#µ<comma_separated_list_of_teams>§#§
+respondersµ#µ<comma_separated_list_of_responders>§#§
 tagsµ#µ<comma_separated_list_of_tags>

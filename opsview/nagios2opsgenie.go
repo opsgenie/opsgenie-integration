@@ -164,7 +164,7 @@ func http_post()  {
 func parseFlags()map[string]string{
 	apiKey := flag.String("apiKey","","apiKey")
 	tags := flag.String("tags","","Tags")
-	teams := flag.String("teams","","Teams")
+	responders := flag.String("responders","","Responders")
 	logLevel := flag.String("logLevel", "", "logLevel")
 	logPath := flag.String("logPath", "", "logPath")
 	opsgenieApiUrl := flag.String("opsgenieApiUrl", "", "opsgenieApiUrl")
@@ -174,8 +174,8 @@ func parseFlags()map[string]string{
 	if *apiKey != ""{
 		parameters["apiKey"] = *apiKey
 	}
-	if *teams != ""{
-		parameters["teams"] = *teams
+	if *responders != ""{
+		parameters["responders"] = *responders
 	}
 	if *tags != ""{
 		parameters["tags"] = *tags

@@ -581,9 +581,8 @@ func parseFlags() {
 
 	logPath := flag.String("logPath", "", "LOGPATH")
 
-	recipients := flag.String("recipients", "", "Recipients")
 	tags := flag.String("tags", "", "Tags")
-	teams := flag.String("teams", "", "Teams")
+	responders := flag.String("responders", "", "Responders")
 	url := flag.String("url", "", "")
 	username := flag.String("username", "", "Username")
 	password := flag.String("password", "", "Password")
@@ -603,16 +602,10 @@ func parseFlags() {
 		parameters["apiKey"] = configParameters ["apiKey"]
 	}
 
-	if *recipients != "" {
-		parameters["recipients"] = *recipients
+	if *responders != "" {
+		parameters["responders"] = *responders
 	} else {
-		parameters["recipients"] = configParameters ["recipients"]
-	}
-
-	if *teams != "" {
-		parameters["teams"] = *teams
-	} else {
-		parameters["teams"] = configParameters ["teams"]
+		parameters["responders"] = configParameters ["responders"]
 	}
 
 	if *tags != "" {

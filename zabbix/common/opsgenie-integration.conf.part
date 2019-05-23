@@ -4,7 +4,7 @@
 #zabbix2opsgenie.logger=warning
 logPath=/var/log/opsgenie/zabbix2opsgenie.log
 
-#recipients=<comma_separated_list_of_recipients>
+#responders=<comma_separated_list_of_responders>
 #tags=<comma_separated_list_of_tags>
 
 ####################################### PROXY CONFIGURATION FOR ZABBIX ############################################

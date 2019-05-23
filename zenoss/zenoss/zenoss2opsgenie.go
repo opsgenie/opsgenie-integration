@@ -306,9 +306,8 @@ func postToOpsGenie() {
 func parseFlags(){
 	apiKey := flag.String("apiKey","","Api Key")
 	evid := flag.String("evid","","Event Id")
-	recipients := flag.String("recipients","","Recipients")
+	responders := flag.String("responders","","Responders")
 	tags := flag.String("tags","","Tags")
-	teams := flag.String("teams","","Teams")
 	state := flag.String("eventState", "", "Event State")
 	configloc := flag.String("config", "", "Config File Location")
 	logPath := flag.String("logPath", "", "LOGPATH")
@@ -347,22 +346,16 @@ func parseFlags(){
 		parameters["apiKey"] = configParameters ["apiKey"]
 	}
 
-	if *recipients != ""{
-		parameters["recipients"] = *recipients
+	if *responders != ""{
+		parameters["responders"] = *responders
 	}else{
-		parameters["recipients"] = configParameters ["recipients"]
+		parameters["responders"] = configParameters ["responders"]
 	}
 
 	if *tags != ""{
 		parameters["tags"] = *tags
 	}else{
 		parameters["tags"] = configParameters ["tags"]
-	}
-
-	if *teams != ""{
-		parameters["teams"] = *teams
-	}else{
-		parameters["teams"] = configParameters ["teams"]
 	}
 
 	if *logPath != "" {

@@ -323,9 +323,8 @@ func parseFlags() map[string]string {
 	servicePerfData := flag.String("spd", "", "SERVICEPERFDATA")
 	logPath := flag.String("logPath", "", "LOGPATH")
 
-	recipients := flag.String("recipients", "", "Recipients")
+	responders := flag.String("responders", "", "Responders")
 	tags := flag.String("tags", "", "Tags")
-	teams := flag.String("teams", "", "Teams")
 
 	flag.Parse()
 
@@ -335,16 +334,10 @@ func parseFlags() map[string]string {
 		parameters["apiKey"] = configParameters ["apiKey"]
 	}
 
-	if *recipients != "" {
-		parameters["recipients"] = *recipients
+	if *responders != "" {
+		parameters["responders"] = *responders
 	} else {
-		parameters["recipients"] = configParameters ["recipients"]
-	}
-
-	if *teams != "" {
-		parameters["teams"] = *teams
-	} else {
-		parameters["teams"] = configParameters ["teams"]
+		parameters["responders"] = configParameters ["responders"]
 	}
 
 	if *tags != "" {

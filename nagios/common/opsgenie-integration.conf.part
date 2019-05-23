@@ -3,9 +3,8 @@
 nagios2opsgenie.logger=warning
 nagios2opsgenie.timeout= 60
 logPath=/var/log/opsgenie/nagios2opsgenie.log
-#recipients=<comma_separated_list_of_recipients>
+#responders=<comma_separated_list_of_responders>
 #tags=<comma_separated_list_of_tags>
-#teams=<comma_separated_list_of_teams>
 
 #You can use different nagiosServer values for each of your Nagios servers (see marid configuration below)
 nagios_server=default
