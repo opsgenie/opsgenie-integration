@@ -260,7 +260,7 @@ func parseFlags() map[string]string {
 	itemValue := flag.String("itemValue", "", "ITEM.VALUE")
 	eventId := flag.String("eventId", "", "EVENT.ID")
 	recoveryEventStatus := flag.String("recoveryEventStatus", "", "EVENT.RECOVERY.STATUS")
-	tags := flag.String("tags", "", "tags")
+	tags := flag.String("tags", "", "comma-separated list of tags")
 	responders := flag.String("responders", "", "responders")
 	logPath := flag.String("logPath", "", "LOGPATH")
 
