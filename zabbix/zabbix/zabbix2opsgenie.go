@@ -31,7 +31,12 @@ var configParameters = map[string]string{"apiKey": API_KEY,
 	"zabbix2opsgenie.http.proxy.host": "localhost",
 	"zabbix2opsgenie.http.proxy.protocol":"http",
 	"zabbix2opsgenie.http.proxy.username": "",
-	"zabbix2opsgenie.http.proxy.password": ""}
+	"zabbix2opsgenie.http.proxy.password": "",
+	"zabbix2opsgenie.severity.information": "P5",
+	"zabbix2opsgenie.severity.warning": "P4",
+	"zabbix2opsgenie.severity.average": "P3",
+	"zabbix2opsgenie.severity.high": "P2",
+	"zabbix2opsgenie.severity.disaster": "P1"}
 var configPath = "/etc/opsgenie/conf/opsgenie-integration.conf"
 var levels = map [string]log.Level{"info":log.Info,"debug":log.Debug,"warning":log.Warning,"error":log.Error}
 var logger log.Logger
@@ -283,6 +288,7 @@ func parseFlags()map[string]string{
 	parameters["itemValue"] = *itemValue
 	parameters["eventId"] = *eventId
 	parameters["recoveryEventStatus"] = *recoveryEventStatus
+	parameters["mappedPriority"] = configParameters["zabbix2opsgenie.severity."+strings.ToLower(*triggerSeverity)]
 
 	if *apiKey != ""{
 		configParameters["apiKey"] = *apiKey

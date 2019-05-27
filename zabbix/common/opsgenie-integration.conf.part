@@ -7,6 +7,13 @@ logPath=/var/log/opsgenie/zabbix2opsgenie.log
 #responders=<comma_separated_list_of_responders>
 #tags=<comma_separated_list_of_tags>
 
+############################ Mapping Zabbix Severity to OpsGenie Priority ###########################
+zabbix2opsgenie.severity.information=P5
+zabbix2opsgenie.severity.warning=P4
+zabbix2opsgenie.severity.average=P3
+zabbix2opsgenie.severity.high=P2
+zabbix2opsgenie.severity.disaster=P1
+
 ####################################### PROXY CONFIGURATION FOR ZABBIX ############################################
 zabbix2opsgenie.http.proxy.enabled=false
 zabbix2opsgenie.http.proxy.port=11111
