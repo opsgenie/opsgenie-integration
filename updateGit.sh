@@ -8,6 +8,8 @@ TAG_NAME=$4
 cd $INTEGRATION_PATH
 result=$(/usr/bin/git branch -D before-release || true)
 echo $result
+/usr/bin/git config --global user.email "opsgenie-release@atlassian.com"
+/usr/bin/git config --global user.name "opsgenie-release"
 #/usr/bin/git stash save before_release
 /usr/bin/git checkout -b before-release
 /usr/bin/git add version.properties
@@ -15,7 +17,6 @@ echo $result
 
 result=$(/usr/bin/git branch -D master || true)
 echo $result
-
 /usr/bin/git fetch origin master
 /usr/bin/git rebase origin/master
 /usr/bin/git checkout master
