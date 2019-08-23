@@ -404,7 +404,7 @@ def updateGit(def args) {
     def sdf = new SimpleDateFormat("yyyy.dd.MM")
     exec {
         commandLine './updateGit.sh', projectDir, "${project(":sdk").projectDir}/..",
-                "Version test bump for ${args}", "OpsGenieClient-v2-${sdf.format(date)}"
+                "Version test bump for ${args}", "OpsGenieClient-v2-${sdf.format(date)}-1"
     }
 }
 
