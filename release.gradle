@@ -29,7 +29,7 @@ def getSdkBasedPackageNames() {
 }
 
 def getLampBasedPackageNames() {
-    return ["lamp", "netcool"]
+    return ["lamp"]
 }
 
 def getMaridBasedPackageNames() {
