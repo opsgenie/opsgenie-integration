@@ -75,7 +75,7 @@ def buildDebForOpsviewV6(String sourceDir, String name, String descrpt, Map file
         filter {
             it.replace('[description]', "'OpsGenie client files'")
                     .replace('[version]', debVersion)
-                    .replace('[package-name]', "opsgenie-opsview")
+                    .replace('[package-name]', "opsgenie-opsviewv6")
         }
         into controlDir
         rename "control_deb", "control"
