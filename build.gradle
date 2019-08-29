@@ -511,6 +511,7 @@ apply from: 'bmcFootPrintsV11Incoming/bmcFootPrintsV11Incoming.gradle'
 apply from: 'bmcFootPrintsV11Marid/bmcFootPrintsV11Marid.gradle'
 apply from: 'cherwell/cherwell.gradle'
 apply from: 'activeDirectory/activeDirectory.gradle'
+apply from: 'opsviewv6/opsviewv6.gradle'
 
 
 task packageIntegrations(dependsOn: [
@@ -562,7 +563,8 @@ task packageIntegrations(dependsOn: [
                                 'packageBMCFootPrintsV11',
                                 'packageBmcFootPrintsV11Incoming',
                                 'packageBmcFootPrintsV11Marid',
-                                'packageCherwell'
+                                'packageCherwell',
+                                'packageOpsviewV6'
 ])
 
 task packageAll(dependsOn: ['packageIntegrations', 'packageLamp'])

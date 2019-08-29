@@ -1,0 +1,143 @@
+task prepareOpsviewV6() << {
+    def destination = "${project.buildDir}/opsviewv6"
+    copy {
+        from "${project.buildDir}/opsgenie-integration"
+        into "${destination}/opsgenie-integration"
+    }
+
+    copy {
+        from "${project.projectDir}/opsviewv6/nagios2opsgenie.go"
+        into "${destination}/opsviewv6"
+    }
+
+    copy {
+        from "${project.projectDir}/opsviewv6/nagios2opsgenie"
+        into "${destination}/opsviewv6"
+    }
+}
+
+def buildRpmForOpsviewV6(String sourceDir, String name, String descrpt, Map fileMappingInput, Map configFilesInput) {
+    def taskName = "generateRpm${sourceDir}"
+
+    def configFiles = [:]
+    configFiles.putAll(configFilesInput)
+    def fileMapping = [:]
+    fileMapping.putAll(fileMappingInput)
+
+    task "${taskName}"(type: Rpm) {
+        def packageVersion = project.ext.versions.getProperty(sourceDir) + project.ext.versionSuffix
+
+        packageName = name
+        description = descrpt
+        summary = descrpt
+        packageDescription = descrpt + ". Please see doc for details: https://www.opsgenie.com/docs/"
+        version = packageVersion.replace("-", ".");
+        os = LINUX
+        user = 'root'
+
+        release = '1.all'
+        packager = "ifountain"
+        vendor = "opsgenie"
+        url = "https://www.opsgenie.com"
+        license = "Apache License 2.0"
+        buildHost = "repo.opsgenie.com"
+        packageGroup = "System Administration Tools"
+
+        for(def source : fileMapping.keySet()) {
+            def dest = fileMapping.get(source)
+            logger.info(source + " - " + dest)
+            from(source) {
+                into(dest)
+            }
+        }
+
+        preInstall file("${project.projectDir}/opsviewv6/native/ogBefore.sh")
+        postInstall file("${project.projectDir}/opsviewv6/native/ogAfter.sh")
+    }
+
+    tasks[taskName].execute()
+}
+
+def buildDebForOpsviewV6(String sourceDir, String name, String descrpt, Map fileMappingInput, Map configFilesInput) {
+
+    def packageVersion = project.ext.versions.getProperty(sourceDir) + project.ext.versionSuffix
+    packageVersion = packageVersion.replace("-", ".")
+
+    def taskName = "prepareDeb${sourceDir}"
+    def dataDir = "${project.buildDir}/debian_tmp/${sourceDir}/data"
+    def controlDir = "${project.buildDir}/debian_tmp/${sourceDir}/control"
+
+    def controlTarget = "${project.buildDir}/deb/control"
+    def debVersion = version.toString().replace("-", ".")
+
+    copy {
+        from "${project.projectDir}/opsviewv6/native/control_deb"
+        filter {
+            it.replace('[description]', "'OpsGenie client files'")
+                    .replace('[version]', debVersion)
+                    .replace('[package-name]', "opsgenie-opsviewv6")
+        }
+        into controlDir
+        rename "control_deb", "control"
+    }
+
+    def configFiles = [:]
+    configFiles.putAll(configFilesInput)
+    def fileMapping = [:]
+    fileMapping.putAll(fileMappingInput)
+
+    task "${taskName}" << {
+
+        fileMapping.put("${project.buildDir}/${sourceDir}/opsgenie-integration/conf/opsgenie-integration.conf", 'etc/opsgenie/conf')
+
+        fileMapping.put("${project.buildDir}/${sourceDir}/opsgenie-integration/conf", 'etc/opsgenie/conf')
+
+        for(def source : fileMapping.keySet()) {
+            def dest = fileMapping.get(source)
+            logger.info(source + " - " + dest)
+            copy {
+                from(source)
+                into("${dataDir}/${dest}")
+            }
+        }
+
+        copy {
+            from "${project.projectDir}/opsviewv6/native/ogBefore.sh"
+            into controlDir
+            rename "ogBefore.sh", "preinst"
+        }
+
+        copy {
+            from "${project.projectDir}/opsviewv6/native/ogAfter.sh"
+            into controlDir
+            rename "ogAfter.sh", "postinst"
+        }
+
+        ant {
+            taskdef(name: 'deb', classname: 'org.vafer.jdeb.ant.DebAntTask', classpath: configurations.debian.asPath)
+        }
+        ant.deb(destfile: "${project.buildDir}/distributions/${name}_${packageVersion}_all.deb", control: controlDir) {
+            ant.data(src: dataDir, type: 'directory', dst: '/')
+        }
+
+        delete "${project.buildDir}/distributions/${name}_${packageVersion}_all.changes"
+    }
+
+    tasks[taskName].execute()
+}
+
+task packageOpsviewV6OS(dependsOn: 'prepareOpsviewV6') << {
+
+    def fileMapping = [
+            "${project.projectDir}/opsviewv6/nagios2opsgenie"   : "opt/opsview/monitoringscripts/notifications/",
+            "${project.projectDir}/opsviewv6/nagios2opsgenie.go": "etc/opsgenie"
+    ]
+
+    buildRpmForOpsviewV6('opsviewv6', 'opsgenie-opsviewv6', 'OpsGenie - Opsview integration files',
+            fileMapping, [:])
+
+    buildDebForOpsviewV6('opsviewv6', 'opsgenie-opsviewv6', 'OpsGenie - Opsview integration files', fileMapping, [:])
+
+}
+
+task packageOpsviewV6(dependsOn: 'packageOpsviewV6OS')
