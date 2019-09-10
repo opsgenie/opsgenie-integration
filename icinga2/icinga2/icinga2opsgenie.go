@@ -308,6 +308,7 @@ func parseFlags()map[string]string{
 
 	responders := flag.String("responders","","Responders")
 	tags := flag.String("tags","","Tags")
+	priority := flag.String("priority","","Priority")
 
 	flag.Parse()
 
@@ -388,6 +389,15 @@ func parseFlags()map[string]string{
 	parameters["service_perf_data"] = *servicePerfData
 	parameters["service_check_command"] = *serviceCheckCommand
 
+	if *priority == "" {
+		parameters["priority"] = ""
+	} else if IsValidPriority(*priority) {
+		parameters["priority"] = *priority
+	} else {
+		logger.Warning("Priority is not valid, needs to be one of P1, P2, P3, P4, P5.")
+		parameters["priority"] = ""
+	}
+
 	args := flag.Args()
 	for i := 0; i < len(args); i += 2 {
 		if(len(args)%2 != 0 && i==len(args)-1){
@@ -400,7 +410,15 @@ func parseFlags()map[string]string{
 	return parameters
 }
 
-
-
-
-
+func IsValidPriority(priority string) bool {
+	switch priority {
+	case
+		"P1",
+		"P2",
+		"P3",
+		"P4",
+		"P5":
+		return true
+	}
+	return false
+}
