@@ -546,7 +546,7 @@ func makePowershellRequest(arguments []string, objToUnmarshal interface{}) error
 	logger.Debug("Making Powershell request with arguments:")
 	logger.Debug(arguments)
 
-	command := exec.Command("powershell.exe", arguments...)
+	command := exec.Command("powershell.exe -ExecutionPolicy Bypass -File ", arguments...)
 	var stdOut bytes.Buffer
 	var stdErr bytes.Buffer
 	command.Stdout = &stdOut
