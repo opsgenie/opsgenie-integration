@@ -1,0 +1,27 @@
+<html>
+<head>
+    <title>Opsgenie Plugin ApiKey Configuration Page</title>
+    <meta name="decorator" content="atl.admin">
+    $webResourceManager.requireResource("com.opsgenie.plugin.tutorial.controller:resources")
+
+</head>
+<body>
+<h1>Opsgenie Plugin ApiKey Configuration Page</h1>
+
+<p>Now it looks nice :) $key </p>
+
+<form class="aui" method="post" action="ConfigureApiKey.jspa">
+    <fieldset>
+        <legend><span>Enter OG ApiKey</span></legend>
+        <div class="text-input">
+            <label for="apiKey">Enter apiKey</label>
+            <input class="text-input" type="text" id="newApiKey" name="newApiKey">
+        </div>
+    </fieldset>
+
+    <div class="buttons">
+        <button id="submitForm" class="aui-button aui-button-primary">Save</button>
+    </div>
+</form>
+</body>
+</html>
