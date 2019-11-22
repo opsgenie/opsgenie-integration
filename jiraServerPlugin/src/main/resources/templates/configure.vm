@@ -1,26 +1,35 @@
 <html>
 <head>
-    <title>Opsgenie Plugin ApiKey Configuration Page</title>
-    <meta name="decorator" content="atl.admin">
-    $webResourceManager.requireResource("com.opsgenie.plugin.tutorial.controller:resources")
-
+    <title>Opsgenie Plugin Configuration</title>
+    <script src="/js/jiraServerPlugin.js"></script>
+    <meta name="decorator" content="atl.admin"/>
 </head>
 <body>
-<h1>Opsgenie Plugin ApiKey Configuration Page</h1>
-
-<p>Now it looks nice :) $key </p>
-
-<form class="aui" method="post" action="ConfigureApiKey.jspa">
-    <fieldset>
-        <legend><span>Enter OG ApiKey</span></legend>
-        <div class="text-input">
-            <label for="apiKey">Enter apiKey</label>
-            <input class="text-input" type="text" id="newApiKey" name="newApiKey">
-        </div>
-    </fieldset>
-
-    <div class="buttons">
-        <button id="submitForm" class="aui-button aui-button-primary">Save</button>
+<div align="left">
+    #if (${hasErrorMessages})
+        <table>
+            <tr>
+                <td>Could not save the configuration!</td>
+            </tr>
+            #foreach ($error in $action.getErrorMessages())
+                <tr>
+                    <td>${error}</td>
+                </tr>
+            #end
+        </table>
+    #end
+</div>
+<form id="admin" class="aui" action="${req.contextPath}/secure/ConfigureApiKey.jspa" method="POST">
+    <div class="field-group">
+        <label for="name">Opsgenie ApiKey</label>
+        <input type="text" id="apiKey" name="apiKey" class="text" value="$textutils.htmlEncode(${apiKey})">
+    </div>
+    <div class="field-group">
+        <label for="baseUrl">Opsgenie BaseUrl</label>
+        <input type="text" id="baseUrl" name="baseUrl" class="text" value="$textutils.htmlEncode(${baseUrl})">
+    </div>
+    <div class="field-group">
+        <input type="submit" value="Save" class="button">
     </div>
 </form>
 </body>
