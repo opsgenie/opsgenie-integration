@@ -11,7 +11,7 @@ import javax.inject.Inject;
 public class OpsgeniePluginSettingsManagerImpl implements OpsgeniePluginSettingsManager {
 
     private static final String API_KEY = "apiKey";
-    private static final String REGION = "region";
+    private static final String BASE_URL = "baseUrl";
     private static final String SERVER_ID = "serverId";
 
     private final PluginSettingsFactory pluginSettingsFactory;
@@ -37,13 +37,13 @@ public class OpsgeniePluginSettingsManagerImpl implements OpsgeniePluginSettings
     @Override
     public String getBaseUrl() {
         PluginSettings pluginSettings = pluginSettingsFactory.createGlobalSettings();
-        return (String) pluginSettings.get(REGION);
+        return (String) pluginSettings.get(BASE_URL);
     }
 
     @Override
     public void setBaseUrl(String region) {
         PluginSettings pluginSettings = pluginSettingsFactory.createGlobalSettings();
-        pluginSettings.put(REGION, region);
+        pluginSettings.put(BASE_URL, region);
     }
 
     @Override

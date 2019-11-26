@@ -1,12 +1,16 @@
 package com.opsgenie.plugin.listener;
 
+import com.google.common.base.Charsets;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.methods.StringRequestEntity;
+import org.apache.logging.log4j.core.util.IOUtils;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 
 @Component
@@ -19,7 +23,7 @@ public class IssueEventSenderWithHttp implements IssueEventSender {
         httpClient = new HttpClient();
     }
 
-    private final static Integer MAX_RETRY_COUNT = 55;
+    private final static Integer MAX_RETRY_COUNT = 5;
 
     private final static Long MAX_RETRY_DURATION = 40_000L;
 
@@ -28,7 +32,7 @@ public class IssueEventSenderWithHttp implements IssueEventSender {
         PostMethod postMethod = new PostMethod(baseUrl + "?apiKey=" + apiKey);
         StringRequestEntity requestEntity = null;
         try {
-            requestEntity = new StringRequestEntity(webhookEventAsJson, "application/json", "UTF-8");
+            requestEntity = new StringRequestEntity(webhookEventAsJson, "application/json", Charsets.UTF_8.name());
         } catch (UnsupportedEncodingException e) {
             //ignored
         }
@@ -56,18 +60,23 @@ public class IssueEventSenderWithHttp implements IssueEventSender {
                 statusCode = httpClient.executeMethod(postMethod);
                 if (statusCode >= 200 && statusCode < 300) {
                     result.setSuccess(true);
-                } else if (!isRetryable(statusCode)) {
-                    failReason = "Failed to send issue event to Opsgenie. Received status: " + statusCode;
                     break;
+                } else if (!isRetryable(statusCode)) {
+                    failReason = buildLogFromHttpResponse(statusCode, postMethod);
+                    break;
+                } else {
+                    failReason = buildLogFromHttpResponse(statusCode, postMethod);
                 }
             } catch (HttpException e) {
                 //do not retry
-                failReason = "Failed to send issue event to Opsgenie. Reason: " + e.getMessage();
+                failReason = e.getMessage();
                 break;
             } catch (IOException e) {
                 //retry
+                failReason = e.getMessage();
             }
         }
+        postMethod.releaseConnection();
         return result.setNumberOfAttempts(currentRetryCount)
                 .setFailReason(failReason);
     }
@@ -80,6 +89,18 @@ public class IssueEventSenderWithHttp implements IssueEventSender {
             //ignored
         }
         return (currentRetryCount < MAX_RETRY_COUNT) && ((currentTime - retryStartTime) <= MAX_RETRY_DURATION);
+    }
+
+    private String buildLogFromHttpResponse(int statusCode, PostMethod postMethod) {
+        String message;
+        try {
+            Reader targetReader = new InputStreamReader(postMethod.getResponseBodyAsStream());
+            message = IOUtils.toString(targetReader);
+            targetReader.close();
+        } catch (IOException e) {
+            message = "Could not get responseBody";
+        }
+        return "Status code: " + statusCode + " " + message;
     }
 
     private boolean isRetryable(int statusCode) {

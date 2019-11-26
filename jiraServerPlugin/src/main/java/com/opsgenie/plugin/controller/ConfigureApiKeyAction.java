@@ -22,7 +22,7 @@ public class ConfigureApiKeyAction extends JiraWebActionSupport {
     private String baseUrl;
 
     private static final String API_KEY = "apiKey";
-    private static final String REGION = "baseUrl";
+    private static final String BASE_URL = "baseUrl";
 
 
     @Inject
@@ -55,7 +55,7 @@ public class ConfigureApiKeyAction extends JiraWebActionSupport {
     protected String doExecute() throws Exception {
         String apiKey = Optional.ofNullable(retrieveParameter(API_KEY, getHttpRequest().getParameterMap()))
                 .orElse(opsgeniePluginSettingsManager.getApiKey());
-        String region = Optional.ofNullable(retrieveParameter(REGION, getHttpRequest().getParameterMap()))
+        String region = Optional.ofNullable(retrieveParameter(BASE_URL, getHttpRequest().getParameterMap()))
                 .orElse(opsgeniePluginSettingsManager.getBaseUrl());
         opsgeniePluginSettingsManager.setApiKey(apiKey);
         opsgeniePluginSettingsManager.setBaseUrl(region);

@@ -19,17 +19,17 @@
     <resource type="download" name="images/" location="/images"/>
     <context>jiraServerPlugin</context>
   </web-resource>
-  <servlet name="Configure ApiKey Servlet" key="apiKey" class="com.opsgenie.plugin.controller.ConfigurationServlet">
-    <description>Configure ApiKey</description>
+  <servlet name="Configure ApiKey Servlet" key="apiKey" class="com.opsgenie.plugin.controller.WebhookListenerServlet">
+    <description>Webhook Event Listener</description>
     <url-pattern>/opsgenie-webhook-listener*</url-pattern>
   </servlet>
   <webwork1 key="configureApiKey" name="Configure Opsgenie ApiKey" class="java.lang.Object">
     <actions>
       <action name="com.opsgenie.plugin.controller.ConfigureApiKeyAction" alias="ConfigureApiKey"
               roles-required="sysadmin">
-        <view name="success">/templates/configure.vm</view>
-        <view name="error">/templates/configure.vm</view>
-        <view name="input">/templates/configure.vm</view>
+        <view name="success">/templates/opsgenie-configure.vm</view>
+        <view name="error">/templates/opsgenie-configure.vm</view>
+        <view name="input">/templates/opsgenie-configure.vm</view>
       </action>
     </actions>
   </webwork1>
@@ -48,6 +48,8 @@
     <resource type="download" name="jiraServerPlugin.js" location="/js/jiraServerPlugin.js"/>
     <context>jiraServerPlugin</context>
   </web-resource>
-  <webhook key="an event" event="jira:issue_created" url="/plugins/servlet/opsgenie-webhook-listener/create"/>
-  <webhook key="an event2" event="jira:issue_updated" url="/plugins/servlet/opsgenie-webhook-listener/update"/>
+  <webhook key="webhook_issue_created" event="jira:issue_created"
+           url="/plugins/servlet/opsgenie-webhook-listener/create"/>
+  <webhook key="webhook_issue_updated" event="jira:issue_updated"
+           url="/plugins/servlet/opsgenie-webhook-listener/update"/>
 </atlassian-plugin>
