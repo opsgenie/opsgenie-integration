@@ -1,35 +1,85 @@
 <html>
 <head>
     <title>Opsgenie Plugin Configuration</title>
-    <script src="/js/jiraServerPlugin.js"></script>
-    <meta name="decorator" content="atl.admin"/>
+    <meta name="decorator"
+          content="atl.admin"/>
+    $webResourceManager.requireResource("com.atlassian.auiplugin:ajs")
+    $webResourceManager.requireResource("com.atlassian.auiplugin:aui-select2")
+    $webResourceManager.requireResource("com.atlassian.auiplugin:aui-tooltips")
+    $webResourceManager.requireResource("com.opsgenie.plugin.jiraServerPlugin:jiraServerPlugin-resources")
 </head>
 <body>
 <div align="left">
     #if (${hasErrorMessages})
-        <table>
-            <tr>
-                <td>Could not save the configuration!</td>
-            </tr>
+        <div class="aui-message aui-message-error">
+            <p class="title">
+                <strong>Could not save the configuration!</strong>
+            </p>
             #foreach ($error in $action.getErrorMessages())
-                <tr>
-                    <td>${error}</td>
-                </tr>
+                <p>${error}</p>
             #end
-        </table>
+        </div>
     #end
 </div>
-<form id="admin" class="aui" action="${req.contextPath}/secure/ConfigureApiKey.jspa" method="POST">
+<form id="admin"
+      class="aui"
+      action="${req.contextPath}/secure/ConfigureApiKey.jspa"
+      method="POST">
     <div class="field-group">
         <label for="name">Opsgenie ApiKey</label>
-        <input type="text" id="apiKey" name="apiKey" class="text" value="$textutils.htmlEncode(${apiKey})">
+        <input type="text"
+               id="apiKey"
+               name="apiKey"
+               class="text long-field"
+               value="$textutils.htmlEncode(${apiKey})">
+        <span class="aui-icon aui-icon-small aui-iconfont-info-circle og-tooltip"
+              title="This is a good explanation of opsgenie api key"></span>
     </div>
     <div class="field-group">
         <label for="baseUrl">Opsgenie BaseUrl</label>
-        <input type="text" id="baseUrl" name="baseUrl" class="text" value="$textutils.htmlEncode(${baseUrl})">
+        <input type="text"
+               id="baseUrl"
+               name="baseUrl"
+               class="text long-field"
+               value="$textutils.htmlEncode(${baseUrl})">
+        <span class="aui-icon aui-icon-small aui-iconfont-info-circle og-tooltip"
+              title="This is a good explanation of base url"></span>
     </div>
     <div class="field-group">
-        <input type="submit" value="Save" class="button">
+        <label for="serverUrl">Jira Server BaseUrl</label>
+        <input type="text"
+               id="serverUrl"
+               name="serverUrl"
+               class="text long-field"
+               value="$textutils.htmlEncode(${serverUrl})">
+        <span class="aui-icon aui-icon-small aui-iconfont-info-circle og-tooltip"
+              title="This is a good explanation of server base url"></span>
+    </div>
+    <div class="field-group">
+        <label for="project-select">Projects</label>
+        <select class="project-select long-field"
+                id="project-select"
+                name="project-select"
+                multiple="true">
+            #foreach ($selectedProject in ${selectedProjects})
+                <option value=${selectedProject.id}
+                                selected=true>${selectedProject.name}</option>
+            #end
+            #foreach ($project in ${projects})
+                <option value=${project.id}>${project.name}</option>
+            #end
+        </select>
+        <span class="aui-icon aui-icon-small aui-iconfont-info-circle og-tooltip"
+              title="This is a good explanation of selected projects"></span>
+        <span class="aui-icon icon-inline-help"><span>Help</span></span>
+        <span class="field-help hidden">This
+                text will be toggled if the user clicks the help
+                icon.</span>
+    </div>
+    <div class="field-group">
+        <input type="submit"
+               value="Save"
+               class="button">
     </div>
 </form>
 </body>

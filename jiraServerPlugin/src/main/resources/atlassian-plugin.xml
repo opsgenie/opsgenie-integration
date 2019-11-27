@@ -52,4 +52,6 @@
            url="/plugins/servlet/opsgenie-webhook-listener/create"/>
   <webhook key="webhook_issue_updated" event="jira:issue_updated"
            url="/plugins/servlet/opsgenie-webhook-listener/update"/>
+  <webhook key="webhook_issue_delete" event="jira:issue_deleted"
+           url="/plugins/servlet/opsgenie-webhook-listener/delete"/>
 </atlassian-plugin>

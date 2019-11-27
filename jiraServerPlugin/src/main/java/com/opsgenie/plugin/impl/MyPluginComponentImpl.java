@@ -1,5 +1,7 @@
 package com.opsgenie.plugin.impl;
 
+import com.atlassian.jira.project.ProjectManager;
+import com.atlassian.jira.user.util.UserManager;
 import com.atlassian.plugin.spring.scanner.annotation.export.ExportAsService;
 import com.atlassian.plugin.spring.scanner.annotation.imports.ComponentImport;
 import com.atlassian.sal.api.ApplicationProperties;
@@ -20,6 +22,12 @@ public class MyPluginComponentImpl implements MyPluginComponent {
     @ComponentImport
     private final ApplicationProperties applicationProperties;
 
+    @ComponentImport
+    private final UserManager userManager;
+
+    @ComponentImport
+    private final ProjectManager projectManager;
+
     @Autowired
     private OpsgeniePluginSettingsManager opsgeniePluginSettingsManager;
 
@@ -30,8 +38,10 @@ public class MyPluginComponentImpl implements MyPluginComponent {
     private PluginSettingsFactory pluginSettingsFactory;
 
     @Inject
-    public MyPluginComponentImpl(final ApplicationProperties applicationProperties) {
+    public MyPluginComponentImpl(final ApplicationProperties applicationProperties, UserManager userManager, ProjectManager projectManager) {
         this.applicationProperties = applicationProperties;
+        this.userManager = userManager;
+        this.projectManager = projectManager;
     }
 
     public String getName() {
