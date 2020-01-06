@@ -8,13 +8,9 @@ import java.util.Optional;
 public interface OpsgeniePluginSettingsManager {
 
     String OG_PLUGIN_SETTINGS = "com.opsgenie.plugin";
-    String API_KEY = "apiKey";
-    String BASE_URL = "baseUrl";
-    String SERVER_URL = "serverUrl";
     String SERVER_ID = "serverId";
-    String SELECTED_PROJECTS = "selectedProjects";
     String SETUP_ENDPOINT = "/v1/jira-adapter/server/setup";
-
+    String OPSGENIE_USERNAME = "Opsgenie";
 
     void setServerId(String serverId);
 
@@ -29,4 +25,5 @@ public interface OpsgeniePluginSettingsManager {
     void updateSettings(OpsgeniePluginSettings opsgeniePluginSettings);
 
     void deleteSettings();
+
 }

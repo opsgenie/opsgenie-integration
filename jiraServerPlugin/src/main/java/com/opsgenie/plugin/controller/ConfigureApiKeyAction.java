@@ -22,8 +22,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Scanned
-//todo eren: listen plugin deletion event
-//todo eren: find serverName
 public class ConfigureApiKeyAction extends JiraWebActionSupport {
 
     @Inject
@@ -62,6 +60,7 @@ public class ConfigureApiKeyAction extends JiraWebActionSupport {
                 settings.validateBeforeSave();
             }
         } catch (ValidationException e) {
+            toDto(opsgeniePluginSettingsManager.getSettings().orElse(null));
             addErrorMessage(e.getMessage());
         }
     }
@@ -76,7 +75,7 @@ public class ConfigureApiKeyAction extends JiraWebActionSupport {
                     opsgeniePluginSettingsManager.updateSettings(newSettings);
                 } else {
                     opsgeniePluginSettingsManager.saveSettings(newSettings);
-                    //createOgUserIfItIsNotCreatedAlready();
+                    createOgUserIfItIsNotCreatedAlready();
                 }
             }
             toDto(opsgeniePluginSettingsManager.getSettings().orElse(null));

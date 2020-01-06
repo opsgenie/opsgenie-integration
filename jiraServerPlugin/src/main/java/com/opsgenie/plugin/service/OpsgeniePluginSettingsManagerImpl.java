@@ -9,6 +9,8 @@ import com.atlassian.sal.api.pluginsettings.PluginSettingsFactory;
 import com.google.gson.Gson;
 import com.opsgenie.plugin.exception.OpsgenieUserCreationFailedException;
 import com.opsgenie.plugin.listener.SendResult;
+import com.opsgenie.plugin.model.ConnectionSetupDto;
+import com.opsgenie.plugin.model.ConnectionUpdateDto;
 import com.opsgenie.plugin.model.OpsgeniePluginSettings;
 import com.opsgenie.plugin.model.OpsgenieUser;
 import org.apache.commons.lang.StringUtils;
@@ -16,8 +18,6 @@ import org.springframework.stereotype.Component;
 
 import javax.inject.Inject;
 import javax.validation.ValidationException;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 
 @Component
@@ -53,7 +53,7 @@ public class OpsgeniePluginSettingsManagerImpl implements OpsgeniePluginSettings
     public void createOpsgenieUser() throws OpsgenieUserCreationFailedException {
         final OpsgeniePluginSettings opsgeniePluginSettings = getSettings()
                 .orElseThrow(() -> new ValidationException("There is no configuration found!"));
-        final String username = "Opsgenie";
+        final String username = OpsgeniePluginSettingsManager.OPSGENIE_USERNAME;
         final String apiKey = opsgeniePluginSettings.getApiKey();
         if (StringUtils.isBlank(apiKey)) {
             throw new ValidationException("In order to create plugin user, an apiKey have to be configured first!");
@@ -68,10 +68,14 @@ public class OpsgeniePluginSettingsManagerImpl implements OpsgeniePluginSettings
             UserDetails userDetails = new UserDetails(username, username)
                     .withPassword(apiKey);
             try {
-                String serverUrl = opsgeniePluginSettings.getServerUrl();
                 OpsgenieUser opsgenieUser = new OpsgenieUser(username, apiKey);
                 userManager.createUser(userDetails);
-                SendResult result = opsgenieClient.post(baseUrl + SETUP_ENDPOINT, apiKey, gson.toJson(buildDto(opsgenieUser, serverUrl)));
+                ConnectionSetupDto connectionSetupDto = new ConnectionSetupDto()
+                        .setUsername(opsgenieUser.getUsername())
+                        .setPassword(opsgenieUser.getPassword())
+                        .setServerId(getServerId().orElseThrow(() -> new ValidationException("serverId is empty!")))
+                        .setServerUrl(opsgeniePluginSettings.getServerUrl());
+                SendResult result = opsgenieClient.post(baseUrl + SETUP_ENDPOINT, apiKey, gson.toJson(connectionSetupDto));
                 if (!result.isSuccess()) {
                     throw new Exception(result.getFailReason() +
                             ". Created User needs to be deleted and plugin needs to be reconfigured.");
@@ -82,7 +86,6 @@ public class OpsgeniePluginSettingsManagerImpl implements OpsgeniePluginSettings
             }
         }
     }
-
 
     @Override
     public Optional<OpsgeniePluginSettings> getSettings() {
@@ -108,30 +111,25 @@ public class OpsgeniePluginSettingsManagerImpl implements OpsgeniePluginSettings
 
     @Override
     public void updateSettings(OpsgeniePluginSettings opsgeniePluginSettings) {
-        Map<String, Object> dto = new HashMap<>();
-        dto.put("serverUrl", opsgeniePluginSettings.getServerUrl());
-        dto.put("serverId", getServerId().orElseThrow(() -> new ValidationException("serverId is empty!")));
-        /*SendResult result = opsgenieClient.put(opsgeniePluginSettings.getBaseUrl() + SETUP_ENDPOINT, opsgeniePluginSettings.getApiKey(), gson.toJson(dto));
+        ConnectionUpdateDto connectionUpdateDto = new ConnectionUpdateDto();
+        connectionUpdateDto.setServerId(getServerId().orElseThrow(() -> new ValidationException("serverId is empty!")));
+        connectionUpdateDto.setServerUrl(opsgeniePluginSettings.getServerUrl());
+        OpsgeniePluginSettings existingSettings = getSettings().orElseThrow(() -> new ValidationException("There is no configuration to update!"));
+        String endpoint = SETUP_ENDPOINT;
+        if (!StringUtils.equals(opsgeniePluginSettings.getApiKey(), existingSettings.getApiKey())) {
+            endpoint = SETUP_ENDPOINT + "/owner";
+        }
+        SendResult result = opsgenieClient.put(opsgeniePluginSettings.getBaseUrl() + endpoint, opsgeniePluginSettings.getApiKey(), gson.toJson(connectionUpdateDto));
         if (!result.isSuccess()) {
-            throw new ValidationException("Could not update serverUrl. Reason: " + result.getFailReason());
+            throw new ValidationException("Could not update the plugin settings. Reason: " + result.getFailReason());
         } else {
             saveSettings(opsgeniePluginSettings);
-        }*/
-        saveSettings(opsgeniePluginSettings);
+        }
     }
 
     @Override
     public void deleteSettings() {
         pluginSettings.remove(OG_PLUGIN_SETTINGS);
-    }
-
-    private Map<String, Object> buildDto(OpsgenieUser opsgenieUser, String serverUrl) {
-        Map<String, Object> dto = new HashMap<>();
-        dto.put("username", opsgenieUser.getUsername());
-        dto.put("password", opsgenieUser.getPassword());
-        dto.put("serverId", getServerId().orElseThrow(() -> new ValidationException("serverId is empty!")));
-        dto.put("serverUrl", serverUrl);
-        return dto;
     }
 
     private <T> T castToTarget(Object value, Class<T> target) {

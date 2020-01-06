@@ -19,6 +19,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.ValidationException;
+import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -32,48 +33,53 @@ public class WebhookListenerServlet extends HttpServlet {
 
     private IssueEventSenderFactory issueEventSenderFactory;
 
-    private AsyncTaskExecutor asyncTaskExecutor;
+    private OpsgenieAsyncTaskExecutor opsgenieAsyncTaskExecutor;
 
     private static final Gson gson = new Gson();
 
     private static final Logger logger = LoggerFactory.getLogger(WebhookListenerServlet.class);
 
     @Inject
-    public WebhookListenerServlet(OpsgeniePluginSettingsManager opsgeniePluginSettingsManager, IssueEventSenderFactory issueEventSenderFactory, AsyncTaskExecutor asyncTaskExecutor) {
+    public WebhookListenerServlet(OpsgeniePluginSettingsManager opsgeniePluginSettingsManager, IssueEventSenderFactory issueEventSenderFactory, OpsgenieAsyncTaskExecutor opsgenieAsyncTaskExecutor) {
         this.issueEventSenderFactory = issueEventSenderFactory;
         this.opsgeniePluginSettingsManager = opsgeniePluginSettingsManager;
-        this.asyncTaskExecutor = asyncTaskExecutor;
+        this.opsgenieAsyncTaskExecutor = opsgenieAsyncTaskExecutor;
     }
 
     @Override
-    protected final void doPost(final HttpServletRequest req, final HttpServletResponse resp) {
-        asyncTaskExecutor.execute(() -> {
+    protected final void doPost(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
+        resp.setStatus(202);
+        WebhookEvent webhookEvent;
+        Optional<OpsgeniePluginSettings> optionalSettings = opsgeniePluginSettingsManager.getSettings();
+        if (!optionalSettings.isPresent()) {
+            logger.info(logPrefix() + "Skipped to post webhook event. Reason: there is no configuration for Opsgenie Plugin.");
+            return;
+        }
+        OpsgeniePluginSettings opsgeniePluginSettings = optionalSettings.get();
+        String apiKey = opsgeniePluginSettings.getApiKey();
+        if (StringUtils.isBlank(apiKey)) {
+            logger.info(logPrefix() + "Skipped to post webhook event.Reason: There is no apiKey configured!. Discarding...");
+            return;
+        }
+        String baseUrl = opsgeniePluginSettings.getBaseUrl();
+        String body = IOUtils.toString(req.getInputStream());
+        if (StringUtils.isBlank(body)) {
+            logger.info(logPrefix() + "Skipped to post webhook event. Reason: Received empty issue event. Discarding...");
+            return;
+        }
+        webhookEvent = gson.fromJson(body, WebhookEvent.class);
+        if (loopDetected(webhookEvent)) {
+            logger.info(logPrefix() + "Skipped to post webhook event to prevent loop.");
+            return;
+        }
+        if (!doesEventBelongOneOfTheTrackedProjects(webhookEvent, opsgeniePluginSettings.getSelectedProjects())) {
+            logger.debug(logPrefix() + "Skipped to post webhook event because project is not tracked.");
+            return;
+        }
+        opsgenieAsyncTaskExecutor.execute(() -> {
             try {
-                WebhookEvent webhookEvent;
-                OpsgeniePluginSettings opsgeniePluginSettings = opsgeniePluginSettingsManager.getSettings()
-                        .orElseThrow(() -> new ValidationException("Skipped to post webhook event. " +
-                                "Reason: there is no configuration for Opsgenie Plugin."));
-                String apiKey = opsgeniePluginSettings.getApiKey();
-                if (StringUtils.isBlank(apiKey)) {
-                    throw new ValidationException("There is no apiKey configured!");
-                }
-                String baseUrl = opsgeniePluginSettings.getBaseUrl();
-                String body = IOUtils.toString(req.getInputStream());
-                if (StringUtils.isBlank(body)) {
-                    throw new ValidationException("Received empty body!");
-                }
-                webhookEvent = gson.fromJson(body, WebhookEvent.class);
-                if (loopDetected(webhookEvent)) {
-                    logger.info(logPrefix() + "Skipped to post webhook event to prevent loop.");
-                    return;
-                }
-                if (!doesEventBelongOneOfTheTrackedProjects(webhookEvent, opsgeniePluginSettings.getSelectedProjects())) {
-                    logger.debug(logPrefix() + "Skipped to post webhook event because project is not tracked.");
-                    return;
-                }
                 IssueEventSender issueEventSender = issueEventSenderFactory.getEventSender(SendMethod.HTTP);
-                SendResult sendResult = issueEventSender.send(Optional.ofNullable(baseUrl)
-                        .orElse("https://api.opsgenie.com"), apiKey, body);
+                SendResult sendResult = issueEventSender.send(baseUrl, apiKey, body);
                 logger.info(logPrefix() + buildLogMessage(sendResult));
             } catch (ValidationException e) {
                 logger.info(logPrefix() + e.getMessage());

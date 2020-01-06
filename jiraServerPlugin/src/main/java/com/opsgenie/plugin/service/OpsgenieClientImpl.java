@@ -5,6 +5,7 @@ import com.opsgenie.plugin.listener.SendResult;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.HttpMethod;
+import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 import org.apache.commons.httpclient.methods.EntityEnclosingMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.methods.PutMethod;
@@ -17,6 +18,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
+import java.util.function.Function;
 
 @Component
 public class OpsgenieClientImpl implements OpsgenieClient {
@@ -34,32 +36,34 @@ public class OpsgenieClientImpl implements OpsgenieClient {
         params.setMaxTotalConnections(20);
         params.setSoTimeout(40000);//40 sec
         params.setConnectionTimeout(10000);//10 sec
-        httpClient.getHttpConnectionManager().setParams(params);
+        MultiThreadedHttpConnectionManager connectionManager = new MultiThreadedHttpConnectionManager();
+        connectionManager.setParams(params);
+        httpClient.setHttpConnectionManager(connectionManager);
     }
 
     @Override
     public SendResult post(String endpoint, String apiKey, String dataAsJson) {
-        PostMethod postMethod = new PostMethod(endpoint + "?apiKey=" + apiKey);
-        return send(postMethod, dataAsJson);
+        return executeWithRetry(endpoint + "?apiKey=" + apiKey, dataAsJson, Method.POST);
     }
 
     @Override
     public SendResult put(String endpoint, String apiKey, String dataAsJson) {
-        PutMethod putMethod = new PutMethod(endpoint + "?apiKey=" + apiKey);
-        return send(putMethod, dataAsJson);
+        return executeWithRetry(endpoint + "?apiKey=" + apiKey, dataAsJson, Method.PUT);
     }
 
-    private SendResult executeWithRetry(HttpMethod httpMethod) {
 
+    private SendResult executeWithRetry(String uri, String dataAsJson, Method method) {
         SendResult result = new SendResult();
         result.setSuccess(false);
         int currentRetryCount = 0;
         long retryStartTime = System.currentTimeMillis();
         int statusCode;
         String failReason = null;
-
+        EntityEnclosingMethod httpMethod = null;
         while (retryPresent(currentRetryCount, retryStartTime)) {
             try {
+                httpMethod = method.apply(uri);
+                setRequestEntity(httpMethod, dataAsJson);
                 currentRetryCount++;
                 statusCode = httpClient.executeMethod(httpMethod);
                 if (statusCode >= 200 && statusCode < 300) {
@@ -78,9 +82,12 @@ public class OpsgenieClientImpl implements OpsgenieClient {
             } catch (IOException e) {
                 //retry
                 failReason = e.getMessage();
+            } finally {
+                if (httpMethod != null) {
+                    httpMethod.releaseConnection();
+                }
             }
         }
-        httpMethod.releaseConnection();
         return result.setNumberOfAttempts(currentRetryCount)
                 .setFailReason(failReason);
     }
@@ -111,7 +118,8 @@ public class OpsgenieClientImpl implements OpsgenieClient {
         return statusCode == 429 || statusCode >= 500;
     }
 
-    private SendResult send(EntityEnclosingMethod httpMethod, String dataAsJson) {
+
+    private EntityEnclosingMethod setRequestEntity(EntityEnclosingMethod httpMethod, String dataAsJson) {
         StringRequestEntity requestEntity = null;
         try {
             requestEntity = new StringRequestEntity(dataAsJson, "application/json", Charsets.UTF_8.name());
@@ -119,6 +127,24 @@ public class OpsgenieClientImpl implements OpsgenieClient {
             //ignored
         }
         httpMethod.setRequestEntity(requestEntity);
-        return executeWithRetry(httpMethod);
+        return httpMethod;
+    }
+
+
+    private enum Method implements Function<String, EntityEnclosingMethod> {
+
+        POST() {
+            @Override
+            public EntityEnclosingMethod apply(String uri) {
+                return new PostMethod(uri);
+            }
+        },
+        PUT() {
+            @Override
+            public EntityEnclosingMethod apply(String uri) {
+                return new PutMethod(uri);
+            }
+        };
+
     }
 }

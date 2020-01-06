@@ -1,6 +1,5 @@
 package com.opsgenie.plugin.listener;
 
-import com.google.gson.Gson;
 import com.opsgenie.plugin.service.OpsgenieClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -12,8 +11,6 @@ public class IssueEventSenderWithHttp implements IssueEventSender {
     private OpsgenieClient opsgenieClient;
 
     private static final String WEBHOOK_ENDPOINT = "/v1/jira-adapter/server/webhook";
-
-    private Gson gson = new Gson();
 
     @Autowired
     public IssueEventSenderWithHttp(OpsgenieClient opsgenieClient) {
