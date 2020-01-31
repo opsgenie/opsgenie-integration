@@ -1,6 +1,7 @@
 ######################################## ZABBIX CONFIGURATION #######################################
 #if you're using marid key, you can add it as a parameter to viaMaridUrl: &maridKey=your_marid_key
 #viaMaridUrl=http://maridHost:port/script/marid2opsgenie.groovy?async=true
+#Possible log severity levels are info, debug, warning and error
 #zabbix2opsgenie.logger=warning
 logPath=/var/log/opsgenie/zabbix2opsgenie.log
 
