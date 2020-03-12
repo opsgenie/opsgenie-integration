@@ -68,9 +68,9 @@ external_id: {{ticket.external_id}}
     - Ticket:Status Is Not Solved
 - Under **Actions:**, select **Notify target** under **Notifications**, and pick the URL target you added earlier for the integration.  
 - Paste the following into the "Message" field:  
->action: addnote ||
-id: {{ticket.id}} ||
-status: {{ticket.status}} ||
-latest_comment : {{ticket.latest_comment_formatted}} ||
-tags: {{ticket.tags}} ||
+>action: addnote ||  
+id: {{ticket.id}} ||  
+status: {{ticket.status}} ||  
+latest_comment : {{ticket.latest_comment_formatted}} ||  
+tags: {{ticket.tags}} ||  
 external_id: {{ticket.external_id}}
