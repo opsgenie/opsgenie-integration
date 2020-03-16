@@ -196,6 +196,7 @@ def executeCommandAndWait(command, logPrefix = "") {
     def err = new StringBuilder()
     proc.waitForProcessOutput(out, err)
     if (out) println logPrefix + " out:\n$out"
+    if (err) println logPrefix + " err:\n$err"
     if (proc.exitValue()) {
         if (System.getenv("IS_LAMP_MANDATORY")) {
             throw new TaskExecutionException(tasks.generateLampZip, new Exception(err.toString()))
