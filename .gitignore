@@ -11,3 +11,7 @@ gradle-app.setting
 Test.properties
 uploadOptions.properties
 version.old.properties
+**/node_modules/*
+**/.firebase
+**/.firebaserc
+*/npm-debug.log
