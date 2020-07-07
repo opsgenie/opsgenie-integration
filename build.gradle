@@ -21,7 +21,7 @@ group = "com.ifountain.opsgenie-integration"
 
 project.ext.versions = new Properties();
 project.ext.versions.load(new FileInputStream("${projectDir}/version.properties"))
-if(gradle.startParameter.taskNames.contains('removeSnapshot')) {
+if (gradle.startParameter.taskNames.contains('removeSnapshot')) {
     project.ext.versionSuffix = ''
 } else {
     project.ext.versionSuffix = '-SNAPSHOT'
@@ -42,7 +42,7 @@ dependencies {
     compile project(":marid")
 }
 
-subprojects  {
+subprojects {
     apply plugin: 'java'
     apply plugin: 'groovy'
     apply plugin: 'maven'
@@ -57,12 +57,11 @@ subprojects  {
     project.ext.versions.load(new FileInputStream("${rootProject.projectDir}/version.properties"))
 
 
-
-    if(project.ext.versions.getProperty(name) != null) {
+    if (project.ext.versions.getProperty(name) != null) {
         version = project.ext.versions.getProperty(name)
     }
 
-    if(gradle.startParameter.taskNames.contains('removeSnapshot')) {
+    if (gradle.startParameter.taskNames.contains('removeSnapshot')) {
         project.ext.versionSuffix = ''
     } else {
         project.ext.versionSuffix = '-SNAPSHOT'
@@ -86,10 +85,10 @@ subprojects  {
                     "Specification-Product": project.name,
                     "Specification-Version": project.version,
                     "Specification-Vendor": "http://www.opsgenie.com",
-                    "Implementation-Title" : project.name[0].toUpperCase() + project.name[1..-1],
+                    "Implementation-Title": project.name[0].toUpperCase() + project.name[1..-1],
                     "Implementation-Product": project.name,
-                    "Implementation-Vendor":"http://www.opsgenie.com",
-                    "Implementation-Version":project.version,
+                    "Implementation-Vendor": "http://www.opsgenie.com",
+                    "Implementation-Version": project.version,
             )
         }
     }
@@ -149,11 +148,19 @@ task generateLampZip << {
     }
 
     copy {
-        from ("${lampProjectDir}/opsgenie-lamp") {
+        from("${lampProjectDir}/opsgenie-lamp") {
             fileMode = 0755
         }
         into "${buildDir}/zip/lamp"
         rename "opsgenie-lamp", "lamp"
+    }
+
+    copy {
+        from("${lampProjectDir}/opsgenie-lamp-mac") {
+            fileMode = 0755
+        }
+        into "${buildDir}/zip/lamp"
+        rename "opsgenie-lamp-mac", "lamp-mac"
     }
 
     copy {
@@ -162,53 +169,55 @@ task generateLampZip << {
     }
 }
 
-def generateLampBinary(String lampProjectPath){
+def generateLampBinary(String lampProjectPath) {
     def isWindows = System.getProperty('os.name').toLowerCase().contains("win");
     if (isWindows) {
         executeCommandAndWait("cmd /c ${lampProjectPath}/build_lamp.bat", "generating lamp binaries")
-    }else{
+    } else {
         executeCommandAndWait("${lampProjectPath}/build_lamp", "generating lamp binaries")
     }
 
-    if (!(new File("${lampProjectPath}/opsgenie-lamp").exists() && new File("${lampProjectPath}/opsgenie-lamp.exe").exists())){
-        if(System.getenv("IS_LAMP_MANDATORY")){
-            throw new TaskExecutionException(tasks.generateLampZip, new Exception("one of or both [opsgenie-lamp, opsgenie-lamp.exe] executables are missing"))
-        }else{
-            def message = "one of or both [opsgenie-lamp, opsgenie-lamp.exe] executables are missing. Lamp package will not be generated, integration packages containing lamp will be generated without lamp."
+    if (!(new File("${lampProjectPath}/opsgenie-lamp").exists() && new File("${lampProjectPath}/opsgenie-lamp.exe").exists()
+            && new File("${lampProjectPath}/opsgenie-lamp-mac").exists())) {
+        if (System.getenv("IS_LAMP_MANDATORY")) {
+            throw new TaskExecutionException(tasks.generateLampZip, new Exception("one of or both [opsgenie-lamp, opsgenie-lamp.exe, opsgenie-lamp-mac] executables are missing"))
+        } else {
+            def message = "one of or both [opsgenie-lamp, opsgenie-lamp.exe, opsgenie-lamp-mac] executables are missing. Lamp package will not be generated, integration packages containing lamp will be generated without lamp."
             println message
             throw new StopActionException(message)
         }
     }
 }
 
-def executeCommandAndWait(command , logPrefix = "")  {
-    println logPrefix+" execute :"+command
+def executeCommandAndWait(command, logPrefix = "") {
+    println logPrefix + " execute :" + command
     def proc = command.execute();
     def out = new StringBuilder()
     def err = new StringBuilder()
     proc.waitForProcessOutput(out, err)
-    if (out) println logPrefix+" out:\n$out"
-    if(proc.exitValue()){
-        if(System.getenv("IS_LAMP_MANDATORY")){
+    if (out) println logPrefix + " out:\n$out"
+    if (err) println logPrefix + " err:\n$err"
+    if (proc.exitValue()) {
+        if (System.getenv("IS_LAMP_MANDATORY")) {
             throw new TaskExecutionException(tasks.generateLampZip, new Exception(err.toString()))
-        }else{
+        } else {
             def message = "Exception occured while building lamp. Lamp package will not be generated, integration packages containing lamp will be generated without lamp."
             println message
             throw new StopActionException(message)
         }
     }
-    println logPrefix+" execute finished"
+    println logPrefix + " execute finished"
 }
 
-def addLampToIntegrationPackage(String buildDir, String destination){
+def addLampToIntegrationPackage(String buildDir, String destination) {
     tasks.generateLampZip.execute()
 
-    if(!new File("${buildDir}/zip/lamp").exists()) {
+    if (!new File("${buildDir}/zip/lamp").exists()) {
         def message = "Could not find Lamp directory. Packages containing lamp will be generated without lamp."
         println message
         throw new StopActionException(message)
     }
-    copy{
+    copy {
         from "${buildDir}/zip/lamp"
         into "${destination}/opsgenie-integration/lamp"
     }
@@ -216,9 +225,9 @@ def addLampToIntegrationPackage(String buildDir, String destination){
     def tempLampConfFilePath = "${destination}/opsgenie-integration/lamp/conf/lamp_temp.conf"
     new File(tempLampConfFilePath).withPrintWriter { out ->
         new File("${destination}/opsgenie-integration/lamp/conf/lamp.conf").eachLine { line ->
-            if (!line.startsWith("apiKey")){
+            if (!line.startsWith("apiKey")) {
                 out.println("${line}")
-            }else{
+            } else {
                 out.println()
             }
         }
@@ -232,9 +241,9 @@ def addLampToIntegrationPackage(String buildDir, String destination){
 }
 
 
-def mergeConfFile(String mainConfFile, String partialConfFilePath, String destinationFilePath){
+def mergeConfFile(String mainConfFile, String partialConfFilePath, String destinationFilePath) {
     def partialConfFile = new File(partialConfFilePath)
-    String wholeConfFile = new File(mainConfFile).getText() +"\n"+ partialConfFile.getText();
+    String wholeConfFile = new File(mainConfFile).getText() + "\n" + partialConfFile.getText();
     def destFile = new File(destinationFilePath)
     destFile.setText(wholeConfFile);
 }
@@ -290,17 +299,17 @@ def buildRpm(String sourceDir, String name, String descrpt, Map fileMappingInput
         File maridScriptsDir = new File("${project.buildDir}/${sourceDir}/opsgenie-integration/marid/scripts")
         def maridScripts = maridScriptsDir.listFiles()
 
-        for(def maridScript : maridScripts) {
+        for (def maridScript : maridScripts) {
             configFiles.put(maridScript.getAbsolutePath(), 'var/opsgenie/marid/scripts')
         }
 
         File intScriptsDir = new File("${projectDir}/${sourceDir}/marid/scripts")
         def intScripts = intScriptsDir.listFiles()
 
-        for(def confFile : configFiles.keySet()) {
+        for (def confFile : configFiles.keySet()) {
             File fConfFile = new File(confFile.toString())
 
-            for(def intScript : intScripts) {
+            for (def intScript : intScripts) {
                 if (fConfFile.getName().equals(intScript.getName())) {
                     if (!confFilesToBeDeleted.contains(confFile)) {
                         confFilesToBeDeleted.add(confFile);
@@ -309,7 +318,7 @@ def buildRpm(String sourceDir, String name, String descrpt, Map fileMappingInput
             }
         }
 
-        for(def confFile : confFilesToBeDeleted) {
+        for (def confFile : confFilesToBeDeleted) {
             configFiles.remove(confFile)
         }
 
@@ -328,7 +337,7 @@ def buildRpm(String sourceDir, String name, String descrpt, Map fileMappingInput
             }
         }
 
-        for(def source : fileMapping.keySet()) {
+        for (def source : fileMapping.keySet()) {
             def dest = fileMapping.get(source)
             logger.info(source + " - " + dest)
             from(source) {
@@ -336,11 +345,11 @@ def buildRpm(String sourceDir, String name, String descrpt, Map fileMappingInput
             }
         }
 
-        from("${nativeSource}/profile"){
+        from("${nativeSource}/profile") {
             into("etc/opsgenie")
         }
 
-        from("${nativeSource}/marid_rpm"){
+        from("${nativeSource}/marid_rpm") {
             into("etc/init.d")
             rename 'marid_rpm', 'marid'
         }
@@ -377,7 +386,7 @@ def buildDeb(String sourceDir, String name, String descrpt, Map fileMappingInput
         fileMapping.put("${project.buildDir}/${sourceDir}/opsgenie-integration/marid/lib", 'var/lib/opsgenie/marid')
         fileMapping.put("${project.buildDir}/${sourceDir}/opsgenie-integration/conf", 'etc/opsgenie/conf')
 
-        for(def source : fileMapping.keySet()) {
+        for (def source : fileMapping.keySet()) {
             def dest = fileMapping.get(source)
             logger.info(source + " - " + dest)
             copy {
@@ -518,53 +527,53 @@ task packageIntegrations(dependsOn: [
 //                              'packageSmarts',
 //                              'packageSplunk',
 //                              'packageOpennms',
-                                'packageNagios',
-                                'packageNagiosIncoming',
-                                'packageNagiosMarid',
-                                'packageNagiosxi',
-                                'packageNagiosXIIncoming',
-                                'packageNagiosXIMarid',
-                                'packageNetcool',
-                                'packageZabbix',
-                                'packageZabbixIncoming',
-                                'packageZabbixMarid',
-                                'packageRedmine',
-                                'packageZenoss',
-                                'packageZenossIncoming',
-                                'packageZenossMarid',
-                                'packageIcinga',
-                                'packageIcingaIncoming',
-                                'packageIcingaMarid',
-                                'packageZendesk',
-                                'packageIcinga2',
-                                'packageIcinga2Incoming',
-                                'packageIcinga2Marid',
-                                'packageSolarwinds',
-                                'packageSolarwindsMSPNcentral',
-                                'packageSolarwindswebhelpdesk',
-                                'packageOEM',
-                                'packageTrackIt',
-                                'packageXmpp',
-                                'packageWebex',
-                                'packageJira',
-                                'packageJiraServiceDesk',
-                                'packageDynatraceAppMon',
-                                'packageOP5',
-                                'packageBMCRemedy',
-                                'packageBmcRemedyIncoming',
-                                'packageBmcRemedyMarid',
-                                'packageOpsview',
-                                'packageVCSA',
-                                'packageLibreNMS',
-                                'packagePrtg',
-                                'packageBMCFootPrintsV12',
-                                'packageBmcFootPrintsV12Incoming',
-                                'packageBmcFootPrintsV12Marid',
-                                'packageBMCFootPrintsV11',
-                                'packageBmcFootPrintsV11Incoming',
-                                'packageBmcFootPrintsV11Marid',
-                                'packageCherwell',
-                                'packageOpsviewV6'
+'packageNagios',
+'packageNagiosIncoming',
+'packageNagiosMarid',
+'packageNagiosxi',
+'packageNagiosXIIncoming',
+'packageNagiosXIMarid',
+'packageNetcool',
+'packageZabbix',
+'packageZabbixIncoming',
+'packageZabbixMarid',
+'packageRedmine',
+'packageZenoss',
+'packageZenossIncoming',
+'packageZenossMarid',
+'packageIcinga',
+'packageIcingaIncoming',
+'packageIcingaMarid',
+'packageZendesk',
+'packageIcinga2',
+'packageIcinga2Incoming',
+'packageIcinga2Marid',
+'packageSolarwinds',
+'packageSolarwindsMSPNcentral',
+'packageSolarwindswebhelpdesk',
+'packageOEM',
+'packageTrackIt',
+'packageXmpp',
+'packageWebex',
+'packageJira',
+'packageJiraServiceDesk',
+'packageDynatraceAppMon',
+'packageOP5',
+'packageBMCRemedy',
+'packageBmcRemedyIncoming',
+'packageBmcRemedyMarid',
+'packageOpsview',
+'packageVCSA',
+'packageLibreNMS',
+'packagePrtg',
+'packageBMCFootPrintsV12',
+'packageBmcFootPrintsV12Incoming',
+'packageBmcFootPrintsV12Marid',
+'packageBMCFootPrintsV11',
+'packageBmcFootPrintsV11Incoming',
+'packageBmcFootPrintsV11Marid',
+'packageCherwell',
+'packageOpsviewV6'
 ])
 
 task packageAll(dependsOn: ['packageIntegrations', 'packageLamp'])

@@ -25,7 +25,7 @@ task prepareNagiosIncoming() << {
 
     copy {
         from "${project.projectDir}/nagiosIncoming/common/opsgenie-integration.conf"
-        into "${destination}/nagios/opsgenie-integration/conf"
+        into "${destination}/nagios/opsgenie-integration/opsgenie-integration.conf"
     }
 }
 task packageNagiosIncomingZip(dependsOn: 'prepareNagiosIncoming', type: Zip) {

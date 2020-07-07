@@ -402,7 +402,7 @@ task newMajor << {
 
 def updateGit(def args) {
     def date = new Date()
-    def sdf = new SimpleDateFormat("yyyy.dd.MM")
+    def sdf = new SimpleDateFormat("yyyy.MM.dd-HH.mm.ss.SSSS")
     exec {
         commandLine './updateGit.sh', projectDir, "${project(":sdk").projectDir}/..",
                 "Version test bump for ${args}", "OpsGenieClient-v2-${sdf.format(date)}-1"
