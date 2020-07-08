@@ -27,11 +27,18 @@ function Get-ADUserDetails {
     $usernamesSplit | foreach {
         $trimmedUserName = $_.Trim()
 
-        $adUser = Get-ADUser -Filter {SamAccountName -eq $trimmedUserName}
-
-        $adUserMap = @{
-            "fullName" = $adUser.GivenName + " " + $adUser.Surname
-            "email" = $adUser.UserPrincipalName
+        $adUser = Get-ADUser -Filter {SamAccountName -eq $trimmedUserName} -Properties EmailAddress, GivenName, Surname, UserPrincipalName
+        
+        if (!$aduser.EmailAddress){
+            $adUserMap = @{
+                "fullName" = $adUser.GivenName + " " + $adUser.Surname
+                "email" = $adUser.UserPrincipalName
+            }
+        } else {
+            $adUserMap = @{
+                "fullName" = $adUser.GivenName + " " + $adUser.Surname
+                "email" = $adUser.EmailAddress
+            }
         }
 
         [void] $usersDetailsList.Add($adUserMap)
