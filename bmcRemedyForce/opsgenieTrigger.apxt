@@ -81,6 +81,7 @@ string customField7='';
 string customField8='';
 string customField9='';
 string customField10='';
+string opsgeniealias = obj.opsgenie_alias__c;
 
 string payload= '{'+
 '\"id\" :' + opsgenieClass.getPayloadStringByHandlingNull(id)+ ',' +
@@ -149,6 +150,7 @@ string payload= '{'+
 '\"externalTicketRef\" :' + opsgenieClass.getPayloadStringByHandlingNull(externalticketref)+ ',' +
 '\"affectedApplication\" :' + opsgenieClass.getPayloadStringByHandlingNull(affectedapplication)+ ',' +
 '\"affectedHardware\" :' + opsgenieClass.getPayloadStringByHandlingNull(affectedhardware)+ ',' +
+'\"opsgenieAlias\" :' + opsgenieClass.getPayloadStringByHandlingNull(opsgeniealias)+ ',' +
 '\"timeToClose\" :' + opsgenieClass.getPayloadStringByHandlingNull(timetoclose) +',' +
 '\"customField1\" :' + opsgenieClass.getPayloadStringByHandlingNull(customField1) +',' +
 '\"customField2\" :' + opsgenieClass.getPayloadStringByHandlingNull(customField2) +',' +
