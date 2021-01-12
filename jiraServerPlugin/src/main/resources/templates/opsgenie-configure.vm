@@ -6,7 +6,7 @@
     $webResourceManager.requireResource("com.atlassian.auiplugin:ajs")
     $webResourceManager.requireResource("com.atlassian.auiplugin:aui-select2")
     $webResourceManager.requireResource("com.atlassian.auiplugin:aui-tooltips")
-    $webResourceManager.requireResource("com.opsgenie.plugin.jiraServerPlugin:jiraServerPlugin-resources")
+    $webResourceManager.requireResource("com.opsgenie.plugin.jiraServerOpsgeniePlugin:jiraServerOpsgeniePlugin-resources")
 </head>
 <body>
 <div align="left">
@@ -23,20 +23,20 @@
 </div>
 <form id="admin"
       class="aui"
-      action="${req.contextPath}/secure/ConfigureApiKey.jspa"
+      action="${req.contextPath}/secure/ConfigureOpsgenie.jspa"
       method="POST">
     <div class="field-group">
-        <label for="name">Opsgenie ApiKey</label>
+        <label for="name">Opsgenie API Key</label>
         <input type="text"
                id="apiKey"
                name="apiKey"
                class="text long-field"
                value="$textutils.htmlEncode(${apiKey})">
         <span class="aui-icon aui-icon-small aui-iconfont-info-circle og-tooltip"
-              title="ApiKey of the Jira Server Integration"></span>
+              title="Opsgenie API Key, as under Opsgenie Settings -> API key management"></span>
     </div>
     <div class="field-group">
-        <label for="baseUrl">Opsgenie BaseUrl</label>
+        <label for="baseUrl">Opsgenie Base Url</label>
         <input type="text"
                id="baseUrl"
                name="baseUrl"
@@ -46,14 +46,14 @@
               title="Opsgenie API base"></span>
     </div>
     <div class="field-group">
-        <label for="serverUrl">Jira Server BaseUrl</label>
+        <label for="serverUrl">Jira Server Base Url</label>
         <input type="text"
                id="serverUrl"
                name="serverUrl"
                class="text long-field"
                value="$textutils.htmlEncode(${serverUrl})">
         <span class="aui-icon aui-icon-small aui-iconfont-info-circle og-tooltip"
-              title="This is a good explanation of server base url"></span>
+              title="The Base URL for the Jira Server"></span>
     </div>
     <div class="field-group">
         <label for="project-select">Projects</label>
@@ -70,11 +70,8 @@
             #end
         </select>
         <span class="aui-icon aui-icon-small aui-iconfont-info-circle og-tooltip"
-              title="This is a good explanation of selected projects"></span>
+              title="Jira Projects to be connected with Opsgenie"></span>
         <span class="aui-icon icon-inline-help"><span>Help</span></span>
-        <span class="field-help hidden">This
-                text will be toggled if the user clicks the help
-                icon.</span>
     </div>
     <div class="field-group">
         <input type="submit"

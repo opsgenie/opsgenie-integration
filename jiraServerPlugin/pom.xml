@@ -4,14 +4,14 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.opsgenie.plugin</groupId>
-    <artifactId>jiraServerPlugin</artifactId>
+    <artifactId>jiraServerOpsgeniePlugin</artifactId>
     <version>1.0.0-SNAPSHOT</version>
     <organization>
-        <name>Example Company</name>
-        <url>http://www.example.com/</url>
+        <name>Atlassian</name>
+        <url>https://www.atlassian.com/</url>
     </organization>
-    <name>jiraServerPlugin</name>
-    <description>This is the com.opsgenie.plugin:jiraServerPlugin plugin for Atlassian JIRA.</description>
+    <name>Jira Server Opsgenie Plugin</name>
+    <description>This is the opsgenie plugin for Atlassian Jira Server</description>
     <packaging>atlassian-plugin</packaging>
     <dependencies>
         <dependency>
