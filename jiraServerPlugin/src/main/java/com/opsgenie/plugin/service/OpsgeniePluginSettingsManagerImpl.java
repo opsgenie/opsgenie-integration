@@ -113,6 +113,7 @@ public class OpsgeniePluginSettingsManagerImpl implements OpsgeniePluginSettings
         }
         opsgeniePluginSettings.validateBeforeSave();
         pluginSettings.put(OG_PLUGIN_SETTINGS, gson.toJson(opsgeniePluginSettings));
+        logger.info("Settings saved successfully!");
     }
 
     @Override
@@ -135,17 +136,23 @@ public class OpsgeniePluginSettingsManagerImpl implements OpsgeniePluginSettings
     }
 
     @Override
-    public void deleteSettings(OpsgeniePluginSettings opsgeniePluginSettings) {
-        ConnectionCloseDto connectionCloseDto = new ConnectionCloseDto();
-        connectionCloseDto.setServerId(getServerId().orElseThrow(() -> new ValidationException("serverId is empty!")));
-        String url = opsgeniePluginSettings.getBaseUrl() + SETUP_ENDPOINT + "/close";
-        SendResult result = opsgenieClient.put(url , opsgeniePluginSettings.getApiKey(), gson.toJson(connectionCloseDto));
+    public void deleteSettings() {
+        Optional<OpsgeniePluginSettings> opsgeniePluginSettings = getSettings();
+        opsgeniePluginSettings.ifPresent(settings -> {
+            logger.info("Deleting settings...");
+            ConnectionCloseDto connectionCloseDto = new ConnectionCloseDto();
+            connectionCloseDto.setServerId(getServerId().orElseThrow(() -> new ValidationException("serverId is empty!")));
+            String url = settings.getBaseUrl() + SETUP_ENDPOINT + "/close";
+            SendResult result = opsgenieClient.put(url , settings.getApiKey(), gson.toJson(connectionCloseDto));
 
-        if (!result.isSuccess()) {
-            logger.error("Could not delete the plugin connection. Reason: " + result.getFailReason());
-        }
+            if (result.isSuccess()) {
+                logger.info("...done!");
+            } else {
+                logger.error("Could not delete the plugin connection. Reason: " + result.getFailReason());
+            }
 
-        pluginSettings.remove(OG_PLUGIN_SETTINGS);
+            pluginSettings.remove(OG_PLUGIN_SETTINGS);
+        });
     }
 
     private <T> T castToTarget(Object value, Class<T> target) {

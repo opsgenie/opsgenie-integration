@@ -24,6 +24,6 @@ public interface OpsgeniePluginSettingsManager {
 
     void updateSettings(OpsgeniePluginSettings opsgeniePluginSettings);
 
-    void deleteSettings(OpsgeniePluginSettings opsgeniePluginSettings);
+    void deleteSettings();
 
 }

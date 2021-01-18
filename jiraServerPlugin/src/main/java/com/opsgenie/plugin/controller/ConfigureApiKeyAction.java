@@ -88,6 +88,7 @@ public class ConfigureApiKeyAction extends JiraWebActionSupport {
             addErrorMessage(e.getMessage());
         } finally {
             toDto(opsgeniePluginSettingsManager.getSettings().orElse(null));
+            logger.info("...done!");
         }
         return super.doExecute();
     }
