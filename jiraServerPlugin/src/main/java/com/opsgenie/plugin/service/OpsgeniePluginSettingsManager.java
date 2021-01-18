@@ -16,7 +16,7 @@ public interface OpsgeniePluginSettingsManager {
 
     Optional<String> getServerId();
 
-    void createOpsgenieUser() throws OpsgenieUserCreationFailedException;
+    void createOpsgenieConnection(OpsgeniePluginSettings opsgeniePluginSettings) throws OpsgenieUserCreationFailedException;
 
     Optional<OpsgeniePluginSettings> getSettings();
 
@@ -24,6 +24,6 @@ public interface OpsgeniePluginSettingsManager {
 
     void updateSettings(OpsgeniePluginSettings opsgeniePluginSettings);
 
-    void deleteSettings();
+    void deleteSettings(OpsgeniePluginSettings opsgeniePluginSettings);
 
 }

@@ -51,7 +51,6 @@ public class OpsgenieClientImpl implements OpsgenieClient {
         return executeWithRetry(endpoint + "?apiKey=" + apiKey, dataAsJson, Method.PUT);
     }
 
-
     private SendResult executeWithRetry(String uri, String dataAsJson, Method method) {
         SendResult result = new SendResult();
         result.setSuccess(false);
