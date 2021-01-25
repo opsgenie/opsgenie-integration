@@ -16,8 +16,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.validation.ValidationException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -50,6 +48,10 @@ public class ConfigureApiKeyAction extends JiraWebActionSupport {
 
     @Override
     protected void doValidation() {
+        if (isGetRequest() || isDeleteRequest()) {
+            return;
+        }
+
         OpsgeniePluginSettings settings = requestParamsToPluginSettings(getHttpRequest().getParameterMap());
         settings.validate().forEach(this::addErrorMessage);
         if (CollectionUtils.isNotEmpty(getErrorMessages())) {
@@ -67,14 +69,14 @@ public class ConfigureApiKeyAction extends JiraWebActionSupport {
 
     @Override
     protected String doExecute() throws Exception {
-        String requestMethod = getHttpRequest().getMethod();
         Optional<OpsgeniePluginSettings> optionalExistingSettings = opsgeniePluginSettingsManager.getSettings();
         OpsgeniePluginSettings newSettings = requestParamsToPluginSettings(getHttpRequest().getParameterMap());
 
-        logger.info("Got Request: " + requestMethod + " Params: " + gson.toJson(getHttpRequest().getParameterMap()));
         try {
-            if (requestMethod.equals("GET")) {
+            if (isGetRequest()) {
                 toDto(opsgeniePluginSettingsManager.getSettings().orElse(null));
+            } else if (isDeleteRequest()) {
+                opsgeniePluginSettingsManager.deleteSettings();
             } else if(optionalExistingSettings.isPresent()) {
                 logger.debug("Settings already exist. Updating...");
                 opsgeniePluginSettingsManager.updateSettings(newSettings);
@@ -85,6 +87,7 @@ public class ConfigureApiKeyAction extends JiraWebActionSupport {
                 opsgeniePluginSettingsManager.saveSettings(newSettings);
             }
         } catch (ValidationException | OpsgenieUserCreationFailedException e) {
+            logger.error("Error: " + e.getMessage());
             addErrorMessage(e.getMessage());
         } finally {
             toDto(opsgeniePluginSettingsManager.getSettings().orElse(null));
@@ -198,5 +201,15 @@ public class ConfigureApiKeyAction extends JiraWebActionSupport {
 
     private boolean isThereAnyNonEmptyField() {
         return StringUtils.isNotBlank(apiKey) || StringUtils.isNotBlank(serverUrl) || StringUtils.isNotBlank(baseUrl) || CollectionUtils.isNotEmpty(selectedProjects);
+    }
+
+    private boolean isGetRequest() {
+        String requestMethod = getHttpRequest().getMethod();
+        return requestMethod.equals("GET");
+    }
+
+    private boolean isDeleteRequest() {
+        String requestMethod = getHttpRequest().getMethod();
+        return requestMethod.equals("POST") && getHttpRequest().getParameter("delete") != null;
     }
 }

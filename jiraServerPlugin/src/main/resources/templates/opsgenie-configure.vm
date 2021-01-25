@@ -71,12 +71,18 @@
         </select>
         <span class="aui-icon aui-icon-small aui-iconfont-info-circle og-tooltip"
               title="Jira Projects to be connected with Opsgenie"></span>
-        <span class="aui-icon icon-inline-help"><span>Help</span></span>
     </div>
     <div class="field-group">
         <input type="submit"
                value="Save"
-               class="button">
+               name="save"
+               class="aui-button aui-button-primary">
+    </div>
+    <div class="field-group">
+        <input type="submit"
+               value="Delete Settings"
+               name="delete"
+               class="error aui-button aui-button-text">
     </div>
 </form>
 </body>
