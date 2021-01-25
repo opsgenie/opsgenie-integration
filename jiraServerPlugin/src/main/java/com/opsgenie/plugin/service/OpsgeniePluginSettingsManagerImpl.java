@@ -67,7 +67,7 @@ public class OpsgeniePluginSettingsManagerImpl implements OpsgeniePluginSettings
         ApplicationUser applicationUser = userManager.getUserByName(username);
 
         if (applicationUser != null) {
-            throw new OpsgenieUserCreationFailedException("User: " + username + " already exists. Please remove it first");
+            throw new OpsgenieUserCreationFailedException("User: " + username + " already exists. Please remove it first!");
         }
 
         if (StringUtils.isNotBlank(apiKey) && StringUtils.isNotBlank(baseUrl)) {
