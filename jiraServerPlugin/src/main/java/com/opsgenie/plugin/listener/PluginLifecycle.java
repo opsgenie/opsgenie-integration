@@ -41,11 +41,8 @@ public class PluginLifecycle implements InitializingBean, DisposableBean {
     }
 
     public void destroy() {
-    }
-
-    @EventListener
-    public void onPluginUninstall(PluginUninstalledEvent vent) throws Exception {
-        logger.debug("Plugin Uninstalled!");
+        logger.debug("Plugin Lifecycle: destroy!");
+        // Delete settings and remove connection on disable/uninstall.
         opsgeniePluginSettingsManager.deleteSettings();
         eventPublisher.unregister(this);
     }
