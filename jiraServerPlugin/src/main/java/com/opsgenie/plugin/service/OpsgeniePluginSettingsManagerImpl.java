@@ -140,14 +140,11 @@ public class OpsgeniePluginSettingsManagerImpl implements OpsgeniePluginSettings
         Optional<OpsgeniePluginSettings> opsgeniePluginSettings = getSettings();
         opsgeniePluginSettings.ifPresent(settings -> {
             logger.info("Deleting settings...");
-            ConnectionCloseDto connectionCloseDto = new ConnectionCloseDto();
-            connectionCloseDto.setServerId(getServerId().orElseThrow(() -> new ValidationException("serverId is empty!")));
-            String url = settings.getBaseUrl() + SETUP_ENDPOINT + "/close";
-            SendResult result = opsgenieClient.put(url , settings.getApiKey(), gson.toJson(connectionCloseDto));
+            String url = settings.getBaseUrl() + SETUP_ENDPOINT;
+            String serverId = getServerId().orElseThrow(() -> new ValidationException("serverId is empty!"));
+            SendResult result = opsgenieClient.delete(url , settings.getApiKey(), serverId);
 
-            if (result.isSuccess()) {
-                logger.info("...done!");
-            } else {
+            if (!result.isSuccess()) {
                 logger.error("Could not delete the plugin connection. Reason: " + result.getFailReason());
             }
 

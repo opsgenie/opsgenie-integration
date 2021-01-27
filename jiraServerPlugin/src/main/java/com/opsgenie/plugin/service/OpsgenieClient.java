@@ -8,4 +8,5 @@ public interface OpsgenieClient {
 
     SendResult put(String endpoint, String apiKey, String dataAsJson);
 
+    SendResult delete(String endpoint, String apiKey, String serverId);
 }
