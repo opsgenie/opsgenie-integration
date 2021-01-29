@@ -22,7 +22,7 @@ public interface OpsgeniePluginSettingsManager {
 
     void saveSettings(OpsgeniePluginSettings opsgeniePluginSettings);
 
-    void updateSettings(OpsgeniePluginSettings opsgeniePluginSettings);
+    void updateSettings(OpsgeniePluginSettings opsgeniePluginSettings) throws OpsgenieUserCreationFailedException;
 
     void deleteSettings();
 

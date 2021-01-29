@@ -75,15 +75,10 @@ public class ConfigureApiKeyAction extends JiraWebActionSupport {
         try {
             if (isGetRequest()) {
                 toDto(opsgeniePluginSettingsManager.getSettings().orElse(null));
-            } else if (isDeleteRequest()) {
-                opsgeniePluginSettingsManager.deleteSettings();
             } else if(optionalExistingSettings.isPresent()) {
-                logger.debug("Settings already exist. Updating...");
                 opsgeniePluginSettingsManager.updateSettings(newSettings);
             } else {
-                logger.debug("Creating a connection...");
                 opsgeniePluginSettingsManager.createOpsgenieConnection(newSettings);
-                logger.debug("Connection creation successful. Saving Settings...");
                 opsgeniePluginSettingsManager.saveSettings(newSettings);
             }
         } catch (ValidationException | OpsgenieUserCreationFailedException e) {

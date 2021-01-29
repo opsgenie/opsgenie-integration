@@ -78,12 +78,6 @@
                name="save"
                class="aui-button aui-button-primary">
     </div>
-    <div class="field-group">
-        <input type="submit"
-               value="Delete Settings"
-               name="delete"
-               class="error aui-button aui-button-text">
-    </div>
 </form>
 </body>
 </html>
