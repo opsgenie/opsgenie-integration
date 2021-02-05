@@ -4,6 +4,7 @@ import com.atlassian.jira.web.action.JiraWebActionSupport;
 import com.atlassian.plugin.spring.scanner.annotation.component.Scanned;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import com.opsgenie.plugin.exception.OpsgenieSaveSettingsFailedException;
 import com.opsgenie.plugin.exception.OpsgenieUserCreationFailedException;
 import com.opsgenie.plugin.model.OpsgeniePluginSettings;
 import com.opsgenie.plugin.model.ProjectDto;
@@ -39,6 +40,8 @@ public class ConfigureApiKeyAction extends JiraWebActionSupport {
 
     private Gson gson = new Gson();
 
+    private final String LOG_PREFIX = "[Opsgenie] ";
+
 
     @Inject
     public ConfigureApiKeyAction(OpsgeniePluginSettingsManager opsgeniePluginSettingsManager) {
@@ -72,21 +75,31 @@ public class ConfigureApiKeyAction extends JiraWebActionSupport {
         Optional<OpsgeniePluginSettings> optionalExistingSettings = opsgeniePluginSettingsManager.getSettings();
         OpsgeniePluginSettings newSettings = requestParamsToPluginSettings(getHttpRequest().getParameterMap());
 
+        String action = null;
+
         try {
             if (isGetRequest()) {
+                action = "Get";
                 toDto(opsgeniePluginSettingsManager.getSettings().orElse(null));
             } else if(optionalExistingSettings.isPresent()) {
+                action = "Update";
                 opsgeniePluginSettingsManager.updateSettings(newSettings);
             } else {
+                action = "Save";
                 opsgeniePluginSettingsManager.createOpsgenieConnection(newSettings);
                 opsgeniePluginSettingsManager.saveSettings(newSettings);
             }
-        } catch (ValidationException | OpsgenieUserCreationFailedException e) {
-            logger.error("Error: " + e.getMessage());
-            addErrorMessage(e.getMessage());
-        } finally {
             toDto(opsgeniePluginSettingsManager.getSettings().orElse(null));
-            logger.info("...done!");
+            logger.info(LOG_PREFIX + action + " settings done!");
+        } catch (ValidationException | OpsgenieUserCreationFailedException e) {
+            logger.error(LOG_PREFIX + action + " settings failed. "  + e.getMessage(), e);
+            addErrorMessage(e.getMessage());
+            toDto(opsgeniePluginSettingsManager.getSettings().orElse(null));
+        } catch(OpsgenieSaveSettingsFailedException e) {
+            logger.error(LOG_PREFIX + action + " settings failed. "  + e.getMessage(), e);
+            addErrorMessage(e.getMessage());
+            opsgeniePluginSettingsManager.deleteSettings(newSettings);
+            toDto(newSettings);
         }
         return super.doExecute();
     }
@@ -175,10 +188,6 @@ public class ConfigureApiKeyAction extends JiraWebActionSupport {
                 .filter(projectDto -> String.valueOf(projectDto.getId()).equals(projectId))
                 .findFirst()
                 .orElse(null);
-    }
-
-    private String logPrefix() {
-        return "[Opsgenie] ";
     }
 
     private void toDto(OpsgeniePluginSettings settings) {

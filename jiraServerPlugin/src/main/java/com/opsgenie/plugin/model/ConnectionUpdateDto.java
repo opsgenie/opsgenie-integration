@@ -16,6 +16,14 @@ public class ConnectionUpdateDto {
     @JsonProperty("serverUrl")
     private String serverUrl;
 
+    @Nullable
+    @JsonProperty("username")
+    private String username;
+
+    @Nullable
+    @JsonProperty("password")
+    private String password;
+
     public String getServerId() {
         return serverId;
     }
@@ -34,12 +42,32 @@ public class ConnectionUpdateDto {
         return this;
     }
 
+    public String getUsername() {
+        return username;
+    }
+
+    public ConnectionUpdateDto setUsername(String username) {
+        this.username = username;
+        return this;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public ConnectionUpdateDto setPassword(String password) {
+        this.password = password;
+        return this;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof ConnectionUpdateDto)) return false;
         ConnectionUpdateDto that = (ConnectionUpdateDto) o;
         return Objects.equals(getServerId(), that.getServerId()) &&
+                Objects.equals(getUsername(), that.getUsername()) &&
+                Objects.equals(getPassword(), that.getPassword()) &&
                 Objects.equals(getServerUrl(), that.getServerUrl());
     }
 
@@ -53,6 +81,8 @@ public class ConnectionUpdateDto {
         return "ConnectionUpdateDto{" +
                 "serverId='" + serverId + '\'' +
                 ", serverUrl='" + serverUrl + '\'' +
+                ", username='" + username + '\'' +
+                ", password='" + password + '\'' +
                 '}';
     }
 }

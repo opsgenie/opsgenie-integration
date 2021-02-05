@@ -1,5 +1,6 @@
 package com.opsgenie.plugin.service;
 
+import com.opsgenie.plugin.exception.OpsgenieSaveSettingsFailedException;
 import com.opsgenie.plugin.exception.OpsgenieUserCreationFailedException;
 import com.opsgenie.plugin.model.OpsgeniePluginSettings;
 
@@ -20,10 +21,10 @@ public interface OpsgeniePluginSettingsManager {
 
     Optional<OpsgeniePluginSettings> getSettings();
 
-    void saveSettings(OpsgeniePluginSettings opsgeniePluginSettings);
+    void saveSettings(OpsgeniePluginSettings opsgeniePluginSettings) throws OpsgenieSaveSettingsFailedException;
 
-    void updateSettings(OpsgeniePluginSettings opsgeniePluginSettings) throws OpsgenieUserCreationFailedException;
+    void updateSettings(OpsgeniePluginSettings opsgeniePluginSettings) throws OpsgenieUserCreationFailedException, OpsgenieSaveSettingsFailedException;
 
-    void deleteSettings();
+    void deleteSettings(OpsgeniePluginSettings opsgeniePluginSettings);
 
 }
