@@ -139,8 +139,4 @@ public class OpsgeniePluginSettings {
             return false;
         }
     }
-
-    public boolean shouldTryToSave() {
-        return StringUtils.isNotBlank(apiKey) && StringUtils.isNotBlank(baseUrl) && CollectionUtils.isNotEmpty(selectedProjects);
-    }
 }

@@ -6,10 +6,7 @@ import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
-import org.apache.commons.httpclient.methods.EntityEnclosingMethod;
-import org.apache.commons.httpclient.methods.PostMethod;
-import org.apache.commons.httpclient.methods.PutMethod;
-import org.apache.commons.httpclient.methods.StringRequestEntity;
+import org.apache.commons.httpclient.methods.*;
 import org.apache.commons.httpclient.params.HttpConnectionManagerParams;
 import org.apache.logging.log4j.core.util.IOUtils;
 import org.springframework.stereotype.Component;
@@ -51,6 +48,10 @@ public class OpsgenieClientImpl implements OpsgenieClient {
         return executeWithRetry(endpoint + "?apiKey=" + apiKey, dataAsJson, Method.PUT);
     }
 
+    @Override
+    public SendResult delete(String endpoint, String apiKey, String serverId) {
+        return executeWithRetry(endpoint + "?apiKey=" + apiKey + "&serverId=" + serverId, null, Method.DELETE);
+    }
 
     private SendResult executeWithRetry(String uri, String dataAsJson, Method method) {
         SendResult result = new SendResult();
@@ -59,11 +60,13 @@ public class OpsgenieClientImpl implements OpsgenieClient {
         long retryStartTime = System.currentTimeMillis();
         int statusCode;
         String failReason = null;
-        EntityEnclosingMethod httpMethod = null;
+        HttpMethod httpMethod = null;
         while (retryPresent(currentRetryCount, retryStartTime)) {
             try {
                 httpMethod = method.apply(uri);
-                setRequestEntity(httpMethod, dataAsJson);
+                if (httpMethod instanceof EntityEnclosingMethod) {
+                    setRequestEntity((EntityEnclosingMethod) httpMethod, dataAsJson);
+                }
                 currentRetryCount++;
                 statusCode = httpClient.executeMethod(httpMethod);
                 if (statusCode >= 200 && statusCode < 300) {
@@ -95,7 +98,7 @@ public class OpsgenieClientImpl implements OpsgenieClient {
     private boolean retryPresent(int currentRetryCount, long retryStartTime) {
         long currentTime = System.currentTimeMillis();
         try {
-            Thread.sleep(currentRetryCount * 100L);
+            Thread.sleep(currentRetryCount * 100);
         } catch (InterruptedException e) {
             //ignored
         }
@@ -131,20 +134,25 @@ public class OpsgenieClientImpl implements OpsgenieClient {
     }
 
 
-    private enum Method implements Function<String, EntityEnclosingMethod> {
+    private enum Method implements Function<String, HttpMethod> {
 
         POST() {
             @Override
-            public EntityEnclosingMethod apply(String uri) {
+            public HttpMethod apply(String uri) {
                 return new PostMethod(uri);
             }
         },
         PUT() {
             @Override
-            public EntityEnclosingMethod apply(String uri) {
+            public HttpMethod apply(String uri) {
                 return new PutMethod(uri);
             }
+        },
+        DELETE() {
+            @Override
+            public HttpMethod apply(String uri) {
+                return new DeleteMethod(uri);
+            }
         };
-
     }
 }

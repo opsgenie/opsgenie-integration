@@ -6,7 +6,7 @@
     </plugin-info>
 
     <!-- from our base plugin -->
-    <component-import key="myComponent" interface="com.opsgenie.plugin.api.MyPluginComponent"/>
+    <component-import key="opsgeniePluginComponent" interface="com.opsgenie.plugin.api.OpsgeniePluginComponent"/>
 
     <!-- from the product container -->
     <component-import key="applicationProperties" interface="com.atlassian.sal.api.ApplicationProperties"/>

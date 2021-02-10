@@ -4,6 +4,7 @@ import com.atlassian.jira.web.action.JiraWebActionSupport;
 import com.atlassian.plugin.spring.scanner.annotation.component.Scanned;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import com.opsgenie.plugin.exception.OpsgenieSaveSettingsFailedException;
 import com.opsgenie.plugin.exception.OpsgenieUserCreationFailedException;
 import com.opsgenie.plugin.model.OpsgeniePluginSettings;
 import com.opsgenie.plugin.model.ProjectDto;
@@ -16,8 +17,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.validation.ValidationException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -41,6 +40,8 @@ public class ConfigureApiKeyAction extends JiraWebActionSupport {
 
     private Gson gson = new Gson();
 
+    private final String LOG_PREFIX = "[Opsgenie] ";
+
 
     @Inject
     public ConfigureApiKeyAction(OpsgeniePluginSettingsManager opsgeniePluginSettingsManager) {
@@ -50,6 +51,10 @@ public class ConfigureApiKeyAction extends JiraWebActionSupport {
 
     @Override
     protected void doValidation() {
+        if (isGetRequest() || isDeleteRequest()) {
+            return;
+        }
+
         OpsgeniePluginSettings settings = requestParamsToPluginSettings(getHttpRequest().getParameterMap());
         settings.validate().forEach(this::addErrorMessage);
         if (CollectionUtils.isNotEmpty(getErrorMessages())) {
@@ -67,21 +72,34 @@ public class ConfigureApiKeyAction extends JiraWebActionSupport {
 
     @Override
     protected String doExecute() throws Exception {
+        Optional<OpsgeniePluginSettings> optionalExistingSettings = opsgeniePluginSettingsManager.getSettings();
+        OpsgeniePluginSettings newSettings = requestParamsToPluginSettings(getHttpRequest().getParameterMap());
+
+        String action = null;
+
         try {
-            OpsgeniePluginSettings newSettings = requestParamsToPluginSettings(getHttpRequest().getParameterMap());
-            if (newSettings.shouldTryToSave()) {
-                Optional<OpsgeniePluginSettings> optionalExistingSettings = opsgeniePluginSettingsManager.getSettings();
-                if (optionalExistingSettings.isPresent()) {
-                    opsgeniePluginSettingsManager.updateSettings(newSettings);
-                } else {
-                    opsgeniePluginSettingsManager.saveSettings(newSettings);
-                    createOgUserIfItIsNotCreatedAlready();
-                }
+            if (isGetRequest()) {
+                action = "Get";
+                toDto(opsgeniePluginSettingsManager.getSettings().orElse(null));
+            } else if(optionalExistingSettings.isPresent()) {
+                action = "Update";
+                opsgeniePluginSettingsManager.updateSettings(newSettings);
+            } else {
+                action = "Save";
+                opsgeniePluginSettingsManager.createOpsgenieConnection(newSettings);
+                opsgeniePluginSettingsManager.saveSettings(newSettings);
             }
             toDto(opsgeniePluginSettingsManager.getSettings().orElse(null));
-        } catch (ValidationException e) {
-            toDto(opsgeniePluginSettingsManager.getSettings().orElse(null));
+            logger.info(LOG_PREFIX + action + " settings done!");
+        } catch (ValidationException | OpsgenieUserCreationFailedException e) {
+            logger.error(LOG_PREFIX + action + " settings failed. "  + e.getMessage(), e);
             addErrorMessage(e.getMessage());
+            toDto(opsgeniePluginSettingsManager.getSettings().orElse(null));
+        } catch(OpsgenieSaveSettingsFailedException e) {
+            logger.error(LOG_PREFIX + action + " settings failed. "  + e.getMessage(), e);
+            addErrorMessage(e.getMessage());
+            opsgeniePluginSettingsManager.deleteSettings(newSettings);
+            toDto(newSettings);
         }
         return super.doExecute();
     }
@@ -172,12 +190,6 @@ public class ConfigureApiKeyAction extends JiraWebActionSupport {
                 .orElse(null);
     }
 
-    private String logPrefix() {
-        DateFormat dateFormat = new SimpleDateFormat("dd/MM/yy HH:mm:ss");
-        Date date = new Date();
-        return "[Opsgenie][" + dateFormat.format(date) + "]";
-    }
-
     private void toDto(OpsgeniePluginSettings settings) {
         if (settings != null) {
             setApiKey(settings.getApiKey());
@@ -191,17 +203,17 @@ public class ConfigureApiKeyAction extends JiraWebActionSupport {
         setProjects(getAllProjects());
     }
 
-    private void createOgUserIfItIsNotCreatedAlready() {
-        try {
-            opsgeniePluginSettingsManager.createOpsgenieUser();
-        } catch (OpsgenieUserCreationFailedException e) {
-            logger.error(logPrefix() + e.getMessage());
-            toDto(opsgeniePluginSettingsManager.getSettings().orElse(null));
-            addErrorMessage(e.getMessage() + ". Try to reconfigure again!");
-        }
-    }
-
     private boolean isThereAnyNonEmptyField() {
         return StringUtils.isNotBlank(apiKey) || StringUtils.isNotBlank(serverUrl) || StringUtils.isNotBlank(baseUrl) || CollectionUtils.isNotEmpty(selectedProjects);
+    }
+
+    private boolean isGetRequest() {
+        String requestMethod = getHttpRequest().getMethod();
+        return requestMethod.equals("GET");
+    }
+
+    private boolean isDeleteRequest() {
+        String requestMethod = getHttpRequest().getMethod();
+        return requestMethod.equals("POST") && getHttpRequest().getParameter("delete") != null;
     }
 }

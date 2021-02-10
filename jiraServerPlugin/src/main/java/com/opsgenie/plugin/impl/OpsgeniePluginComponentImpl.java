@@ -6,7 +6,7 @@ import com.atlassian.plugin.spring.scanner.annotation.export.ExportAsService;
 import com.atlassian.plugin.spring.scanner.annotation.imports.ComponentImport;
 import com.atlassian.sal.api.ApplicationProperties;
 import com.atlassian.sal.api.pluginsettings.PluginSettingsFactory;
-import com.opsgenie.plugin.api.MyPluginComponent;
+import com.opsgenie.plugin.api.OpsgeniePluginComponent;
 import com.opsgenie.plugin.listener.IssueEventSenderFactory;
 import com.opsgenie.plugin.service.OpsgeniePluginSettingsManager;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,10 +15,10 @@ import org.springframework.stereotype.Component;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-@ExportAsService({MyPluginComponent.class})
-@Named("myPluginComponent")
+@ExportAsService({OpsgeniePluginComponent.class})
+@Named("opsgeniePluginComponent")
 @Component
-public class MyPluginComponentImpl implements MyPluginComponent {
+public class OpsgeniePluginComponentImpl implements OpsgeniePluginComponent {
     @ComponentImport
     private final ApplicationProperties applicationProperties;
 
@@ -38,7 +38,7 @@ public class MyPluginComponentImpl implements MyPluginComponent {
     private PluginSettingsFactory pluginSettingsFactory;
 
     @Inject
-    public MyPluginComponentImpl(final ApplicationProperties applicationProperties, UserManager userManager, ProjectManager projectManager) {
+    public OpsgeniePluginComponentImpl(final ApplicationProperties applicationProperties, UserManager userManager, ProjectManager projectManager) {
         this.applicationProperties = applicationProperties;
         this.userManager = userManager;
         this.projectManager = projectManager;
@@ -46,9 +46,9 @@ public class MyPluginComponentImpl implements MyPluginComponent {
 
     public String getName() {
         if (null != applicationProperties) {
-            return "myComponent:" + applicationProperties.getDisplayName();
+            return "opsgeniePluginComponent:" + applicationProperties.getDisplayName();
         }
 
-        return "myComponent";
+        return "opsgeniePluginComponent";
     }
 }

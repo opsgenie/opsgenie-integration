@@ -7,25 +7,25 @@
     <vendor name="${project.organization.name}" url="${project.organization.url}"/>
     <param name="plugin-icon">images/pluginIcon.png</param>
     <param name="plugin-logo">images/pluginLogo.png</param>
-    <param name="configure.url">/secure/ConfigureApiKey.jspa</param>
+    <param name="configure.url">/secure/ConfigureOpsgenie.jspa</param>
   </plugin-info>
   <!-- add our i18n resource -->
-  <resource type="i18n" name="i18n" location="jiraServerPlugin"/>
+  <resource type="i18n" name="i18n" location="jiraServerOpsgeniePlugin"/>
   <!-- add our web resources -->
-  <web-resource key="jiraServerPlugin-resources" name="jiraServerPlugin Web Resources">
+  <web-resource key="jiraServerOpsgeniePlugin-resources" name="Jira Server Opsgenie Plugin Web Resources">
     <dependency>com.atlassian.auiplugin:ajs</dependency>
-    <resource type="download" name="jiraServerPlugin.css" location="/css/jiraServerPlugin.css"/>
-    <resource type="download" name="jiraServerPlugin.js" location="/js/jiraServerPlugin.js"/>
+    <resource type="download" name="jiraServerOpsgeniePlugin.css" location="/css/jiraServerOpsgeniePlugin.css"/>
+    <resource type="download" name="jiraServerOpsgeniePlugin.js" location="/js/jiraServerOpsgeniePlugin.js"/>
     <resource type="download" name="images/" location="/images"/>
-    <context>jiraServerPlugin</context>
+    <context>jiraServerOpsgeniePlugin</context>
   </web-resource>
   <servlet name="Configure ApiKey Servlet" key="apiKey" class="com.opsgenie.plugin.controller.WebhookListenerServlet">
     <description>Webhook Event Listener</description>
     <url-pattern>/opsgenie-webhook-listener*</url-pattern>
   </servlet>
-  <webwork1 key="configureApiKey" name="Configure Opsgenie ApiKey" class="java.lang.Object">
+  <webwork1 key="configureOpsgenie" name="Configure Opsgenie ApiKey" class="java.lang.Object">
     <actions>
-      <action name="com.opsgenie.plugin.controller.ConfigureApiKeyAction" alias="ConfigureApiKey"
+      <action name="com.opsgenie.plugin.controller.ConfigureApiKeyAction" alias="ConfigureOpsgenie"
               roles-required="sysadmin">
         <view name="success">/templates/opsgenie-configure.vm</view>
         <view name="error">/templates/opsgenie-configure.vm</view>
@@ -37,7 +37,7 @@
             section="admin_plugins_menu/admin_opsgenie_section" weight="15"
             i18n-name-key="opsgenie-plugin.admin.apiKey.page.web.item.name">
     <label key="opsgenie-plugin.admin.apiKey.page.web.item.name"/>
-    <link linkId="admin_opsgenie_webitem_link">/secure/ConfigureApiKey.jspa</link>
+    <link linkId="admin_opsgenie_webitem_link">/secure/ConfigureOpsgenie.jspa</link>
   </web-item>
   <web-section key="admin_opsgenie_apiKey_section" name="admin_opsgenie_apiKey_section" location="admin_plugins_menu"
                weight="20" i18n-name-key="opsgenie-plugin.admin.apiKey.page.web.section.name">
@@ -45,8 +45,8 @@
   </web-section>
   <web-resource key="opsgenie-apikey-resources" name="opsgenie-plugin ApiKey Resources for Configuration Page">
     <dependency>com.atlassian.auiplugin:ajs</dependency>
-    <resource type="download" name="jiraServerPlugin.js" location="/js/jiraServerPlugin.js"/>
-    <context>jiraServerPlugin</context>
+    <resource type="download" name="jiraServerOpsgeniePlugin.js" location="/js/jiraServerOpsgeniePlugin.js"/>
+    <context>jiraServerOpsgeniePlugin</context>
   </web-resource>
   <webhook key="webhook_issue_created" event="jira:issue_created"
            url="/plugins/servlet/opsgenie-webhook-listener/create"/>

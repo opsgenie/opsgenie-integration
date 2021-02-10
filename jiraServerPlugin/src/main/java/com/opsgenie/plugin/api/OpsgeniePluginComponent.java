@@ -1,5 +1,5 @@
 package com.opsgenie.plugin.api;
 
-public interface MyPluginComponent {
+public interface OpsgeniePluginComponent {
     String getName();
 }

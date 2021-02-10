@@ -1,5 +1,7 @@
 package com.opsgenie.plugin.service;
 
+import com.atlassian.jira.exception.CreateException;
+import com.atlassian.jira.exception.PermissionException;
 import com.atlassian.jira.user.ApplicationUser;
 import com.atlassian.jira.user.UserDetails;
 import com.atlassian.jira.user.util.UserManager;
@@ -7,13 +9,13 @@ import com.atlassian.plugin.spring.scanner.annotation.imports.ComponentImport;
 import com.atlassian.sal.api.pluginsettings.PluginSettings;
 import com.atlassian.sal.api.pluginsettings.PluginSettingsFactory;
 import com.google.gson.Gson;
+import com.opsgenie.plugin.exception.OpsgenieSaveSettingsFailedException;
 import com.opsgenie.plugin.exception.OpsgenieUserCreationFailedException;
 import com.opsgenie.plugin.listener.SendResult;
-import com.opsgenie.plugin.model.ConnectionSetupDto;
-import com.opsgenie.plugin.model.ConnectionUpdateDto;
-import com.opsgenie.plugin.model.OpsgeniePluginSettings;
-import com.opsgenie.plugin.model.OpsgenieUser;
+import com.opsgenie.plugin.model.*;
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import javax.inject.Inject;
@@ -30,6 +32,8 @@ public class OpsgeniePluginSettingsManagerImpl implements OpsgeniePluginSettings
     private static final Gson gson = new Gson();
 
     private PluginSettings pluginSettings;
+
+    private static final Logger logger = LoggerFactory.getLogger(OpsgeniePluginSettingsManagerImpl.class);
 
     @Inject
     public OpsgeniePluginSettingsManagerImpl(@ComponentImport PluginSettingsFactory pluginSettingsFactory, UserManager userManager, OpsgenieClient opsgenieClient) {
@@ -50,40 +54,50 @@ public class OpsgeniePluginSettingsManagerImpl implements OpsgeniePluginSettings
     }
 
     @Override
-    public void createOpsgenieUser() throws OpsgenieUserCreationFailedException {
-        final OpsgeniePluginSettings opsgeniePluginSettings = getSettings()
-                .orElseThrow(() -> new ValidationException("There is no configuration found!"));
+    public void createOpsgenieConnection(OpsgeniePluginSettings opsgeniePluginSettings) throws OpsgenieUserCreationFailedException {
+        logger.debug("Creating a connection...");
         final String username = OpsgeniePluginSettingsManager.OPSGENIE_USERNAME;
         final String apiKey = opsgeniePluginSettings.getApiKey();
-        if (StringUtils.isBlank(apiKey)) {
-            throw new ValidationException("In order to create plugin user, an apiKey have to be configured first!");
-        }
         final String baseUrl = opsgeniePluginSettings.getBaseUrl();
-        if (StringUtils.isBlank(baseUrl)) {
-            throw new ValidationException("In order to create plugin user, a baseUrl have to be configured first!");
-        }
-        ApplicationUser applicationUser = userManager.getUserByName(username);
-        //plugin settings may not be sync with the user existence. If user deleted then the customer need to reinstall the plugin in order to add new user :((
-        if (applicationUser == null && StringUtils.isNotBlank(apiKey) && StringUtils.isNotBlank(baseUrl)) {
-            UserDetails userDetails = new UserDetails(username, username)
-                    .withPassword(apiKey);
-            try {
-                OpsgenieUser opsgenieUser = new OpsgenieUser(username, apiKey);
-                userManager.createUser(userDetails);
-                ConnectionSetupDto connectionSetupDto = new ConnectionSetupDto()
-                        .setUsername(opsgenieUser.getUsername())
-                        .setPassword(opsgenieUser.getPassword())
-                        .setServerId(getServerId().orElseThrow(() -> new ValidationException("serverId is empty!")))
-                        .setServerUrl(opsgeniePluginSettings.getServerUrl());
-                SendResult result = opsgenieClient.post(baseUrl + SETUP_ENDPOINT, apiKey, gson.toJson(connectionSetupDto));
-                if (!result.isSuccess()) {
-                    throw new Exception(result.getFailReason() +
-                            ". Created User needs to be deleted and plugin needs to be reconfigured.");
-                }
-            } catch (Exception e) {
-                deleteSettings();
-                throw new OpsgenieUserCreationFailedException(e.getMessage());
+
+        if (findUser().isPresent()) {
+            throw new OpsgenieUserCreationFailedException("User: " + username + " already exists. Please remove it first!");
+        };
+
+        if (StringUtils.isNotBlank(apiKey) && StringUtils.isNotBlank(baseUrl)) {
+            OpsgenieUser opsgenieUser = new OpsgenieUser(username, apiKey);
+            ConnectionSetupDto connectionSetupDto = new ConnectionSetupDto()
+                    .setUsername(opsgenieUser.getUsername())
+                    .setPassword(opsgenieUser.getPassword())
+                    .setServerId(getServerId().orElseThrow(() -> new ValidationException("serverId is empty!")))
+                    .setServerUrl(opsgeniePluginSettings.getServerUrl());
+            SendResult result = opsgenieClient.post(baseUrl + SETUP_ENDPOINT, apiKey, gson.toJson(connectionSetupDto));
+
+            if (result.isSuccess()) {
+                createUser(opsgenieUser);
+            } else {
+                throw new OpsgenieUserCreationFailedException(result.getFailReason());
             }
+        }
+    }
+
+    private Optional<ApplicationUser> findUser() {
+        ApplicationUser applicationUser = userManager.getUserByName(OpsgeniePluginSettingsManager.OPSGENIE_USERNAME);
+        if (applicationUser == null) {
+            return Optional.empty();
+        } else {
+            return Optional.of(applicationUser);
+        }
+    }
+
+    private void createUser(OpsgenieUser user) throws OpsgenieUserCreationFailedException {
+        logger.debug("Creating user...");
+        UserDetails userDetails = new UserDetails(user.getUsername(), user.getUsername())
+                .withPassword(user.getPassword());
+        try {
+            userManager.createUser(userDetails);
+        } catch (CreateException | PermissionException e) {
+            throw new OpsgenieUserCreationFailedException(e.getMessage());
         }
     }
 
@@ -101,34 +115,68 @@ public class OpsgeniePluginSettingsManagerImpl implements OpsgeniePluginSettings
     }
 
     @Override
-    public void saveSettings(OpsgeniePluginSettings opsgeniePluginSettings) {
+    public void saveSettings(OpsgeniePluginSettings opsgeniePluginSettings) throws OpsgenieSaveSettingsFailedException {
+        logger.debug("Saving Settings...");
         if (opsgeniePluginSettings == null) {
-            throw new ValidationException("OpsgeniePluginSettings cannot be null");
+            throw new ValidationException("Opsgenie Plugin Settings cannot be null");
         }
-        opsgeniePluginSettings.validateBeforeSave();
-        pluginSettings.put(OG_PLUGIN_SETTINGS, gson.toJson(opsgeniePluginSettings));
+
+        try {
+            opsgeniePluginSettings.validateBeforeSave();
+            pluginSettings.put(OG_PLUGIN_SETTINGS, gson.toJson(opsgeniePluginSettings));
+            logger.info("Settings saved successfully!");
+        } catch (Exception e) {
+            throw new OpsgenieSaveSettingsFailedException("Could not save settings: " + e.getMessage(), e);
+        }
     }
 
     @Override
-    public void updateSettings(OpsgeniePluginSettings opsgeniePluginSettings) {
-        ConnectionUpdateDto connectionUpdateDto = new ConnectionUpdateDto();
-        connectionUpdateDto.setServerId(getServerId().orElseThrow(() -> new ValidationException("serverId is empty!")));
-        connectionUpdateDto.setServerUrl(opsgeniePluginSettings.getServerUrl());
+    public void updateSettings(OpsgeniePluginSettings opsgeniePluginSettings) throws OpsgenieUserCreationFailedException, OpsgenieSaveSettingsFailedException {
+        logger.debug("Settings already exist. Updating...");
+        ConnectionUpdateDto connectionUpdateDto = new ConnectionUpdateDto()
+                .setServerId(getServerId().orElseThrow(() -> new ValidationException("Could not find server Id!")))
+                .setServerUrl(opsgeniePluginSettings.getServerUrl());
+
         OpsgeniePluginSettings existingSettings = getSettings().orElseThrow(() -> new ValidationException("There is no configuration to update!"));
+
+        OpsgenieUser opsgenieUser = new OpsgenieUser(OpsgeniePluginSettingsManager.OPSGENIE_USERNAME, opsgeniePluginSettings.getApiKey());
+        boolean shouldCreateUser = !findUser().isPresent();
+        if (shouldCreateUser) {
+            connectionUpdateDto.setUsername(opsgenieUser.getUsername());
+            connectionUpdateDto.setPassword(opsgenieUser.getPassword());
+        }
+
         String endpoint = SETUP_ENDPOINT;
         if (!StringUtils.equals(opsgeniePluginSettings.getApiKey(), existingSettings.getApiKey())) {
             endpoint = SETUP_ENDPOINT + "/owner";
         }
         SendResult result = opsgenieClient.put(opsgeniePluginSettings.getBaseUrl() + endpoint, opsgeniePluginSettings.getApiKey(), gson.toJson(connectionUpdateDto));
-        if (!result.isSuccess()) {
-            throw new ValidationException("Could not update the plugin settings. Reason: " + result.getFailReason());
-        } else {
+
+        if (result.isSuccess()) {
+            if (shouldCreateUser) {
+                createUser(opsgenieUser);
+            }
             saveSettings(opsgeniePluginSettings);
+        } else {
+            throw new ValidationException("Could not update the plugin settings. Reason: " + result.getFailReason());
         }
     }
 
     @Override
-    public void deleteSettings() {
+    public void deleteSettings(OpsgeniePluginSettings settings) {
+        if (settings == null) {
+            return;
+        }
+
+        logger.info("Deleting settings...");
+        String url = settings.getBaseUrl() + SETUP_ENDPOINT;
+        String serverId = getServerId().orElseThrow(() -> new ValidationException("serverId is empty!"));
+        SendResult result = opsgenieClient.delete(url , settings.getApiKey(), serverId);
+
+        if (!result.isSuccess()) {
+            logger.error("Could not delete the plugin connection. Reason: " + result.getFailReason());
+        }
+
         pluginSettings.remove(OG_PLUGIN_SETTINGS);
     }
 
