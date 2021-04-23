@@ -77,6 +77,8 @@ if (alertFromOpsgenie.size() > 0) {
                     }
                 }
             }
+        } else if (action == "UnAcknowledge") {
+            urlPath = "/v1/actions/remove-acknowledgement"
         } else if (action == "TakeOwnership") {
             urlPath = "/v1/actions/add-comment"
             contentMap.put("comment", String.valueOf("alert ownership taken by ${alert.username}"))
