@@ -66,24 +66,24 @@ public class OpsgeniePluginSettings {
     public List<String> validate() {
         List<String> errorMessages = new ArrayList<>();
         if (StringUtils.isNotBlank(baseUrl) && !UrlValidator.getInstance().isValid(baseUrl)) {
-            errorMessages.add("Base url is not valid!");
+            errorMessages.add("Opsgenie Base Url is not valid!");
             setBaseUrl("");
         }
         if (StringUtils.isNotBlank(apiKey) && !isApiKeyValid(apiKey)) {
-            errorMessages.add("Api key format is not valid!");
+            errorMessages.add("Opsgenie API Key format is not valid!");
             setApiKey("");
         }
         if (StringUtils.isNotBlank(serverUrl) && !UrlValidator.getInstance().isValid(serverUrl)) {
-            errorMessages.add("JiraServer url is not valid!");
+            errorMessages.add("Jira Server Base Url is not valid!");
             setServerUrl("");
         }
         if (StringUtils.isNotBlank(serverUrl) && StringUtils.contains(serverUrl, "opsgenie.com")) {
-            errorMessages.add("JiraServer url cannot contains opsgenie.com");
+            errorMessages.add("Jira Server Base Url cannot contains opsgenie.com!");
             setServerUrl("");
         }
         if (CollectionUtils.isNotEmpty(selectedProjects) && selectedProjects.stream()
                 .anyMatch(projectDto -> StringUtils.isBlank(projectDto.getName()) || projectDto.getId() == 0)) {
-            errorMessages.add("Projects dto is not valid!");
+            errorMessages.add("Projects are not valid!");
             setSelectedProjects(Collections.emptyList());
         }
         return errorMessages;
@@ -91,13 +91,13 @@ public class OpsgeniePluginSettings {
 
     public void validateBeforeSave() {
         if (StringUtils.isBlank(apiKey)) {
-            throw new ValidationException("apiKey cannot be empty!");
+            throw new ValidationException("Opsgenie API Key cannot be empty!");
         }
         if (StringUtils.isBlank(baseUrl)) {
-            throw new ValidationException("baseUrl cannot be empty!");
+            throw new ValidationException("Opsgenie Base Url cannot be empty!");
         }
         if (CollectionUtils.isEmpty(selectedProjects)) {
-            throw new ValidationException("selectedProjects cannot be empty!");
+            throw new ValidationException("Projects cannot be empty!");
         }
         List<String> violations = validate();
         if (CollectionUtils.isNotEmpty(violations)) {

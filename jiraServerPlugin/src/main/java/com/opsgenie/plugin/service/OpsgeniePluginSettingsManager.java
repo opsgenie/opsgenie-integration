@@ -1,5 +1,6 @@
 package com.opsgenie.plugin.service;
 
+import com.atlassian.jira.user.ApplicationUser;
 import com.opsgenie.plugin.exception.OpsgenieSaveSettingsFailedException;
 import com.opsgenie.plugin.exception.OpsgenieUserCreationFailedException;
 import com.opsgenie.plugin.model.OpsgeniePluginSettings;
@@ -16,6 +17,10 @@ public interface OpsgeniePluginSettingsManager {
     void setServerId(String serverId);
 
     Optional<String> getServerId();
+
+    Optional<ApplicationUser> getUser();
+
+    String getServerUrl();
 
     void createOpsgenieConnection(OpsgeniePluginSettings opsgeniePluginSettings) throws OpsgenieUserCreationFailedException;
 

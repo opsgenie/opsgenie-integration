@@ -54,4 +54,9 @@
            url="/plugins/servlet/opsgenie-webhook-listener/update"/>
   <webhook key="webhook_issue_delete" event="jira:issue_deleted"
            url="/plugins/servlet/opsgenie-webhook-listener/delete"/>
+  <rest name="Opsgenie Rest Resource" i18n-name-key="opsgenie-rest-resource.name" key="opsgenie-rest-resource"
+        path="/opsgenie" version="1.0">
+    <description key="opsgenie-rest-resource.description">The Opsgenie Rest Resource</description>
+    <package>com.opsgenie.plugin.rest</package>
+  </rest>
 </atlassian-plugin>
