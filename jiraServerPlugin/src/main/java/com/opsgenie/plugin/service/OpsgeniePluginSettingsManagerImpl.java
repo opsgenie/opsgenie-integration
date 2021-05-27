@@ -12,7 +12,10 @@ import com.google.gson.Gson;
 import com.opsgenie.plugin.exception.OpsgenieSaveSettingsFailedException;
 import com.opsgenie.plugin.exception.OpsgenieUserCreationFailedException;
 import com.opsgenie.plugin.listener.SendResult;
-import com.opsgenie.plugin.model.*;
+import com.opsgenie.plugin.model.ConnectionSetupDto;
+import com.opsgenie.plugin.model.ConnectionUpdateDto;
+import com.opsgenie.plugin.model.OpsgeniePluginSettings;
+import com.opsgenie.plugin.model.OpsgenieUser;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,7 +63,7 @@ public class OpsgeniePluginSettingsManagerImpl implements OpsgeniePluginSettings
         final String apiKey = opsgeniePluginSettings.getApiKey();
         final String baseUrl = opsgeniePluginSettings.getBaseUrl();
 
-        if (findUser().isPresent()) {
+        if (getUser().isPresent()) {
             throw new OpsgenieUserCreationFailedException("User: " + username + " already exists. Please remove it first!");
         };
 
@@ -81,13 +84,19 @@ public class OpsgeniePluginSettingsManagerImpl implements OpsgeniePluginSettings
         }
     }
 
-    private Optional<ApplicationUser> findUser() {
+    public Optional<ApplicationUser> getUser() {
         ApplicationUser applicationUser = userManager.getUserByName(OpsgeniePluginSettingsManager.OPSGENIE_USERNAME);
         if (applicationUser == null) {
             return Optional.empty();
         } else {
             return Optional.of(applicationUser);
         }
+    }
+
+    @Override
+    public String getServerUrl() {
+        OpsgeniePluginSettings existingSettings = getSettings().orElseThrow(() -> new ValidationException("There is no configuration!"));
+        return existingSettings.getServerUrl();
     }
 
     private void createUser(OpsgenieUser user) throws OpsgenieUserCreationFailedException {
@@ -140,7 +149,7 @@ public class OpsgeniePluginSettingsManagerImpl implements OpsgeniePluginSettings
         OpsgeniePluginSettings existingSettings = getSettings().orElseThrow(() -> new ValidationException("There is no configuration to update!"));
 
         OpsgenieUser opsgenieUser = new OpsgenieUser(OpsgeniePluginSettingsManager.OPSGENIE_USERNAME, opsgeniePluginSettings.getApiKey());
-        boolean shouldCreateUser = !findUser().isPresent();
+        boolean shouldCreateUser = !getUser().isPresent();
         if (shouldCreateUser) {
             connectionUpdateDto.setUsername(opsgenieUser.getUsername());
             connectionUpdateDto.setPassword(opsgenieUser.getPassword());
