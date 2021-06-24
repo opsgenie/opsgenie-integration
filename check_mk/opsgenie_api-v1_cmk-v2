@@ -1,0 +1,35 @@
+#!/usr/bin/env python3
+# OpsGenie_APIv1_CMKv2
+
+import json
+import os
+import requests
+
+def main():
+    header_type = {'Content-Type':'application/json'}
+    context = dict([(var[7:], value)
+                    for (var, value) in os.environ.items()
+                    if var.startswith("NOTIFY_")])
+
+    if "PARAMETER_1" in context:
+        opsgenie_api_url = context["PARAMETER_1"]
+
+        if "PARAMETER_1" in context.keys():
+            del context["PARAMETER_1"]
+        if "PARAMETERS" in context.keys():
+            del context["PARAMETERS"]
+    else:
+        return "No API Key Specified."
+
+    try:
+        req = requests.post(opsgenie_api_url, headers=header_type, data=json.dumps(context))
+        is_success = True
+    except:
+        is_success = False
+
+    if is_success:
+        return "Script finished successfully."
+    else:
+        return "Script failed."
+
+main()
