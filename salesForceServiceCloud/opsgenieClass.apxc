@@ -11,7 +11,7 @@ global class opsgenieClass {
     System.debug(' Response: ' + res.getBody());
   }
   global static string getPayloadStringByHandlingNull(String value){
-  return value==null?null:'"'+value.replaceAll('[^a-zA-Z0-9\\s]', '').replaceAll('\\s+', ' ')+'"';
+  return value==null?null:'"'+value.replaceAll('[^a-zA-Z0-9\\s\\-]', '').replaceAll('\\s+', ' ')+'"';
   }
   global static string getPayloadStringByHandlingNull(DateTime value){
   return value==null?null:'"'+value+'"';
