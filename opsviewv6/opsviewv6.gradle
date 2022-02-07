@@ -129,7 +129,7 @@ def buildDebForOpsviewV6(String sourceDir, String name, String descrpt, Map file
 task packageOpsviewV6OS(dependsOn: 'prepareOpsviewV6') << {
 
     def fileMapping = [
-            "${project.projectDir}/opsviewv6/nagios2opsgenie"   : "opt/opsview/monitoringscripts/notifications/",
+            "${project.projectDir}/opsviewv6/nagios2opsgenie"   : "opt/opsgenie/opsview/monitoringscripts/notifications/",
             "${project.projectDir}/opsviewv6/nagios2opsgenie.go": "etc/opsgenie"
     ]
 
