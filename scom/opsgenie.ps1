@@ -10,10 +10,32 @@ Param (
     [String]$ManagedEntity,
     [String]$MPElement = "NotPresent",
     [String]$scomModulePath,
-    [Switch]$install
+    [Switch]$install,
+    [Switch]$enableLogging
 )
 
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+
+$logfile = "C:\scripts\opsgenie\log.csv"
+$timeStampFormat = "MM-dd-yyyy HH:mm:ss"
+$IntegrationLogEntry = ""
+
+
+function Add-OpsgenieIntegrationLogEntry {    
+    Param (
+        [parameter(Mandatory=$true, HelpMessage="This function is expecting log level as a string.")][String]$logLevel,
+        [parameter(Mandatory=$true, HelpMessage="This function is expecting a log message as a string.")][String]$logMessage
+    ) 
+    $logMessage=$logMessage.Replace('"','""')
+    $timestamp = get-date -Format $timeStampFormat
+    $script:IntegrationLogEntry = "$($IntegrationLogEntry)`"$($timestamp)`",`"$($logLevel)`",`"$($AlertID)`",`"$($logMessage)`"`n"
+}
+
+
+
+if ($enableLogging){if (-not (Test-Path -LiteralPath  $logfile -PathType Leaf)){Write-Output "`"TimeStamp`",`"LogLevel`",`"SCOMAlertId`",`"LogMessage`"" | Out-File $logfile -Append};Add-OpsgenieIntegrationLogEntry  -logLevel "INFO" -logMessage "Opsgenie intergration script has started  for alertId $($alertID)"}
+ 
+
 
 Import-Module OperationsManager
 if ($?){write-host -ForegroundColor Green "Module has been successfully imported.";echo ""; echo ""} 
@@ -37,9 +59,9 @@ else {
     if ($?){write-host -ForegroundColor Green "Module has been successfully imported.";echo ""; echo ""} else {echo ""; echo ""; write-host -NoNewline -ForegroundColor Yellow "Could not improt module try specifying it using ";write-host -NoNewline -ForegroundColor Cyan "-scomModulePath <path>";write-host -ForegroundColor yellow " when starting this script.";exit}
 }
 
+
 function Install-ogIntegration{
     $PsCommandArgs = "-executionpolicy bypass -File `"C:\scripts\opsgenie\opsgenie.ps1`" -Url `""+$Url+"`" -AlertID `"`$Data[Default='NotPresent']/Context/DataItem/AlertId$`" -CreatedByMonitor `"`$Data[Default='NotPresent']/Context/DataItem/CreatedByMonitor$`" -ManagedEntitySource `"`$Data[Default='NotPresent']/Context/DataItem/ManagedEntityDisplayName$`" -WorkflowId `"`$Data[Default='NotPresent']/Context/DataItem/WorkflowId$`" -DataItemCreateTimeLocal `"`$Data[Default='NotPresent']/Context/DataItem/DataItemCreateTimeLocal$`" -ManagedEntityPath `"`$Data[Default='NotPresent']/Context/DataItem/ManagedEntityPath$`" -ManagedEntity `"`$Data[Default='NotPresent']/Context/DataItem/ManagedEntity$`" -MPElement `"`$MPElement$`""
-
     Write-host -ForegroundColor Cyan "Creating OpsGenie Notification Channel."
     Add-SCOMNotificationChannel -ApplicationPath ($PSHOME+"\Powershell.exe") -Name "OpsGenie" -Argument $PsCommandArgs -WorkingDirectory $PSHOME
     if ($?){write-host -ForegroundColor Green "OpsGenie Notification Channel has been successfully created.";echo ""; echo ""} else {echo ""; write-host -ForegroundColor Yellow "Failed to create OpsGenie Notification Channel!!!";exit}
@@ -58,20 +80,33 @@ function Install-ogIntegration{
     exit
 }
 
+
 if ($install){Install-ogIntegration}
 
-$alert = Get-SCOMAlert -Id $AlertID
-$resolutionStateRaw = Get-SCOMAlert -Id $AlertID | select -expand ResolutionState
+
+try {
+    $alert = Get-SCOMAlert -Id $alertID
+    if ($enableLogging) {    
+    $linebreak ="
+"
+    if ($enableLogging){Add-OpsgenieIntegrationLogEntry -logLevel "INFO" -logMessage "The following SCOM alert details has been retrieved: alertName='$($alert.name)',alertDescription='$($alert.Description.replace($linebreak," "))',resolutionStateLastModified='$($alert.TimeResolutionStateLastModified)',priority='$($alert.Priority)',owner='$($alert.Owner)',repeatCount='$($alert.RepeatCount)',severity='$($alert.Severity)',category'$($alert.Category)'"}
+    }
+} 
+catch {
+    if ($enableLogging){Add-OpsgenieIntegrationLogEntry -logLevel "ERROR" -logMessage "Opsgenie intergration script has failed to retrieved SCOM alert: Exception Type='$($_.Exception.GetType().FullName)',Exception Message='$($_.Exception.Message)'"}
+    write-output $IntegrationLogEntry | Out-File $logfile  -Append
+    exit
+}
 
 
 $params = @{
     alertId                     = $AlertID
-    alertName                   = if($alert.Name) {$alert.Name.ToString()} else {"Not Present"}
-    alertDescription            = if($alert.Description) {$alert.Description.ToString()} else {"Not Present"}
-    resolutionState             = if($resolutionStateRaw -eq "0") {"New"} elseif($resolutionStateRaw -eq "255") {"Closed"} else {"Not Present"}
+    alertName                   = if($alert.Name) {$alert.Name} else {"Not Present"}
+    alertDescription            = if($alert.Description) {$alert.Description} else {"Not Present"}
+    resolutionState             = if($alert.ResolutionState -eq 0) {"New"} elseif($alert.ResolutionState -eq 255) {"Closed"} else {"Not Present"}
     resolutionStateLastModified = if($alert.TimeResolutionStateLastModified) {$alert.TimeResolutionStateLastModified.ToString()} else {"Not Present"}
     priority                    = if($alert.Priority) {$alert.Priority.ToString()} else {"Not Present"}
-    owner                       = if($alert.Owner) {$alert.Owner.ToString()} else {"Not Present"}
+    owner                       = if($alert.Owner) {$alert.Owner} else {"Not Present"}
     repeatCount                 = if($alert.RepeatCount) {$alert.RepeatCount.ToString()} else {"Not Present"}
     severity                    = if($alert.Severity) {$alert.Severity.ToString()} else {"Not Present"}
     category                    = if($alert.Category) {$alert.Category.ToString()} else {"Not Present"}
@@ -86,30 +121,33 @@ $params = @{
     managedEntityGUID           = $ManagedEntity
     timeAdded                   = if($alert.TimeAdded) {$alert.TimeAdded.ToString()} else {"Not Present"}
     mpElement                   = $MPElement
-    customField1                = if($alert.CustomField1) {$alert.CustomField1.ToString()} else {"Not Present"}
-    customField2                = if($alert.CustomField2) {$alert.CustomField2.ToString()} else {"Not Present"}
-    customField3                = if($alert.CustomField3) {$alert.CustomField3.ToString()} else {"Not Present"}
-    customField4                = if($alert.CustomField4) {$alert.CustomField4.ToString()} else {"Not Present"}
-    customField5                = if($alert.CustomField5) {$alert.CustomField5.ToString()} else {"Not Present"}
-    customField6                = if($alert.CustomField6) {$alert.CustomField6.ToString()} else {"Not Present"}
-    customField7                = if($alert.CustomField7) {$alert.CustomField7.ToString()} else {"Not Present"}
-    customField8                = if($alert.CustomField8) {$alert.CustomField8.ToString()} else {"Not Present"}
-    customField9                = if($alert.CustomField9) {$alert.CustomField9.ToString()} else {"Not Present"}
-    customField10               = if($alert.CustomField10) {$alert.CustomField10.ToString()} else {"Not Present"}
+    customField1                = if($alert.CustomField1) {$alert.CustomField1} else {"Not Present"}
+    customField2                = if($alert.CustomField2) {$alert.CustomField2} else {"Not Present"}
+    customField3                = if($alert.CustomField3) {$alert.CustomField3} else {"Not Present"}
+    customField4                = if($alert.CustomField4) {$alert.CustomField4} else {"Not Present"}
+    customField5                = if($alert.CustomField5) {$alert.CustomField5} else {"Not Present"}
+    customField6                = if($alert.CustomField6) {$alert.CustomField6} else {"Not Present"}
+    customField7                = if($alert.CustomField7) {$alert.CustomField7} else {"Not Present"}
+    customField8                = if($alert.CustomField8) {$alert.CustomField8} else {"Not Present"}
+    customField9                = if($alert.CustomField9) {$alert.CustomField9} else {"Not Present"}
+    customField10               = if($alert.CustomField10) {$alert.CustomField10} else {"Not Present"}
 }
 
-$json = ConvertTo-Json -InputObject $params
 
-$postFile = "C:\scripts\opsgenie\postResult.txt"
-
-try {
-    write-output "Connection to OpsGenie Status" | Out-File $postFile -Append
-    Invoke-RestMethod -Method Post -ContentType "application/json" -Body $json -Uri $Url | Out-File $postFile -Append
-
+if ($params.resolutionstate -match "Not Present"){
+    if ($enableLogging){Add-OpsgenieIntegrationLogEntry -logLevel "WARNING" -logMessage "The following SCOM alert $($alert.id) will not be sent to Opsgenie as it does not contain resolutionState `"New`" or `"Closed`"."}
 }
+else {
+    $json = ConvertTo-Json -InputObject $params
 
-catch {
 
-    out-file -InputObject "Exception Type: $($_.Exception.GetType().FullName) Exception Message: $($_.Exception.Message)" -FilePath $postFile -Append
+    try {
+        $opsgenie_API_Request = Invoke-RestMethod -Method Post -ContentType "application/json" -Body $json -Uri $Url
+        if ($enableLogging){Add-OpsgenieIntegrationLogEntry  -logLevel "INFO" -logMessage "Successfully posted SCOM alert to Opsgenie API the requestId for this call is $($opsgenie_API_Request.requestId)."}
+    }
 
+    catch {
+         if ($enableLogging){Add-OpsgenieIntegrationLogEntry -logLevel "ERROR" -logMessage "Opsgenie intergration script has failed to POST SCOM alert details to the Opsgenie API: Exception Type='$($_.Exception.GetType().FullName)',Exception Message='$($_.Exception.Message)'"}
+    }
 }
+write-output $IntegrationLogEntry | Out-File $logfile -Append
