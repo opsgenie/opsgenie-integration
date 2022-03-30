@@ -21,6 +21,7 @@ import (
 	"github.com/alexcesaro/log/golog"
 )
 
+var VERSION = "1.1"
 var NAGIOS_SERVER = "default"
 var API_KEY = ""
 var TOTAL_TIME = 60
@@ -41,23 +42,7 @@ var levels = map[string]log.Level{"info": log.Info, "debug": log.Debug, "warning
 var logger log.Logger
 
 func main() {
-	configFile, err := os.Open(configPath)
-	if err == nil {
-		readConfigFile(configFile)
-	} else {
-		panic(err)
-	}
-
-	version := flag.String("v", "", "")
-	parseFlags()
-
-	logger = configureLogger()
-	printConfigToLog()
-
-	if *version != "" {
-		fmt.Println("Version: 1.1")
-		return
-	}
+	parseFlags_readConfig_setupLogging()
 
 	if parameters["notification_type"] == "" {
 		if logger != nil {
@@ -252,7 +237,10 @@ func http_post() {
 	}
 }
 
-func parseFlags() map[string]string {
+func parseFlags_readConfig_setupLogging() {
+	version := flag.String("v", "", "")
+	configfile := flag.String("c", "", "Configuration file")
+
 	apiKey := flag.String("apiKey", "", "api key")
 	nagiosServer := flag.String("ns", "", "nagios server")
 
@@ -333,6 +321,34 @@ func parseFlags() map[string]string {
 
 	flag.Parse()
 
+	if *version != "" {
+		fmt.Println("Version:", VERSION)
+		os.Exit(1)
+	}
+
+	// Need config file parsed before setting up logging
+	if *configfile != "" { // Override default configfile based on commandline
+		configPath = *configfile
+	}
+	configFile, err := os.Open(configPath)
+	if err == nil {
+		readConfigFile(configFile)
+	} else {
+		panic(err)
+	}
+
+	// Logging related commandline options
+	if *logPath != "" {
+		parameters["logPath"] = *logPath
+	} else {
+		parameters["logPath"] = configParameters["logPath"]
+	}
+
+	// Logging needed to be setup before parsing further command line options below that could have errors to report
+	logger = configureLogger()
+	printConfigToLog()
+
+	// Handle the remaining options from commandline and/or configuration file
 	if *apiKey != "" {
 		parameters["apiKey"] = *apiKey
 	} else {
@@ -354,12 +370,6 @@ func parseFlags() map[string]string {
 		parameters["tags"] = *tags
 	} else {
 		parameters["tags"] = configParameters["tags"]
-	}
-
-	if *logPath != "" {
-		parameters["logPath"] = *logPath
-	} else {
-		parameters["logPath"] = configParameters["logPath"]
 	}
 
 	parameters["entity_type"] = *entityType
@@ -441,6 +451,4 @@ func parseFlags() map[string]string {
 			parameters[args[i]] = args[i+1]
 		}
 	}
-
-	return parameters
 }
