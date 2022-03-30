@@ -46,7 +46,7 @@ func main() {
 
 	if parameters["notification_type"] == "" {
 		if logger != nil {
-			logger.Warning("Stopping, Nagios NOTIFICATIONTYPE param has no value, please make sure your Nagios and OpsGenie files pass necessary parameters")
+			logger.Error("Stopping, Nagios NOTIFICATIONTYPE param has no value, please make sure your Nagios and OpsGenie files pass necessary parameters")
 		}
 
 		return
@@ -186,8 +186,7 @@ func http_post() {
 
 	if logger != nil {
 		logger.Debug("URL: ", apiUrl)
-		logger.Debug("Data to be posted:")
-		logger.Debug(parameters)
+		logger.Debug("Data to be posted:", parameters)
 	}
 
 	var buf, _ = json.Marshal(parameters)
@@ -197,7 +196,7 @@ func http_post() {
 		client := getHttpClient(i)
 
 		if logger != nil {
-			logger.Debug(logPrefix+"Trying to send data to OpsGenie with timeout: ", (TOTAL_TIME/12)*2*i)
+			logger.Debug(logPrefix+" Trying to send data to OpsGenie with timeout: ", (TOTAL_TIME/12)*2*i)
 		}
 
 		resp, error := client.Do(request)
@@ -207,28 +206,27 @@ func http_post() {
 			if err == nil {
 				if resp.StatusCode == 200 {
 					if logger != nil {
-						logger.Debug(logPrefix + " Response code: " + strconv.Itoa(resp.StatusCode))
-						logger.Debug(logPrefix + "Response: " + string(body[:]))
-						logger.Info(logPrefix + "Data from Nagios posted to " + target + " successfully")
+						logger.Debug(logPrefix + " Response code: " + strconv.Itoa(resp.StatusCode) + ", Response Body: " + string(body[:]))
+						logger.Info(logPrefix + " Data from Nagios posted to " + target + " successfully")
 					}
 				} else {
 					if logger != nil {
-						logger.Error(logPrefix + "Couldn't post data from Nagios to " + target + " successfully; Response code: " + strconv.Itoa(resp.StatusCode) + " Response Body: " + string(body[:]))
+						logger.Error(logPrefix + " Couldn't post data from Nagios to " + target + "; Response code: " + strconv.Itoa(resp.StatusCode) + ", Response Body: " + string(body[:]))
 					}
 				}
 			} else {
 				if logger != nil {
-					logger.Error(logPrefix+"Couldn't read the response from "+target, err)
+					logger.Error(logPrefix+" Couldn't read the response from "+target, err)
 				}
 			}
 			break
 		} else if i < 3 {
 			if logger != nil {
-				logger.Error(logPrefix+"Error occurred while sending data, will retry.", error)
+				logger.Error(logPrefix+" Error occurred while sending data, will retry.", error)
 			}
 		} else {
 			if logger != nil {
-				logger.Error(logPrefix+"Failed to post data from Nagios. ", error)
+				logger.Error(logPrefix+" Failed to post data from Nagios.", error)
 			}
 		}
 		if resp != nil {
