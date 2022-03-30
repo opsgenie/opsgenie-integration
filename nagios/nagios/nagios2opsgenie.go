@@ -318,6 +318,7 @@ func parseFlags_readConfig_setupLogging() {
 
 	responders := flag.String("responders", "", "Responders")
 	tags := flag.String("tags", "", "Tags")
+	priority := flag.String("priority", "", "Priority (P1...P5)")
 
 	flag.Parse()
 
@@ -370,6 +371,15 @@ func parseFlags_readConfig_setupLogging() {
 		parameters["tags"] = *tags
 	} else {
 		parameters["tags"] = configParameters["tags"]
+	}
+
+	if *priority == "" {
+		parameters["priority"] = ""
+	} else if IsValidPriority(*priority) {
+		parameters["priority"] = *priority
+	} else {
+		logger.Warning("Priority is not valid, needs to be one of P1, P2, P3, P4, P5.")
+		parameters["priority"] = ""
 	}
 
 	parameters["entity_type"] = *entityType
@@ -451,4 +461,17 @@ func parseFlags_readConfig_setupLogging() {
 			parameters[args[i]] = args[i+1]
 		}
 	}
+}
+
+func IsValidPriority(priority string) bool {
+	switch priority {
+	case
+		"P1",
+		"P2",
+		"P3",
+		"P4",
+		"P5":
+		return true
+	}
+	return false
 }
