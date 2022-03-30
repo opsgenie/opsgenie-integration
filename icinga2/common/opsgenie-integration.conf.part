@@ -36,6 +36,7 @@ actions.AddNote.script=icingaActionExecutor.groovy
 actions.TakeOwnership.script=icingaActionExecutor.groovy
 actions.AssignOwnership.script=icingaActionExecutor.groovy
 actions.Create.script=icingaActionExecutor.groovy
+actions.UnAcknowledge.script=icingaActionExecutor.groovy
 
 #You can configure more than one Icinga Server like the following (used in marid)
 #In order to use feature you should also set icinga_server:server1
