@@ -318,6 +318,7 @@ func parseFlags_readConfig_setupLogging() {
 	tags := flag.String("tags", "", "Tags")
 	priority := flag.String("priority", "", "Priority (P1...P5)")
 
+	saved_args := os.Args // save the arguments for logging once it is initialized
 	flag.Parse()
 
 	if *version != "" {
@@ -345,6 +346,7 @@ func parseFlags_readConfig_setupLogging() {
 
 	// Logging needed to be setup before parsing further command line options below that could have errors to report
 	logger = configureLogger()
+	logger.Info("Invocation:", saved_args[0], `"`+strings.Join(saved_args[1:], `" "`)+`"`)
 	printConfigToLog()
 
 	// Handle the remaining options from commandline and/or configuration file
