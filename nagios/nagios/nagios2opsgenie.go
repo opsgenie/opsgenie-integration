@@ -22,12 +22,11 @@ import (
 )
 
 var VERSION = "1.1"
-var NAGIOS_SERVER = "default"
 var API_KEY = ""
 var TOTAL_TIME = 60
 var configParameters = map[string]string{
 	"apiKey":                              API_KEY,
-	"nagios_server":                       NAGIOS_SERVER,
+	"nagios_server":                       "",
 	"nagios2opsgenie.logger":              "warning",
 	"opsgenie.api.url":                    "https://api.opsgenie.com",
 	"nagios2opsgenie.http.proxy.enabled":  "false",
@@ -355,10 +354,16 @@ func parseFlags_readConfig_setupLogging() {
 	} else {
 		parameters["apiKey"] = configParameters["apiKey"]
 	}
+	// Nagios servername precedence: command line > config file > os.Hostname
 	if *nagiosServer != "" {
 		parameters["nagios_server"] = *nagiosServer
-	} else {
+	} else if configParameters["nagios_server"] != "" {
 		parameters["nagios_server"] = configParameters["nagios_server"]
+	} else {
+		thisServerHostname, err := os.Hostname()
+		if err == nil {
+			parameters["nagios_server"] = thisServerHostname
+		}
 	}
 
 	if *responders != "" {
