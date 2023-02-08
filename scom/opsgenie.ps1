@@ -103,7 +103,7 @@ $params = @{
     alertId                     = $AlertID
     alertName                   = if($alert.Name) {$alert.Name} else {"Not Present"}
     alertDescription            = if($alert.Description) {$alert.Description} else {"Not Present"}
-    resolutionState             = if($alert.ResolutionState -eq 0) {"New"} elseif($alert.ResolutionState -eq 255) {"Closed"} else {"Not Present"}
+    resolutionState             = if($alert.ResolutionState -eq 0) {"New"} elseif($alert.ResolutionState -eq 255) {"Closed"} elseif($alert.ResolutionState) {$alert.ResolutionState.ToString()} else {"Not Present"}
     resolutionStateLastModified = if($alert.TimeResolutionStateLastModified) {$alert.TimeResolutionStateLastModified.ToString()} else {"Not Present"}
     priority                    = if($alert.Priority) {$alert.Priority.ToString()} else {"Not Present"}
     owner                       = if($alert.Owner) {$alert.Owner} else {"Not Present"}
@@ -135,7 +135,7 @@ $params = @{
 
 
 if ($params.resolutionstate -match "Not Present"){
-    if ($enableLogging){Add-OpsgenieIntegrationLogEntry -logLevel "WARNING" -logMessage "The following SCOM alert $($alert.id) will not be sent to Opsgenie as it does not contain resolutionState `"New`" or `"Closed`"."}
+    if ($enableLogging){Add-OpsgenieIntegrationLogEntry -logLevel "WARNING" -logMessage "The following SCOM alert $($alert.id) will not be sent to Opsgenie as it does not contain a resolutionState."}
 }
 else {
     $json = ConvertTo-Json -InputObject $params
