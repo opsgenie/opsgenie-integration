@@ -147,7 +147,7 @@ else {
     }
 
     catch {
-         if ($enableLogging){Add-OpsgenieIntegrationLogEntry -logLevel "ERROR" -logMessage "Opsgenie intergration script has failed to POST SCOM alert details to the Opsgenie API: Exception Type='$($_.Exception.GetType().FullName)',Exception Message='$($_.Exception.Message)'"}
+         if ($enableLogging){Add-OpsgenieIntegrationLogEntry -logLevel "ERROR" -logMessage "Opsgenie integration script has failed to POST SCOM alert details to the Opsgenie API: Exception Type='$($_.Exception.GetType().FullName)',Exception Message='$($_.Exception.Message)'"}
     }
 }
-write-output $IntegrationLogEntry | Out-File $logfile -Append
+if ($enableLogging){write-output $IntegrationLogEntry | Out-File $logfile -Append}
