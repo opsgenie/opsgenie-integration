@@ -1,6 +1,4 @@
 # OpsGenie - Microsoft Active Directory Group and User Synchronization Script
-# Author: Celal Emre CICEK
-# Copyright (c) OpsGenie LLC
 
 param([string] $command = "listGroups", [string] $groupName = "", [string] $usernames = "")
 

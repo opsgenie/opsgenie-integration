@@ -118,4 +118,4 @@ Configuration
             * The default value is [YOUR PROXY SERVER USER PASSWORD] placeholder.
 
     - For more information please refer to refer to the support document at
-        https://docs.opsgenie.com/v1.0/docs/microsoft-active-directory-integration.
+        https://support.atlassian.com/opsgenie/docs/integrate-opsgenie-with-microsoft-active-directory/.

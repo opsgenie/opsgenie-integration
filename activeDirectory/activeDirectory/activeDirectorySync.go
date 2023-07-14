@@ -39,6 +39,7 @@ var logLevels = map[string]log.Level{"info": log.Info, "debug": log.Debug, "warn
 var logger log.Logger
 var totalTime = 60
 var configPath = "." + string(os.PathSeparator) + "activeDirectorySync.conf"
+var deletedUsersWithTeam = make(map[string]string)
 
 const powershellScriptPath = "." + string(os.PathSeparator) + "activeDirectorySync.ps1"
 
@@ -287,13 +288,7 @@ func main() {
 				}
 
 				if userHasADUserTag {
-					errDeleteOpsGenieUser := deleteOpsGenieUser(user)
-
-					if errDeleteOpsGenieUser != nil {
-						logger.Error("Error occurred while deleting the user in OpsGenie. Error: " + errDeleteOpsGenieUser.Error())
-					} else {
-						logger.Info("Deleted the user with username [" + user + "] in OpsGenie successfully.")
-					}
+					deleteOpsGenieUser(user)
 				}
 			}
 		}
@@ -495,6 +490,8 @@ func httpRequest(url string, method string, headers map[string]string, body map[
 							"\"]; Response code: " + strconv.Itoa(response.StatusCode) + " Response Body: " +
 							string(responseBody[:]))
 					}
+					err = errors.New(responseBody)
+					return response, responseBody, err
 				}
 			} else {
 				if logger != nil {
@@ -535,7 +532,7 @@ func getHeadersForLogging(headers map[string]string) map[string]string {
 }
 
 func makePowershellRequest(arguments []string, objToUnmarshal interface{}) error {
-	arguments = append([]string{powershellScriptPath}, arguments...)
+	arguments = append([]string{"-ExecutionPolicy", "Bypass", powershellScriptPath}, arguments...)
 
 	for index, argument := range arguments {
 		if strings.Contains(argument, " ") {
@@ -546,7 +543,7 @@ func makePowershellRequest(arguments []string, objToUnmarshal interface{}) error
 	logger.Debug("Making Powershell request with arguments:")
 	logger.Debug(arguments)
 
-	command := exec.Command("powershell.exe -ExecutionPolicy Bypass -File ", arguments...)
+	command := exec.Command("powershell.exe", arguments...)
 	var stdOut bytes.Buffer
 	var stdErr bytes.Buffer
 	command.Stdout = &stdOut
@@ -666,11 +663,11 @@ func getOpsGenieTeamMembers(teamName string) ([]string, error) {
 		var dataMap = responseMap["data"].(map[string]interface{})
 
 		if _, ok := dataMap["members"]; ok {
-			var membersList= dataMap["members"].([]interface{})
+			var membersList = dataMap["members"].([]interface{})
 
 			for _, memberMap := range membersList {
-				var userMap= memberMap.(map[string]interface{})["user"].(map[string]interface{})
-				var username= userMap["username"].(string)
+				var userMap = memberMap.(map[string]interface{})["user"].(map[string]interface{})
+				var username = userMap["username"].(string)
 
 				if len(username) > 0 {
 					ogTeamMembers = append(ogTeamMembers, username)
@@ -711,6 +708,7 @@ func deleteMemberFromOpsGenieTeam(teamName string, member string) error {
 	_, _, err := httpRequest(configParameters["ogUrl"]+"/v2/teams/"+teamName+
 		"/members/"+member+"?teamIdentifierType=name", "DELETE", headers, nil)
 
+	deletedUsersWithTeam[member] = teamName
 	return err
 }
 
@@ -812,14 +810,27 @@ func createOpsGenieUser(fullName string, email string) error {
 	return err
 }
 
-func deleteOpsGenieUser(email string) error {
+func deleteOpsGenieUser(user string) error {
 	headers := map[string]string{
 		"Authorization": "GenieKey " + configParameters["ogApiKey"],
 		"Content-Type":  "application/json",
 	}
 
-	_, _, err := httpRequest(configParameters["ogUrl"]+"/v2/users/"+email,
+	_, _, err := httpRequest(configParameters["ogUrl"]+"/v2/users/"+user,
 		"DELETE", headers, nil)
+
+	if err != nil {
+		logger.Error("DELETE Error occurred while deleting the user in OpsGenie.")
+		var teamName = deletedUsersWithTeam[user]
+		var addErr = addMembersToOpsGenieTeam(teamName, user)
+		if addErr != nil {
+			logger.Error("DELETE ROLLBACK Error occurred while adding the member [" + user + "] to the team [" + teamName + "] in OpsGenie. Error: " + err.Error())
+		} else {
+			logger.Info("DELETE ROLLBACK Added the member[" + user + "] to the team [" + teamName + "] in OpsGenie successfully.")
+		}
+	} else {
+		logger.Info("Deleted the user with username [" + user + "] in OpsGenie successfully.")
+	}
 
 	return err
 }
