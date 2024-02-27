@@ -264,7 +264,8 @@ func parseFlags()map[string]string{
 	tags := flag.String ("tags","","tags")
 	responders := flag.String ("responders","","responders")
 	logPath := flag.String("logPath", "", "LOGPATH")
-
+        eventAck := flag.string("eventAck", "", "EVENTACK")
+	
 	flag.Parse()
 
 	parameters["triggerName"] = *triggerName
@@ -283,6 +284,7 @@ func parseFlags()map[string]string{
 	parameters["itemValue"] = *itemValue
 	parameters["eventId"] = *eventId
 	parameters["recoveryEventStatus"] = *recoveryEventStatus
+        parameters["eventAck"] = *eventAck
 
 	if *apiKey != ""{
 		configParameters["apiKey"] = *apiKey
