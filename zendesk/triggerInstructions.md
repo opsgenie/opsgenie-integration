@@ -1,13 +1,13 @@
 ## Zendesk to Opsgenie Trigger Setting
 ### Create Action:
 - Click **Create**.  
-- From the **Triggers** page, click **add trigger**.  
+- From the **Triggers** page, click **Create Trigger**.  
 - Put **Send Create action to Opsgenie** into **Trigger name**, description is optional.  
 - Under **Meet ALL of the following conditions:**, add two conditions as specified below:  
   - Status Is not Solved  
   - Ticket Is Created  
-- Under **Actions:**, click **add action**, select **Notify target**, and pick the URL target you added earlier for the integration.  
-- Paste the following into the **Message** field:  
+- Under **Actions:**, click **Add action**, select **Notify by > Active Webhook**, and pick the webhook you added earlier for the integration.
+- Add a new URL parameter named **ticket** and paste the following into the **value** field:  
 >action: create ||  
 id: {{ticket.id}} ||  
 status: {{ticket.status}} ||  
@@ -34,8 +34,8 @@ description: {{ticket.description}}
 - Put "Send Open action to Opsgenie" into **Trigger name**.  
 - Under **Meet ANY of the following conditions:**, add two conditions as specified below:  
   - Ticket:Status Is Open  
-- Under **Actions:**, select **Notify target** under **Notifications**, and pick the URL target you added earlier for the integration.  
-- Paste the following into the **Message** field:  
+- Under **Actions:**, click **Add action**, select **Notify by > Active Webhook**, and pick the webhook you added earlier for the integration.
+- Add a new URL parameter named **ticket** and paste the following into the **value** field:  
 >action: open ||  
 id: {{ticket.id}} ||  
 status: {{ticket.status}} ||  
@@ -49,8 +49,8 @@ external_id: {{ticket.external_id}}
 - Put "Send Pending action to Opsgenie" into **Trigger name**.  
 - Under **Meet ANY of the following conditions:**, add two conditions as specified below:  
   - Ticket:Status Is Pending  
-- Under **Actions:**, select **Notify target** under **Notifications**, and pick the URL target you added earlier for the integration.  
-- Paste the following into the **Message** field:  
+- Under **Actions:**, click **Add action**, select **Notify by > Active Webhook**, and pick the webhook you added earlier for the integration.
+- Add a new URL parameter named **ticket** and paste the following into the **value** field:  
 >action: pending ||  
 id: {{ticket.id}} ||  
 status: {{ticket.status}} ||  
@@ -65,8 +65,8 @@ external_id: {{ticket.external_id}}
 - Under **Meet ANY of the following conditions:**, add two conditions as specified below:  
   - Ticket:Status Is Solved  
   - Ticket:Status Is Closed  
-- Under **Actions:**, select **Notify target** under **Notifications**, and pick the URL target you added earlier for the integration.  
-- Paste the following into the "Message" field:  
+- Under **Actions:**, click **Add action**, select **Notify by > Active Webhook**, and pick the webhook you added earlier for the integration.
+- Add a new URL parameter named **ticket** and paste the following into the **value** field:  
 >action: close ||  
 id: {{ticket.id}} ||  
 status: {{ticket.status}} ||  
@@ -81,8 +81,8 @@ external_id: {{ticket.external_id}}
 - Under **Meet ALL of the following conditions:**, add two conditions as specified below:  
     - Ticket: Is Updated
     - Ticket:Status Is Not Solved
-- Under **Actions:**, select **Notify target** under **Notifications**, and pick the URL target you added earlier for the integration.  
-- Paste the following into the "Message" field:  
+- Under **Actions:**, click **Add action**, select **Notify by > Active Webhook**, and pick the webhook you added earlier for the integration.
+- Add a new URL parameter named **ticket** and paste the following into the **value** field:  
 >action: addnote ||  
 id: {{ticket.id}} ||  
 status: {{ticket.status}} ||  
