@@ -1,58 +1,58 @@
 package main
 
 import (
+	"bufio"
 	"bytes"
+	"crypto/tls"
 	"encoding/json"
 	"flag"
-	"net/http"
-	"net"
-	"time"
-	"os"
-	"bufio"
-	"strings"
-	"io"
-	"strconv"
-	"github.com/alexcesaro/log/golog"
-	"github.com/alexcesaro/log"
 	"fmt"
+	"github.com/alexcesaro/log"
+	"github.com/alexcesaro/log/golog"
+	"io"
 	"io/ioutil"
-	"crypto/tls"
+	"net"
+	"net/http"
 	"net/url"
+	"os"
+	"strconv"
+	"strings"
+	"time"
 )
 
 var API_KEY = ""
 var TOTAL_TIME = 60
 var parameters = map[string]string{}
 var configParameters = map[string]string{"apiKey": API_KEY,
-	"opsgenie.api.url" : "https://api.opsgenie.com",
-	"zabbix2opsgenie.logger":"warning",
-	"zabbix2opsgenie.http.proxy.enabled" : "false",
-	"zabbix2opsgenie.http.proxy.port" : "1111",
-	"zabbix2opsgenie.http.proxy.host": "localhost",
-	"zabbix2opsgenie.http.proxy.protocol":"http",
+	"opsgenie.api.url":                    "https://api.opsgenie.com",
+	"zabbix2opsgenie.logger":              "warning",
+	"zabbix2opsgenie.http.proxy.enabled":  "false",
+	"zabbix2opsgenie.http.proxy.port":     "1111",
+	"zabbix2opsgenie.http.proxy.host":     "localhost",
+	"zabbix2opsgenie.http.proxy.protocol": "http",
 	"zabbix2opsgenie.http.proxy.username": "",
 	"zabbix2opsgenie.http.proxy.password": ""}
 var configPath = "/etc/opsgenie/conf/opsgenie-integration.conf"
-var levels = map [string]log.Level{"info":log.Info,"debug":log.Debug,"warning":log.Warning,"error":log.Error}
+var levels = map[string]log.Level{"info": log.Info, "debug": log.Debug, "warning": log.Warning, "error": log.Error}
 var logger log.Logger
 
 func main() {
 
 	configFile, err := os.Open(configPath)
 
-	if err == nil{
+	if err == nil {
 		readConfigFile(configFile)
-	}else{
+	} else {
 		panic(err)
 	}
 
-	version := flag.String("v","","")
+	version := flag.String("v", "", "")
 	parseFlags()
 
 	logger = configureLogger()
 	printConfigToLog()
 
-	if *version != ""{
+	if *version != "" {
 		fmt.Println("Version: 1.1")
 		return
 	}
@@ -60,9 +60,9 @@ func main() {
 	http_post()
 }
 
-func printConfigToLog(){
+func printConfigToLog() {
 	if logger != nil {
-		if (logger.LogDebug()) {
+		if logger.LogDebug() {
 			logger.Debug("Config:")
 			for k, v := range configParameters {
 				if strings.Contains(k, "password") {
@@ -75,30 +75,30 @@ func printConfigToLog(){
 	}
 }
 
-func readConfigFile(file io.Reader){
+func readConfigFile(file io.Reader) {
 	scanner := bufio.NewScanner(file)
 
-	for scanner.Scan(){
+	for scanner.Scan() {
 		line := scanner.Text()
 
 		line = strings.TrimSpace(line)
-		if !strings.HasPrefix(line,"#") && line != "" {
-			l := strings.SplitN(line,"=",2)
+		if !strings.HasPrefix(line, "#") && line != "" {
+			l := strings.SplitN(line, "=", 2)
 			l[0] = strings.TrimSpace(l[0])
 			l[1] = strings.TrimSpace(l[1])
 			configParameters[l[0]] = l[1]
-			if l[0] == "timeout"{
-				TOTAL_TIME,_ = strconv.Atoi(l[1])
+			if l[0] == "timeout" {
+				TOTAL_TIME, _ = strconv.Atoi(l[1])
 			}
 		}
 	}
 
-    if err := scanner.Err(); err != nil {
+	if err := scanner.Err(); err != nil {
 		panic(err)
-    }
+	}
 }
 
-func configureLogger ()log.Logger{
+func configureLogger() log.Logger {
 	level := configParameters["zabbix2opsgenie.logger"]
 	var logFilePath = parameters["logPath"]
 
@@ -111,9 +111,9 @@ func configureLogger ()log.Logger{
 	file, err := os.OpenFile(logFilePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 
 	if err != nil {
-		fmt.Println("Could not create log file \"" + logFilePath + "\", will log to \"/tmp/zabbix2opsgenie.log\" file. Error: ", err)
+		fmt.Println("Could not create log file \""+logFilePath+"\", will log to \"/tmp/zabbix2opsgenie.log\" file. Error: ", err)
 
-		fileTmp, errTmp := os.OpenFile("/tmp/zabbix2opsgenie.log", os.O_CREATE | os.O_WRONLY | os.O_APPEND, 0666)
+		fileTmp, errTmp := os.OpenFile("/tmp/zabbix2opsgenie.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 
 		if errTmp != nil {
 			fmt.Println("Logging disabled. Reason: ", errTmp)
@@ -127,7 +127,7 @@ func configureLogger ()log.Logger{
 	return tmpLogger
 }
 
-func getHttpClient (timeout int) *http.Client {
+func getHttpClient(timeout int) *http.Client {
 	seconds := (TOTAL_TIME / 12) * 2 * timeout
 	var proxyEnabled = configParameters["zabbix2opsgenie.http.proxy.enabled"]
 	var proxyHost = configParameters["zabbix2opsgenie.http.proxy.host"]
@@ -137,14 +137,13 @@ func getHttpClient (timeout int) *http.Client {
 	var proxyPassword = configParameters["zabbix2opsgenie.http.proxy.password"]
 	proxy := http.ProxyFromEnvironment
 
-
 	if proxyEnabled == "true" {
 
 		u := new(url.URL)
 		u.Scheme = scheme
-		u.Host =  proxyHost + ":" + proxyPort
+		u.Host = proxyHost + ":" + proxyPort
 		if len(proxyUsername) > 0 {
-			u.User = url.UserPassword(proxyUsername,proxyPassword)
+			u.User = url.UserPassword(proxyUsername, proxyPassword)
 		}
 		if logger != nil {
 			logger.Debug("Formed Proxy url: ", u)
@@ -154,10 +153,10 @@ func getHttpClient (timeout int) *http.Client {
 	logger.Warning("final proxy", proxy)
 	client := &http.Client{
 		Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{InsecureSkipVerify : true},
-			Proxy: proxy,
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+			Proxy:           proxy,
 			Dial: func(netw, addr string) (net.Conn, error) {
-				conn, err := net.DialTimeout(netw, addr, time.Second * time.Duration(seconds))
+				conn, err := net.DialTimeout(netw, addr, time.Second*time.Duration(seconds))
 				if err != nil {
 					if logger != nil {
 						logger.Error("Error occurred while connecting: ", err)
@@ -172,19 +171,19 @@ func getHttpClient (timeout int) *http.Client {
 	return client
 }
 
-func http_post()  {
+func http_post() {
 	parameters["apiKey"] = configParameters["apiKey"]
 
 	var logPrefix = "[TriggerId: " + parameters["triggerId"] + ", HostName: " + parameters["hostName"] + "]"
 
-    	apiUrl := configParameters["opsgenie.api.url"] + "/v1/json/zabbix"
+	apiUrl := configParameters["opsgenie.api.url"] + "/v1/json/zabbix"
 	viaMaridUrl := configParameters["viaMaridUrl"]
 	target := ""
 
-	if viaMaridUrl != ""{
+	if viaMaridUrl != "" {
 		apiUrl = viaMaridUrl
 		target = "Marid"
-	}else{
+	} else {
 		target = "OpsGenie"
 	}
 
@@ -202,48 +201,48 @@ func http_post()  {
 		client := getHttpClient(i)
 
 		if logger != nil {
-			logger.Debug(logPrefix + "Trying to send data to " + target + " with timeout: ", (TOTAL_TIME / 12) * 2 * i)
+			logger.Debug(logPrefix+"Trying to send data to "+target+" with timeout: ", (TOTAL_TIME/12)*2*i)
 		}
 
 		resp, error := client.Do(request)
 		if error == nil {
 			defer resp.Body.Close()
 			body, err := ioutil.ReadAll(resp.Body)
-			if err == nil{
-				if resp.StatusCode == 200{
+			if err == nil {
+				if resp.StatusCode == 200 {
 					if logger != nil {
 						logger.Debug(logPrefix + " Response code: " + strconv.Itoa(resp.StatusCode))
 						logger.Debug(logPrefix + "Response: " + string(body[:]))
-						logger.Info(logPrefix +  "Data from Zabbix posted to " + target + " successfully")
+						logger.Info(logPrefix + "Data from Zabbix posted to " + target + " successfully")
 					}
-				}else {
+				} else {
 					if logger != nil {
 						logger.Error(logPrefix + "Couldn't post data from Zabbix to " + target + " successfully; Response code: " + strconv.Itoa(resp.StatusCode) + " Response Body: " + string(body[:]))
 					}
 				}
-			}else{
+			} else {
 				if logger != nil {
-					logger.Error(logPrefix + "Couldn't read the response from " + target, err)
+					logger.Error(logPrefix+"Couldn't read the response from "+target, err)
 				}
 			}
 			break
-		}else if i < 3 {
+		} else if i < 3 {
 			if logger != nil {
-				logger.Error(logPrefix + "Error occurred while sending data, will retry.", error)
+				logger.Error(logPrefix+"Error occurred while sending data, will retry.", error)
 			}
-		}else {
+		} else {
 			if logger != nil {
-				logger.Error(logPrefix + "Failed to post data from Zabbix ", error)
+				logger.Error(logPrefix+"Failed to post data from Zabbix ", error)
 			}
 		}
-		if resp != nil{
+		if resp != nil {
 			defer resp.Body.Close()
 		}
 	}
 }
 
-func parseFlags()map[string]string{
-	apiKey := flag.String("apiKey","","apiKey")
+func parseFlags() map[string]string {
+	apiKey := flag.String("apiKey", "", "apiKey")
 
 	triggerName := flag.String("triggerName", "", "TRIGGER.NAME")
 	triggerId := flag.String("triggerId", "", "TRIGGER.ID")
@@ -251,18 +250,18 @@ func parseFlags()map[string]string{
 	triggerSeverity := flag.String("triggerSeverity", "", "TRIGGER.SEVERITY")
 	triggerDescription := flag.String("triggerDescription", "", "TRIGGER.DESCRIPTION")
 	triggerUrl := flag.String("triggerUrl", "", "TRIGGER.URL")
-	triggerValue := flag.String("triggerValue","","TRIGGER.VALUE")
+	triggerValue := flag.String("triggerValue", "", "TRIGGER.VALUE")
 	triggerHostGroupName := flag.String("triggerHostGroupName", "", "TRIGGER.HOSTGROUP.NAME")
-	hostName := flag.String("hostName","","HOSTNAME")
+	hostName := flag.String("hostName", "", "HOSTNAME")
 	ipAddress := flag.String("ipAddress", "", "IPADDRESS")
 	date := flag.String("date", "", "DATE")
-	time := flag.String("time","","TIME")
-	itemKey := flag.String("itemKey","","ITEM.KEY")
+	time := flag.String("time", "", "TIME")
+	itemKey := flag.String("itemKey", "", "ITEM.KEY")
 	itemValue := flag.String("itemValue", "", "ITEM.VALUE")
-	eventId := flag.String ("eventId","","EVENT.ID")
-	recoveryEventStatus := flag.String ("recoveryEventStatus","","EVENT.RECOVERY.STATUS")
-	tags := flag.String ("tags","","tags")
-	responders := flag.String ("responders","","responders")
+	eventId := flag.String("eventId", "", "EVENT.ID")
+	recoveryEventStatus := flag.String("recoveryEventStatus", "", "EVENT.RECOVERY.STATUS")
+	tags := flag.String("tags", "", "comma-separated list of tags")
+	responders := flag.String("responders", "", "responders")
 	logPath := flag.String("logPath", "", "LOGPATH")
 
 	flag.Parse()
@@ -284,20 +283,20 @@ func parseFlags()map[string]string{
 	parameters["eventId"] = *eventId
 	parameters["recoveryEventStatus"] = *recoveryEventStatus
 
-	if *apiKey != ""{
+	if *apiKey != "" {
 		configParameters["apiKey"] = *apiKey
 	}
 
-	if *responders != ""{
+	if *responders != "" {
 		parameters["responders"] = *responders
-	}else{
-		parameters["responders"] = configParameters ["responders"]
+	} else {
+		parameters["responders"] = configParameters["responders"]
 	}
 
-	if *tags != ""{
+	if *tags != "" {
 		parameters["tags"] = *tags
-	}else{
-		parameters["tags"] = configParameters ["tags"]
+	} else {
+		parameters["tags"] = configParameters["tags"]
 	}
 
 	if *logPath != "" {
@@ -307,7 +306,7 @@ func parseFlags()map[string]string{
 	}
 	args := flag.Args()
 	for i := 0; i < len(args); i += 2 {
-		if(len(args)%2 != 0 && i==len(args)-1){
+		if len(args)%2 != 0 && i == len(args)-1 {
 			parameters[args[i]] = ""
 		} else {
 			parameters[args[i]] = args[i+1]
